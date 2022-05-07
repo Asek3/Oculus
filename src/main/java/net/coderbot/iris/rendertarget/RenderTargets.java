@@ -12,8 +12,7 @@ import java.util.function.IntSupplier;
 
 public class RenderTargets {
 	private final RenderTarget[] targets;
-	private int currentDepthTexture;
-
+	private final DepthTexture depthTexture;
 	private final DepthTexture noTranslucents;
 	private final DepthTexture noHand;
 
@@ -40,8 +39,7 @@ public class RenderTargets {
 					.setPixelFormat(settings.getInternalFormat().getPixelFormat()).build();
 		});
 
-		this.currentDepthTexture = depthTexture;
-
+		this.depthTexture = new DepthTexture(width, height);
 		this.noTranslucents = new DepthTexture(width, height);
 		this.noHand = new DepthTexture(width, height);
 
@@ -66,6 +64,7 @@ public class RenderTargets {
 			target.destroy();
 		}
 
+		depthTexture.destroy();
 		noTranslucents.destroy();
 		noHand.destroy();
 	}
@@ -83,7 +82,7 @@ public class RenderTargets {
 	}
 
 	public int getDepthTexture() {
-		return currentDepthTexture;
+		return depthTexture.getTextureId();
 	}
 
 	public DepthTexture getDepthTextureNoTranslucents() {
@@ -99,21 +98,6 @@ public class RenderTargets {
 	}
 
 	public void resizeIfNeeded(boolean recreateDepth, int newDepthTextureId, int newWidth, int newHeight) {
-		if (recreateDepth || newDepthTextureId != currentDepthTexture) {
-			// Re-attach the depth textures with the new depth texture ID, since Minecraft re-creates
-			// the depth texture when resizing its render targets.
-			//
-			// I'm not sure if our framebuffers holding on to the old depth texture between frames
-			// could be a concern, in the case of resizing and similar. I think it should work
-			// based on what I've seen of the spec, though - it seems like deleting a texture
-			// automatically detaches it from its framebuffers.
-			currentDepthTexture = newDepthTextureId;
-
-			for (GlFramebuffer framebuffer : ownedFramebuffers) {
-				framebuffer.addDepthAttachment(newDepthTextureId);
-			}
-		}
-
 		if (newWidth == cachedWidth && newHeight == cachedHeight) {
 			// No resize needed
 			return;
@@ -126,6 +110,7 @@ public class RenderTargets {
 			target.resize(newWidth, newHeight);
 		}
 
+		depthTexture.resize(newWidth, newHeight);
 		noTranslucents.resize(newWidth, newHeight);
 		noHand.resize(newWidth, newHeight);
 
@@ -169,7 +154,7 @@ public class RenderTargets {
 
 		GlFramebuffer framebuffer =  createColorFramebuffer(stageWritesToMain, drawBuffers);
 
-		framebuffer.addDepthAttachment(currentDepthTexture);
+		framebuffer.addDepthAttachment(this.getDepthTexture());
 
 		return framebuffer;
 	}
@@ -191,7 +176,7 @@ public class RenderTargets {
 	public GlFramebuffer createColorFramebufferWithDepth(ImmutableSet<Integer> stageWritesToMain, int[] drawBuffers) {
 		GlFramebuffer framebuffer = createColorFramebuffer(stageWritesToMain, drawBuffers);
 
-		framebuffer.addDepthAttachment(currentDepthTexture);
+		framebuffer.addDepthAttachment(this.getDepthTexture());
 
 		return framebuffer;
 	}
