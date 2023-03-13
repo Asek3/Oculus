@@ -7,10 +7,10 @@
   "iris.keybinds": "Iris",
   "iris.shaders.reloaded.failure": "Impossibile ricaricare gli shader! Motivo: %s",
   "iris.shaders.toggled.failure": "Impossibile modificare stato shader! Motivo: %s",
-  "iris.sodium.failure.title": "Errore nel caricamento di Iris!",
+  "iris.sodium.failure.title": "Errore nel caricamento di Oculus!",
   "iris.sodium.failure.download": "Scarica Rubidium",
-  "iris.sodium.failure.reason.notFound": "Iris richiede Rubidium per buone performance, ma Rubidium non è installato. Scarica Rubidium, mettilo nella tua cartella delle mod, e riavvia il gioco.",
-  "iris.sodium.failure.reason.incompatible": "Iris richiede Rubidium per buone performance, ma è stata trovata una versione incompatibile. Scarica la versione corretta di Rubidium, mettilo nella tua cartella delle mod, rimuovi la versione sbagliata, e riavvia il gioco.",
+  "iris.sodium.failure.reason.notFound": "Oculus richiede Rubidium per buone performance, ma Rubidium non è installato. Scarica Rubidium, mettilo nella tua cartella delle mod, e riavvia il gioco.",
+  "iris.sodium.failure.reason.incompatible": "Oculus richiede Rubidium per buone performance, ma è stata trovata una versione incompatibile. Scarica la versione corretta di Rubidium, mettilo nella tua cartella delle mod, rimuovi la versione sbagliata, e riavvia il gioco.",
 
   "options.iris.apply": "Applica",
   "options.iris.refresh": "Aggiorna",

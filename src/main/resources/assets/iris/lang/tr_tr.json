@@ -7,7 +7,7 @@
   "iris.keybinds": "Iris",
   "iris.shaders.reloaded.failure": "Shaderları yenileme başarısız! Sebep: %s",
   "iris.shaders.toggled.failure": "Shaderları açma/kapama başarısız! Sebep: %s",
-  "iris.sodium.failure.title": "Iris yüklenilemedi!",
+  "iris.sodium.failure.title": "Oculus yüklenilemedi!",
   "iris.sodium.failure.download": "Rubidium'u İndir",
   "iris.sodium.failure.reason.notFound": "İyi performans için Iris'e Rubidium gerek, ancak kurulu değil. Lütfen Rubidium'u indir ve modlar klasörüne yerleştirip oyunu yeniden başlat.",
   "iris.sodium.failure.reason.incompatible": "İyi performans için Iris'e Rubidium gerek, ancak uyumsuz bir sürüm bulundu. Lütfen Rubidium'un uygun sürümünü indir, modlar klasörüne yerleştir, uyumsuz sürümü kaldır ve oyunu yeniden başlat.",

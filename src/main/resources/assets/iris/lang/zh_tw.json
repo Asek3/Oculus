@@ -7,10 +7,10 @@
   "iris.keybinds": "Iris",
   "iris.shaders.reloaded.failure": "無法重新載入光影！原因：%s",
   "iris.shaders.toggled.failure": "無法使用光影！原因：%s",
-  "iris.sodium.failure.title": "無法載入 Iris！",
+  "iris.sodium.failure.title": "無法載入 Oculus！",
   "iris.sodium.failure.download": "下載 Rubidium",
-  "iris.sodium.failure.reason.notFound": "為了讓 Iris 有良好的效能表現，您需要安裝 Rubidium。請先下載它、將它存放於模組資料夾後重新啟動遊戲。",
-  "iris.sodium.failure.reason.incompatible": "為了讓 Iris 有良好的效能表現，您需要安裝版本相容的 Rubidium。請先下載正確的版本、將它存放於模組資料夾、移除不正確的版本後重新啟動遊戲。",
+  "iris.sodium.failure.reason.notFound": "為了讓 Oculus 有良好的效能表現，您需要安裝 Rubidium。請先下載它、將它存放於模組資料夾後重新啟動遊戲。",
+  "iris.sodium.failure.reason.incompatible": "為了讓 Oculus 有良好的效能表現，您需要安裝版本相容的 Rubidium。請先下載正確的版本、將它存放於模組資料夾、移除不正確的版本後重新啟動遊戲。",
 
   "options.iris.apply": "套用",
   "options.iris.refresh": "重新整理",

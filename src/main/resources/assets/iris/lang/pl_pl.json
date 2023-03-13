@@ -12,10 +12,10 @@
   "iris.keybinds": "Iris",
   "iris.shaders.reloaded.failure": "Nie udało się przeładować Shaderów! Powód: %s",
   "iris.shaders.toggled.failure": "Nie udało się przełączyć Shaderów! Powód: %s",
-  "iris.sodium.failure.title": "Iris nie udało się załadować!",
+  "iris.sodium.failure.title": "Oculus nie udało się załadować!",
   "iris.sodium.failure.download": "Pobierz Rubidium",
-  "iris.sodium.failure.reason.notFound": "Iris wymaga Rubidium dla poprawnego działania, a Rubidium nie jest zainstalowane. Proszę pobrać Rubidium, umieścić go w folderze mods i ponownie uruchomić grę.",
-  "iris.sodium.failure.reason.incompatible": "Iris wymaga Rubidium dla poprawnego działania, znaleziono niekompatybilną wersję Rubidium. Proszę pobrać właściwą wersję Rubidium, umieścić ją w folderze mods oraz usunąć niekompatybilną wersję i ponownie uruchomić grę.",
+  "iris.sodium.failure.reason.notFound": "Oculus wymaga Rubidium dla poprawnego działania, a Rubidium nie jest zainstalowane. Proszę pobrać Rubidium, umieścić go w folderze mods i ponownie uruchomić grę.",
+  "iris.sodium.failure.reason.incompatible": "Oculus wymaga Rubidium dla poprawnego działania, znaleziono niekompatybilną wersję Rubidium. Proszę pobrać właściwą wersję Rubidium, umieścić ją w folderze mods oraz usunąć niekompatybilną wersję i ponownie uruchomić grę.",
 
   "options.iris.apply": "Zastosuj",
   "options.iris.refresh": "Odśwież",

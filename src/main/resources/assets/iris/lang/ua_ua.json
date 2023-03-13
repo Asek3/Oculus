@@ -12,7 +12,7 @@
   "iris.keybinds": "Iris",
   "iris.shaders.reloaded.failure": "Не вдалося перезавантажити шейдери! Причина: %s",
   "iris.shaders.toggled.failure": "Не вдалося перемкнути шейдери! Причина: %s",
-  "iris.sodium.failure.title": "Iris не вдалося завантажити!",
+  "iris.sodium.failure.title": "Oculus не вдалося завантажити!",
   "iris.sodium.failure.download": "Завантажити Rubidium",
   "iris.sodium.failure.reason.notFound": "Для гарної роботи Iris потрібен Rubidium, але Rubidium не встановлено. Будь ласка, завантажте Rubidium, помістіть його в папку модів і повторно запустіть гру.",
   "iris.sodium.failure.reason.incompatible": "Для гарної роботи Iris потрібен Rubidium, але була знайдена несумісна версія. Будь ласка, завантажте правильну версію Rubidium, помістіть її у папку модів, видаліть неправильну версію та перезапустіть гру.",

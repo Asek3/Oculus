@@ -12,10 +12,10 @@
   "iris.keybinds": "Iris",
   "iris.shaders.reloaded.failure": "Failed to reload shaders! Reason: %s",
   "iris.shaders.toggled.failure": "Failed to toggle shaders! Reason: %s",
-  "iris.sodium.failure.title": "Iris failed to load!",
+  "iris.sodium.failure.title": "Oculus failed to load!",
   "iris.sodium.failure.download": "Download Rubidium",
-  "iris.sodium.failure.reason.notFound": "Iris requires Rubidium for good performance, but Rubidium is not installed. Please download Rubidium, place it in your mods folder, and re-launch the game.",
-  "iris.sodium.failure.reason.incompatible": "Iris requires Rubidium for good performance, but an incompatible version was found. Please download the correct version of Rubidium, place it in your mods folder, remove the incorrect version, and re-launch the game.",
+  "iris.sodium.failure.reason.notFound": "Oculus requires Rubidium for good performance, but Rubidium is not installed. Please download Rubidium, place it in your mods folder, and re-launch the game.",
+  "iris.sodium.failure.reason.incompatible": "Oculus requires Rubidium for good performance, but an incompatible version was found. Please download the correct version of Rubidium, place it in your mods folder, remove the incorrect version, and re-launch the game.",
 
   "options.iris.apply": "Apply",
   "options.iris.refresh": "Refresh",

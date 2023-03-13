@@ -7,10 +7,10 @@
   "iris.keybinds": "Iris",
   "iris.shaders.reloaded.failure": "Nepodarilo sa obnoviť tieňovače! Dôvod: %s",
   "iris.shaders.toggled.failure": "Nepodarilo sa prepnúť tieňovače! Dôvod: %s",
-  "iris.sodium.failure.title": "Iris sa nepodarilo načítať!",
+  "iris.sodium.failure.title": "Oculus sa nepodarilo načítať!",
   "iris.sodium.failure.download": "Stiahnuť Rubidium",
-  "iris.sodium.failure.reason.notFound": "Iris potrebuje Rubidium pre dobrý výkon, ale Rubidium nie je nainštalovaný. Prosím, stiahnite si Rubidium, dajte ho do priečinka módov a reštartujte hru.",
-  "iris.sodium.failure.reason.incompatible": "Iris potrebuje Rubidium pre dobrý výkon, ale máte zlú verziu Rubidium. Prosím, stiahnite si správnu verziu Rubidium, dajte ho do priečinka módov, odstráňte zlú verziu a reštartujte hru.",
+  "iris.sodium.failure.reason.notFound": "Oculus potrebuje Rubidium pre dobrý výkon, ale Rubidium nie je nainštalovaný. Prosím, stiahnite si Rubidium, dajte ho do priečinka módov a reštartujte hru.",
+  "iris.sodium.failure.reason.incompatible": "Oculus potrebuje Rubidium pre dobrý výkon, ale máte zlú verziu Rubidium. Prosím, stiahnite si správnu verziu Rubidium, dajte ho do priečinka módov, odstráňte zlú verziu a reštartujte hru.",
 
   "options.iris.apply": "Aplikovať",
   "options.iris.refresh": "Obnoviť",

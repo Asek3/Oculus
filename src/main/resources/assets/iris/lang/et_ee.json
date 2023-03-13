@@ -7,10 +7,10 @@
   "iris.keybinds": "Iris",
   "iris.shaders.reloaded.failure": "Varjutajate taaslaadimine ebaõnnestus! Põhjus: %s",
   "iris.shaders.toggled.failure": "Varjutajate lülitamine ebaõnnestus! Põhjus: %s",
-  "iris.sodium.failure.title": "Irise laadimine ebaõnnestus!",
+  "iris.sodium.failure.title": "Oculus laadimine ebaõnnestus!",
   "iris.sodium.failure.download": "Laadi Rubidium alla",
-  "iris.sodium.failure.reason.notFound": "Iris vajab hea jõudluse saavutamiseks Rubidiumi, ent Rubidium ei ole paigaldatud. Palun laadi Rubidium alla, aseta see oma mods kausta ning taaskäivita mäng.",
-  "iris.sodium.failure.reason.incompatible": "Iris vajab hea jõudluse saavutamiseks Rubidiumi, ent leiti ühildumatu Rubidiumi versioon. Palun laadi sobiv Rubidiumi versioon alla, aseta see oma mods kausta, kustuta sobimatu versioon ning taaskäivita mäng.",
+  "iris.sodium.failure.reason.notFound": "Oculus vajab hea jõudluse saavutamiseks Rubidiumi, ent Rubidium ei ole paigaldatud. Palun laadi Rubidium alla, aseta see oma mods kausta ning taaskäivita mäng.",
+  "iris.sodium.failure.reason.incompatible": "Oculus vajab hea jõudluse saavutamiseks Rubidiumi, ent leiti ühildumatu Rubidiumi versioon. Palun laadi sobiv Rubidiumi versioon alla, aseta see oma mods kausta, kustuta sobimatu versioon ning taaskäivita mäng.",
   
   "options.iris.apply": "Rakenda",
   "options.iris.refresh": "Värskenda",

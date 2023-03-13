@@ -7,10 +7,10 @@
   "iris.keybinds": "Iris",
   "iris.shaders.reloaded.failure": "%s 사유로 인하여 쉐이더를 다시 불러오지 못했습니다!",
   "iris.shaders.toggled.failure": "%s 사유로 인하여 쉐이더를 켜지/끄지 못했습니다!",
-  "iris.sodium.failure.title": "Iris를 불러오지 못했습니다!",
+  "iris.sodium.failure.title": "Oculus를 불러오지 못했습니다!",
   "iris.sodium.failure.download": "Rubidium 다운로드",
-  "iris.sodium.failure.reason.notFound": "Iris를 최상의 성능으로 쓰기 위한 Rubidium이 설치되어 있지 않습니다. Rubidium을 내려받아 mods 폴더에 넣어 게임을 다시 실행해주세요.",
-  "iris.sodium.failure.reason.incompatible": "Iris를 최상의 성능으로 쓰기 위한 Rubidium의 버전이 호환되지 않습니다. Iris와 맞는 버전의 Rubidium을 내려받아 mods 폴더에 넣고, 호환 안되는 버전의 Rubidium을 제거 후 게임을 다시 실행해주세요.",
+  "iris.sodium.failure.reason.notFound": "Oculus를 최상의 성능으로 쓰기 위한 Rubidium이 설치되어 있지 않습니다. Rubidium을 내려받아 mods 폴더에 넣어 게임을 다시 실행해주세요.",
+  "iris.sodium.failure.reason.incompatible": "Oculus를 최상의 성능으로 쓰기 위한 Rubidium의 버전이 호환되지 않습니다. Iris와 맞는 버전의 Rubidium을 내려받아 mods 폴더에 넣고, 호환 안되는 버전의 Rubidium을 제거 후 게임을 다시 실행해주세요.",
 
   "options.iris.apply": "적용",
   "options.iris.refresh": "새로고침",

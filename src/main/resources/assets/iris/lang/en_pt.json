@@ -7,7 +7,7 @@
   "iris.keybinds": "Yer Iris Wheel bounds",
   "iris.shaders.reloaded.failure": "Failed to clean ye Glass eyes! Reason: %s",
   "iris.shaders.toggled.failure": "Failed to place ye Glass eyes back in! Reason: %s",
-  "iris.sodium.failure.title": "Iris failed to load!",
+  "iris.sodium.failure.title": "Oculus failed to load!",
   "iris.sodium.failure.reason": "Yee 'ave Rubidium in yer mods folder, however Iris includes it. Please close the game 'n remove Rubidium from yer mods Coffer.",
 
   "options.iris.apply": "Apply",
