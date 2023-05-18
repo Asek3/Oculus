@@ -6,10 +6,17 @@ modId="oculus"
 version="${version}"
 displayName="Oculus"
 logoFile="oculus-logo.png"
-authors="coderbot, IMS212, Justsnoopy30, FoundationGames"
+authors="coderbot, IMS212, Justsnoopy30, FoundationGames, Paint_Ninja"
 description='''
 Unofficial Fork of "Iris", made to work with FML
 '''
+
+[[dependencies.oculus]]
+modId = "minecraft" # Gives a friendlier error message when installed on the wrong MC version
+mandatory = true
+versionRange = "[1.19.4,1.20)" # Allows 1.19.4 to 1.19.9
+ordering = "NONE"
+side = "CLIENT"
 
 [mods."sodium:options"]
 "mixin.features.entity.fast_render"=false

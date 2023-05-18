@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 import java.util.zip.ZipError;
 import java.util.zip.ZipException;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -63,10 +65,8 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkConstants;
 
-@Mod(Iris.MODID)
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = Oculus.MODID, value = Dist.CLIENT)
 public class Iris {
-	public static final String MODID = "oculus";
-
 	/**
 	 * The user-facing name of the mod. Moved into a constant to facilitate
 	 * easy branding changes (for forks). You'll still need to change this
@@ -103,15 +103,6 @@ public class Iris {
 	// Change this for snapshots!
 	private static String backupVersionNumber = "1.19.4";
 
-	public Iris() {
-		try {
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onKeyRegister);
-
-			ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-		}catch(Exception e) {}
-	}
-	
 	/**
 	 * Called very early on in Minecraft initialization. At this point we *cannot* safely access OpenGL, but we can do
 	 * some very basic setup, config loading, and environment checks.
@@ -148,12 +139,14 @@ public class Iris {
 
 		initialized = true;
 	}
-	
-	public void onInitializeClient(final FMLClientSetupEvent event) {
-		IRIS_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
+
+	@SubscribeEvent
+	public static void onInitializeClient(final FMLClientSetupEvent event) {
+		IRIS_VERSION = ModList.get().getModContainerById(Oculus.MODID).get().getModInfo().getVersion().toString();
 	}
-	
-	public void onKeyRegister(RegisterKeyMappingsEvent event) {
+
+	@SubscribeEvent
+	public static void onKeyRegister(final RegisterKeyMappingsEvent event) {
 		event.register(reloadKeybind);
 		event.register(toggleShadersKeybind);
 		event.register(shaderpackScreenKeybind);
