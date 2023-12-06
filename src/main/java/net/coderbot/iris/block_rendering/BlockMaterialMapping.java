@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraftforge.client.ChunkRenderTypeSet;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,15 +36,15 @@ public class BlockMaterialMapping {
 		return blockStateIds;
 	}
 
-	public static Map<Block, RenderType> createBlockTypeMap(Map<NamespacedId, BlockRenderType> blockPropertiesMap) {
-		Map<Block, RenderType> blockTypeIds = new Reference2ReferenceOpenHashMap<>();
+	public static Map<Block, ChunkRenderTypeSet> createBlockTypeMap(Map<NamespacedId, BlockRenderType> blockPropertiesMap) {
+		Map<Block, ChunkRenderTypeSet> blockTypeIds = new Reference2ReferenceOpenHashMap<>();
 
 		blockPropertiesMap.forEach((id, blockType) -> {
 			ResourceLocation resourceLocation = new ResourceLocation(id.getNamespace(), id.getName());
 
 			Block block = BuiltInRegistries.BLOCK.get(resourceLocation);
 
-			blockTypeIds.put(block, convertBlockToRenderType(blockType));
+			blockTypeIds.put(block, ChunkRenderTypeSet.of(convertBlockToRenderType(blockType)));
 		});
 
 		return blockTypeIds;
