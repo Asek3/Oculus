@@ -1,6 +1,7 @@
 package net.coderbot.iris.mixin.fantastic;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.coderbot.iris.fantastic.ParticleRenderingPhase;
@@ -23,10 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -63,10 +61,10 @@ public class MixinParticleEngine implements PhasedParticleEngine {
 	@Final
 	private Map<ParticleRenderType, Queue<Particle>> particles;
 
-	private static final List<ParticleRenderType> OPAQUE_PARTICLE_RENDER_TYPES;
+	private static final Set<ParticleRenderType> OPAQUE_PARTICLE_RENDER_TYPES;
 
 	static {
-		OPAQUE_PARTICLE_RENDER_TYPES = ImmutableList.of(
+		OPAQUE_PARTICLE_RENDER_TYPES = ImmutableSet.of(
 				ParticleRenderType.PARTICLE_SHEET_OPAQUE,
 				ParticleRenderType.PARTICLE_SHEET_LIT,
 				ParticleRenderType.CUSTOM,
@@ -81,20 +79,13 @@ public class MixinParticleEngine implements PhasedParticleEngine {
 
 	@Redirect(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/particle/ParticleEngine;particles:Ljava/util/Map;"))
 	private Map<ParticleRenderType, Queue<Particle>> iris$selectParticlesToRender(ParticleEngine instance) {
-		Map<ParticleRenderType, Queue<Particle>> toRender = new HashMap<>(particles);
 		if (phase == ParticleRenderingPhase.TRANSLUCENT) {
-			// Remove all known opaque particle texture sheets.
-			for(ParticleRenderType type : OPAQUE_PARTICLE_RENDER_TYPES)
-				toRender.remove(type);
-
-			return toRender;
+			return Maps.filterKeys(particles, type -> !OPAQUE_PARTICLE_RENDER_TYPES.contains(type));
 		} else if (phase == ParticleRenderingPhase.OPAQUE) {
-			// Render only opaque particle sheets
-			toRender.remove(ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT);
-			return toRender;
+			return Maps.filterKeys(particles, type -> !type.equals(ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT));
 		} else {
 			// Don't override particle rendering
-			return toRender;
+			return particles;
 		}
 	}
 
