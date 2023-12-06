@@ -29,10 +29,13 @@ public abstract class MixinRegionChunkRenderer extends ShaderChunkRenderer {
 	}
 
 	@Redirect(remap = false, method = "createRegionTessellation", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/gl/tessellation/TessellationBinding;forVertexBuffer(Lme/jellysquid/mods/sodium/client/gl/buffer/GlBuffer;[Lme/jellysquid/mods/sodium/client/gl/attribute/GlVertexAttributeBinding;)Lme/jellysquid/mods/sodium/client/gl/tessellation/TessellationBinding;"))
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private TessellationBinding iris$onInit(GlBuffer buffer, GlVertexAttributeBinding[] attributes) {
 		if (!BlockRenderingSettings.INSTANCE.shouldUseExtendedVertexFormat()) {
 			return TessellationBinding.forVertexBuffer(buffer, attributes);
 		}
+
+		GlVertexFormat vertexFormat = this.vertexFormat;
 
 		attributes = new GlVertexAttributeBinding[]{
 			new GlVertexAttributeBinding(IrisChunkShaderBindingPoints.ATTRIBUTE_POSITION_ID,

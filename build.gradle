@@ -40,6 +40,7 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+        maven { url "https://maven.blamejared.com/" }
 	maven {
 		url "https://maven.su5ed.dev/releases"
 	}
@@ -51,7 +52,7 @@ dependencies {
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 	
 	//modCompileOnly "maven.modrinth:rubidium:0.7.1"
-	modCompileOnly "me.jellysquid.mods:rubidium-upstream:0.7.1+git.1cdb739"
+	modCompileOnly "org.embeddedt:embeddium-1.20.1:0.2.12-git.149aa28+mc1.20.1"
 }
 
 processResources {
