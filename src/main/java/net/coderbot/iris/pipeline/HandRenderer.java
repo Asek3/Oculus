@@ -1,6 +1,9 @@
 package net.coderbot.iris.pipeline;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 import net.coderbot.batchedentityrendering.impl.FullyBufferedMultiBufferSource;
 import net.coderbot.iris.mixin.GameRendererAccessor;
@@ -60,7 +63,9 @@ public class HandRenderer {
 		Item item = Minecraft.getInstance().player.getItemBySlot(hand == InteractionHand.OFF_HAND ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND).getItem();
 
 		if (item instanceof BlockItem) {
-			return ItemBlockRenderTypes.getChunkRenderType(((BlockItem) item).getBlock().defaultBlockState()) == RenderType.translucent();
+			BlockState state = ((BlockItem) item).getBlock().defaultBlockState();
+			BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
+			return model.getRenderTypes(state, Minecraft.getInstance().level.random, ModelData.EMPTY).contains(RenderType.translucent());
 		}
 
 		return false;
