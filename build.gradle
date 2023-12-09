@@ -61,6 +61,20 @@ sourceSets {
 	}
 }
 
+loom {
+	runs {
+		client {
+			mods {
+				oculus {
+					sourceSet sourceSets.main
+					sourceSet sourceSets.vendored
+					sourceSet sourceSets.sodiumCompatibility
+				}
+			}
+		}
+	}
+}
+
 repositories {
 	maven {
 		name = "Modrinth"
@@ -83,9 +97,10 @@ dependencies {
 	modCompileOnly "org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}"
 	compileOnly "maven.modrinth:distanthorizons:2.0.1-a-1.20.1"
 
-	implementation shadow("io.github.douira:glsl-transformer:2.0.0")
-	implementation shadow("org.antlr:antlr4-runtime:4.11.1")
-	implementation include("org.anarres:jcpp:1.4.14")
+	forgeRuntimeLibrary(implementation(shadow(project(path: ":glsl-relocated", configuration: "bundledJar")))) {
+		transitive = false
+	}
+	forgeRuntimeLibrary(implementation(include("org.anarres:jcpp:1.4.14")))
 }
 
 processResources {
@@ -102,7 +117,6 @@ shadowJar {
 	from jar.archiveFile
 
 	relocate 'org.apache.commons.collections4', 'oculus.org.apache.commons.collections4'
-	relocate 'org.antlr', 'oculus.org.antlr'
 
 	archiveClassifier.set "shadow"
 }

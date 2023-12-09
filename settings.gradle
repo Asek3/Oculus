@@ -10,3 +10,5 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+include("glsl-relocated")
