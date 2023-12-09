@@ -8,7 +8,9 @@ repositories {
 }
 
 dependencies {
-    implementation(shadow("io.github.douira:glsl-transformer:2.0.0"))
+    implementation(shadow("io.github.douira:glsl-transformer:2.0.0")) {
+        exclude module: "antlr4" // we only want to shadow the runtime module
+    }
     implementation shadow("org.antlr:antlr4-runtime:4.11.1")
 }
 
