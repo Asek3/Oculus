@@ -46,6 +46,7 @@
     "sky.MixinLevelRenderer",
     "vertex_format.entity.MixinEntityRenderDispatcher",
     "vertex_format.entity.MixinModelVertex",
+    "vertex_format.CompactChunkVertexAccessor",
     "vertex_format.ChunkMeshAttributeAccessor",
     "vertex_format.GlVertexAttributeFormatAccessor",
     "vertex_format.MixinChunkMeshAttribute",

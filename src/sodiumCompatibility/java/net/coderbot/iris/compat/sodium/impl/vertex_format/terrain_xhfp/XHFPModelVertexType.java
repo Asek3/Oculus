@@ -7,6 +7,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEn
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import net.coderbot.iris.compat.sodium.impl.vertex_format.IrisChunkMeshAttributes;
 import net.coderbot.iris.compat.sodium.impl.vertex_format.IrisGlVertexAttributeFormat;
+import net.coderbot.iris.compat.sodium.mixin.vertex_format.CompactChunkVertexAccessor;
 
 /**
  * Like HFPModelVertexType, but extended to support Iris. The extensions aren't particularly efficient right now.
@@ -27,7 +28,7 @@ public class XHFPModelVertexType implements ChunkVertexType {
 		.build();
 
 	private static final int POSITION_MAX_VALUE = 65536;
-	private static final int TEXTURE_MAX_VALUE = 65536;
+	private static final int TEXTURE_MAX_VALUE = CompactChunkVertexAccessor.getTEXTURE_MAX_VALUE();
 
 	private static final float MODEL_ORIGIN = 8.0f;
 	private static final float MODEL_RANGE = 32.0f;
