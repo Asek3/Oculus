@@ -27,7 +27,7 @@ public class XHFPModelVertexType implements ChunkVertexType {
 		.build();
 
 	private static final int POSITION_MAX_VALUE = 65536;
-	private static final int TEXTURE_MAX_VALUE = 65536;
+	private static final int TEXTURE_MAX_VALUE = 32768;
 
 	private static final float MODEL_ORIGIN = 8.0f;
 	private static final float MODEL_RANGE = 32.0f;
@@ -48,7 +48,7 @@ public class XHFPModelVertexType implements ChunkVertexType {
 	}
 
 	static short encodeBlockTexture(float value) {
-		return (short) (Math.min(0.99999997F, value) * TEXTURE_MAX_VALUE);
+		return (short) (Math.round(value * TEXTURE_MAX_VALUE) & 0xFFFF);
 	}
 
 	static float decodeBlockTexture(short raw) {
