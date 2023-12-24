@@ -18,6 +18,7 @@
     "MixinBooleanState",
     "MixinBiomes",
     "MixinClientLanguage",
+    "MixinClientPacketListener",
     "MixinDebugScreenOverlay",
     "MixinTheEndPortalRenderer",
     "MixinEntityRenderDispatcher",
