@@ -1,4 +1,4 @@
-package net.coderbot.iris.mixin.compat.pixelmon;
+package net.coderbot.iris.compat.pixelmon.mixin;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import org.objectweb.asm.Opcodes;

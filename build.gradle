@@ -21,7 +21,7 @@ loom {
 				"mixins.oculus.compat.indigo.json",
 				"mixins.oculus.compat.dh.json",
 				"mixins.oculus.compat.indium.json",
-				"mixins.oculus.compat.json"
+				"mixins.oculus.compat.pixelmon.json"
 		]
 	}
 	mixin.defaultRefmapName = "oculus-mixins-refmap.json"

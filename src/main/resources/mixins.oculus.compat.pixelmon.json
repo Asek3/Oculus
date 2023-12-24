@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "plugin": "net.coderbot.iris.compat.pixelmon.mixin.OculusPixelmonCompatMixinPlugin",
+  "package": "net.coderbot.iris.compat.pixelmon.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MixinNormalizedFace"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
