@@ -102,7 +102,7 @@ dependencies {
 	mappings loom.officialMojangMappings()
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-	modImplementation "org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}"
+	modCompileOnly "org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}"
 	compileOnly "maven.modrinth:distanthorizons:2.0.1-a-1.20.1"
 
 	forgeRuntimeLibrary(implementation(shadow(project(path: ":glsl-relocated", configuration: "bundledJar")))) {
