@@ -12,7 +12,7 @@ public class LaunchWarn {
 	public static void main(String[] args) {
 		// TODO: make this translatable
 		String message = "This file is the Forge version of Oculus, meant to be installed as a mod. Would you like to get the Forge Installer instead?";
-		String fallback = "This file is the Forge version of Oculus, meant to be installed as a mod. Please download the Forge Installer from https://files.minecraftforge.net.";
+		String fallback = "This file is the Forge version of Oculus, meant to be installed as a mod. Please download the Forge Installer from https://neoforged.net/";
 		if (GraphicsEnvironment.isHeadless()) {
 			System.err.println(fallback);
 		} else {
@@ -27,7 +27,7 @@ public class LaunchWarn {
 
 				if (option == JOptionPane.YES_OPTION) {
 					try {
-						Desktop.getDesktop().browse(URI.create("https://files.minecraftforge.net"));
+						Desktop.getDesktop().browse(URI.create("https://neoforged.net"));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
