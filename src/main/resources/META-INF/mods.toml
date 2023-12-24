@@ -29,6 +29,7 @@ side = "BOTH"
 
 [[dependencies.oculus]]
 modId = "embeddium"
+mandatory = false
 versionRange = "[0.2.14,)"
 ordering = "NONE"
 side = "CLIENT"
