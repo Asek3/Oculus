@@ -26,3 +26,10 @@ mandatory = true
 versionRange = "[1.20.1]"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.oculus]]
+modId = "embeddium"
+mandatory = true
+versionRange = "[0.2.14,)"
+ordering = "NONE"
+side = "CLIENT"
