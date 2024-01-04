@@ -29,6 +29,7 @@
     "copyEntity.shadows.EntityRenderDispatcherMixin",
     "font.MixinGlyphRenderer",
     "pbr_animation.MixinSpriteContents",
+    "shader_overrides.MixinChunkBuilderMeshingTask",
     "shader_overrides.MixinGlProgram",
     "shader_overrides.MixinRegionChunkRenderer",
     "shader_overrides.MixinShaderChunkRenderer",
