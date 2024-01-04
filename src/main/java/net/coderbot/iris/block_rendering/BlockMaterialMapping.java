@@ -3,12 +3,13 @@ package net.coderbot.iris.block_rendering;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.shaderpack.materialmap.BlockEntry;
 import net.coderbot.iris.shaderpack.materialmap.BlockRenderType;
 import net.coderbot.iris.shaderpack.materialmap.NamespacedId;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -18,10 +19,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class BlockMaterialMapping {
 	public static Object2IntMap<BlockState> createBlockStateIdMap(Int2ObjectMap<List<BlockEntry>> blockPropertiesMap) {
@@ -36,13 +39,13 @@ public class BlockMaterialMapping {
 		return blockStateIds;
 	}
 
-	public static Map<Block, ChunkRenderTypeSet> createBlockTypeMap(Map<NamespacedId, BlockRenderType> blockPropertiesMap) {
-		Map<Block, ChunkRenderTypeSet> blockTypeIds = new Reference2ReferenceOpenHashMap<>();
+	public static Map<Holder.Reference<Block>, ChunkRenderTypeSet> createBlockTypeMap(Map<NamespacedId, BlockRenderType> blockPropertiesMap) {
+		Map<Holder.Reference<Block>, ChunkRenderTypeSet> blockTypeIds = new Object2ObjectOpenHashMap<>();
 
 		blockPropertiesMap.forEach((id, blockType) -> {
 			ResourceLocation resourceLocation = new ResourceLocation(id.getNamespace(), id.getName());
 
-			Block block = BuiltInRegistries.BLOCK.get(resourceLocation);
+			Holder.Reference<Block> block = ForgeRegistries.BLOCKS.getDelegateOrThrow(resourceLocation);
 
 			blockTypeIds.put(block, ChunkRenderTypeSet.of(convertBlockToRenderType(blockType)));
 		});
@@ -68,10 +71,15 @@ public class BlockMaterialMapping {
 		NamespacedId id = entry.getId();
 		ResourceLocation resourceLocation = new ResourceLocation(id.getNamespace(), id.getName());
 
-		Block block = BuiltInRegistries.BLOCK.get(resourceLocation);
+		Optional<Holder.Reference<Block>> delegateOpt = ForgeRegistries.BLOCKS.getDelegate(resourceLocation);
 
 		// If the block doesn't exist, by default the registry will return AIR. That probably isn't what we want.
-		// TODO: Assuming that Registry.BLOCK.getDefaultId() == "minecraft:air" here
+		if (delegateOpt.isEmpty() || !delegateOpt.get().isBound()) {
+			return;
+		}
+
+		Block block = delegateOpt.get().get();
+
 		if (block == Blocks.AIR) {
 			return;
 		}
