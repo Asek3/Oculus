@@ -4,7 +4,7 @@
   "iris.keybind.reload": "Shaders neu lade",
   "iris.keybind.shaderPackSelection": "Shaderpack uswähle",
   "iris.keybind.toggleShaders": "Shaders i/uschalte",
-  "iris.keybinds": "Iris",
+  "iris.keybinds": "Oculus",
   "iris.shaders.reloaded.failure": "Shader neu lade hed ned funktioniert! Grund: %s",
   "iris.shaders.toggled.failure": "Shader i/uschalte hed ned funktioniert! Grund: %s",
 

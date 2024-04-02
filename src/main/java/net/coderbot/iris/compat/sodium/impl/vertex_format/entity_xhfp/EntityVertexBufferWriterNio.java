@@ -5,8 +5,10 @@ import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterNi
 import me.jellysquid.mods.sodium.client.model.vertex.formats.glyph.GlyphVertexSink;
 import me.jellysquid.mods.sodium.client.model.vertex.formats.quad.QuadVertexSink;
 import me.jellysquid.mods.sodium.client.util.Norm3b;
+import net.coderbot.iris.uniforms.CapturedRenderingState;
 import net.coderbot.iris.vendored.joml.Vector3f;
 import net.coderbot.iris.vertices.IrisVertexFormats;
+import net.coderbot.iris.vertices.NormI8;
 import net.coderbot.iris.vertices.NormalHelper;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
@@ -43,6 +45,9 @@ public class EntityVertexBufferWriterNio extends VertexBufferWriterNio implement
 		buffer.putFloat(i + 20, v);
 		buffer.putInt(i + 24, overlay);
 		buffer.putInt(i + 28, light);
+		buffer.putShort(i + 36, (short) CapturedRenderingState.INSTANCE.getCurrentRenderedEntity());
+		buffer.putShort(i + 38, (short) CapturedRenderingState.INSTANCE.getCurrentRenderedBlockEntity());
+		buffer.putShort(i + 40, (short) CapturedRenderingState.INSTANCE.getCurrentRenderedItem());
 
 		if (vertexCount == 4) {
 			this.endQuad(normal);
@@ -74,7 +79,7 @@ public class EntityVertexBufferWriterNio extends VertexBufferWriterNio implement
 			normalX = saveNormal.x;
 			normalY = saveNormal.y;
 			normalZ = saveNormal.z;
-			normal = NormalHelper.packNormal(saveNormal, 0.0F);
+			normal = NormI8.pack(normalX, normalY, normalZ, 0.0F);
 		} else {
 			normalX = Norm3b.unpackX(normal);
 			normalY = Norm3b.unpackY(normal);
@@ -84,10 +89,10 @@ public class EntityVertexBufferWriterNio extends VertexBufferWriterNio implement
 		int tangent = NormalHelper.computeTangent(normalX, normalY, normalZ, quad);
 
 		for (int vertex = 0; vertex < 4; vertex++) {
-			buffer.putFloat(i + 36 - STRIDE * vertex, uSum);
-			buffer.putFloat(i + 40 - STRIDE * vertex, vSum);
+			buffer.putFloat(i + 42 - STRIDE * vertex, uSum);
+			buffer.putFloat(i + 46 - STRIDE * vertex, vSum);
 			buffer.putInt(i + 32 - STRIDE * vertex, normal);
-			buffer.putInt(i + 44 - STRIDE * vertex, tangent);
+			buffer.putInt(i + 50 - STRIDE * vertex, tangent);
 		}
 
 		uSum = 0;

@@ -58,9 +58,4 @@ public abstract class TypeSpecifier extends InnerASTNode {
   public TypeSpecifier cloneInto(Root root) {
     return (TypeSpecifier) super.cloneInto(root);
   }
-
-  @Override
-  public TypeSpecifier cloneSeparate() {
-    return (TypeSpecifier) super.cloneSeparate();
-  }
 }

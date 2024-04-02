@@ -47,9 +47,4 @@ public abstract class LoopStatement extends Statement {
   public LoopStatement cloneInto(Root root) {
     return (LoopStatement) super.cloneInto(root);
   }
-
-  @Override
-  public LoopStatement cloneSeparate() {
-    return (LoopStatement) super.cloneSeparate();
-  }
 }

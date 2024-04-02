@@ -3,7 +3,8 @@ package io.github.douira.glsl_transformer.ast.node.statement.loop;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.node.statement.Statement;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class DoWhileLoopStatement extends ConditionLoopStatement {
   public DoWhileLoopStatement(Statement statement, Expression condition) {
@@ -40,10 +41,5 @@ public class DoWhileLoopStatement extends ConditionLoopStatement {
   @Override
   public DoWhileLoopStatement cloneInto(Root root) {
     return (DoWhileLoopStatement) super.cloneInto(root);
-  }
-
-  @Override
-  public DoWhileLoopStatement cloneSeparate() {
-    return (DoWhileLoopStatement) super.cloneSeparate();
   }
 }

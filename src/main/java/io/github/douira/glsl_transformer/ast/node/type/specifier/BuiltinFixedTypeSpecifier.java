@@ -1,11 +1,12 @@
 package io.github.douira.glsl_transformer.ast.node.type.specifier;
 
-import repack.antlr.v4.runtime.Token;
-
 import io.github.douira.glsl_transformer.GLSLLexer;
-import io.github.douira.glsl_transformer.ast.data.*;
+import io.github.douira.glsl_transformer.ast.data.TokenTyped;
+import io.github.douira.glsl_transformer.ast.data.TypeUtil;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
+import repack.antlr.v4.runtime.Token;
 
 public class BuiltinFixedTypeSpecifier extends TypeSpecifier {
   public enum BuiltinType implements TokenTyped {
@@ -165,10 +166,5 @@ public class BuiltinFixedTypeSpecifier extends TypeSpecifier {
   @Override
   public BuiltinFixedTypeSpecifier cloneInto(Root root) {
     return (BuiltinFixedTypeSpecifier) super.cloneInto(root);
-  }
-
-  @Override
-  public BuiltinFixedTypeSpecifier cloneSeparate() {
-    return (BuiltinFixedTypeSpecifier) super.cloneSeparate();
   }
 }

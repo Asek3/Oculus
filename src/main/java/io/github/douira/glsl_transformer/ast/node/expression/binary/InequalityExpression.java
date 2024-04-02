@@ -40,9 +40,4 @@ public class InequalityExpression extends BinaryExpression {
   public InequalityExpression cloneInto(Root root) {
     return (InequalityExpression) super.cloneInto(root);
   }
-
-  @Override
-  public InequalityExpression cloneSeparate() {
-    return (InequalityExpression) super.cloneSeparate();
-  }
 }

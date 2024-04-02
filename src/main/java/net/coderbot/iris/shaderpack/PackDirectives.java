@@ -1,11 +1,14 @@
 package net.coderbot.iris.shaderpack;
 
 import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.coderbot.iris.Iris;
+import net.coderbot.iris.gl.buffer.ShaderStorageInfo;
 import net.coderbot.iris.gl.texture.TextureScaleOverride;
 import net.coderbot.iris.gl.texture.TextureType;
 import net.coderbot.iris.helpers.Tri;
@@ -16,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class PackDirectives {
+	private boolean supportsColorCorrection;
 	private int noiseTextureResolution;
 	private float sunPathRotation;
 	private float ambientOcclusionLevel;
@@ -30,6 +34,9 @@ public class PackDirectives {
 	private boolean moon;
 	private boolean rainDepth;
 	private boolean separateAo;
+	private boolean voxelizeLightBlocks;
+	private boolean separateEntityDraws;
+	private boolean frustumCulling;
 	private boolean oldLighting;
 	private boolean concurrentCompute;
 	private boolean oldHandLight;
@@ -37,6 +44,7 @@ public class PackDirectives {
 	private Object2ObjectMap<String, Object2BooleanMap<String>> explicitFlips = new Object2ObjectOpenHashMap<>();
 	private Object2ObjectMap<String, TextureScaleOverride> scaleOverrides = new Object2ObjectOpenHashMap<>();
 	private Object2ObjectMap<Tri<String, TextureType, TextureStage>, String> textureMap;
+	private Int2ObjectArrayMap<ShaderStorageInfo> bufferObjects;
 
 	private final PackRenderTargetDirectives renderTargetDirectives;
 	private final PackShadowDirectives shadowDirectives;
@@ -45,11 +53,13 @@ public class PackDirectives {
 	private PackDirectives(Set<Integer> supportedRenderTargets, PackShadowDirectives packShadowDirectives) {
 		noiseTextureResolution = 256;
 		sunPathRotation = 0.0F;
+		supportsColorCorrection = false;
 		ambientOcclusionLevel = 1.0F;
 		wetnessHalfLife = 600.0f;
 		drynessHalfLife = 200.0f;
 		eyeBrightnessHalfLife = 10.0f;
 		centerDepthHalfLife = 1.0F;
+		bufferObjects = new Int2ObjectArrayMap<>();
 		renderTargetDirectives = new PackRenderTargetDirectives(supportedRenderTargets);
 		shadowDirectives = packShadowDirectives;
 	}
@@ -63,7 +73,11 @@ public class PackDirectives {
 		moon = properties.getMoon().orElse(true);
 		rainDepth = properties.getRainDepth().orElse(false);
 		separateAo = properties.getSeparateAo().orElse(false);
+		voxelizeLightBlocks = properties.getVoxelizeLightBlocks().orElse(false);
+		separateEntityDraws = properties.getSeparateEntityDraws().orElse(false);
+		frustumCulling = properties.getFrustumCulling().orElse(true);
 		oldLighting = properties.getOldLighting().orElse(false);
+		supportsColorCorrection = properties.supportsColorCorrection().orElse(false);
 		concurrentCompute = properties.getConcurrentCompute().orElse(false);
 		oldHandLight = properties.getOldHandLight().orElse(true);
 		explicitFlips = properties.getExplicitFlips();
@@ -71,12 +85,16 @@ public class PackDirectives {
 		prepareBeforeShadow = properties.getPrepareBeforeShadow().orElse(false);
 		particleRenderingSettings = properties.getParticleRenderingSettings();
 		textureMap = properties.getCustomTexturePatching();
+		bufferObjects = properties.getBufferObjects();
 	}
 
 	PackDirectives(Set<Integer> supportedRenderTargets, PackDirectives directives) {
 		this(supportedRenderTargets, new PackShadowDirectives(directives.getShadowDirectives()));
 		cloudSetting = directives.cloudSetting;
 		separateAo = directives.separateAo;
+		voxelizeLightBlocks = directives.voxelizeLightBlocks;
+		separateEntityDraws = directives.separateEntityDraws;
+		frustumCulling = directives.frustumCulling;
 		oldLighting = directives.oldLighting;
 		concurrentCompute = directives.concurrentCompute;
 		explicitFlips = directives.explicitFlips;
@@ -84,6 +102,7 @@ public class PackDirectives {
 		prepareBeforeShadow = directives.prepareBeforeShadow;
 		particleRenderingSettings = directives.particleRenderingSettings;
 		textureMap = directives.textureMap;
+		bufferObjects = directives.bufferObjects;
 	}
 
 	public int getNoiseTextureResolution() {
@@ -146,6 +165,18 @@ public class PackDirectives {
 		return separateAo;
 	}
 
+	public boolean shouldVoxelizeLightBlocks() {
+		return voxelizeLightBlocks;
+	}
+
+	public boolean shouldUseSeparateEntityDraws() {
+		return separateEntityDraws;
+	}
+
+	public boolean shouldUseFrustumCulling() {
+		return frustumCulling;
+	}
+
 	public boolean isOldLighting() {
 		return oldLighting;
 	}
@@ -171,6 +202,14 @@ public class PackDirectives {
 
 	public PackShadowDirectives getShadowDirectives() {
 		return shadowDirectives;
+	}
+
+	public Int2ObjectArrayMap<ShaderStorageInfo> getBufferObjects() {
+		return bufferObjects;
+	}
+
+	public boolean supportsColorCorrection() {
+		return supportsColorCorrection;
 	}
 
 	private static float clamp(float val, float lo, float hi) {

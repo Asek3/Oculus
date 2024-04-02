@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.expression.unary;
 
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class DecrementPostfixExpression extends UnaryExpression {
   public DecrementPostfixExpression(Expression expression) {
@@ -39,10 +40,5 @@ public class DecrementPostfixExpression extends UnaryExpression {
   @Override
   public DecrementPostfixExpression cloneInto(Root root) {
     return (DecrementPostfixExpression) super.cloneInto(root);
-  }
-
-  @Override
-  public DecrementPostfixExpression cloneSeparate() {
-    return (DecrementPostfixExpression) super.cloneSeparate();
   }
 }

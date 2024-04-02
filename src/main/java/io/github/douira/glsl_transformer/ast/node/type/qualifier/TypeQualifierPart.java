@@ -42,9 +42,4 @@ public abstract class TypeQualifierPart extends InnerASTNode {
   public TypeQualifierPart cloneInto(Root root) {
     return (TypeQualifierPart) super.cloneInto(root);
   }
-
-  @Override
-  public TypeQualifierPart cloneSeparate() {
-    return (TypeQualifierPart) super.cloneSeparate();
-  }
 }

@@ -8,9 +8,9 @@
   "iris.shaders.reloaded.failure": "เกิดข้อผิดพลาดในการโหลดแสงเงาใหม่! สาเหตุ: %s",
   "iris.shaders.toggled.failure": "เกิดข้อผิดพลาดในการเปิด/ปิดแสงเงา! สาเหตุ: %s",
   "iris.sodium.failure.title": "Oculus เกิดข้อผิดพลาดขณะที่กำลังโหลด!",
-  "iris.sodium.failure.download": "ดาวน์โหลด Rubidium",
-  "iris.sodium.failure.reason.notFound": "Oculus ต้องใช้ Rubidium เพื่อประสิทธิภาพที่ดีขึ้น แต่ Rubidium ยังไม่ได้รับการติดตั้ง โปรดดาวน์โหลด Rubidium แล้ววางไว้ในโฟลเดอร์ mods เสร็จแล้วให้เปิดเกมใหม่อีกครั้ง",
-  "iris.sodium.failure.reason.incompatible": "Oculus ต้องใช้ Rubidium เพื่อประสิทธิภาพที่ดีขึ้น แต่พบเวอร์ชั่นของ Rubidium ที่ไม่สามารถใช้ร่วมกับ Oculus ได้ โปรดดาวน์โหลด Rubidium เวอร์ชั่นที่สามารถใช้กับ Oculus ได้ แล้ววางไว้ในโฟลเดอร์ mods ลบตัวเวอร์ชั่นที่ใช้ร่วมกันไม่ได้ออก เสร็จแล้วให้เปิดเกมใหม่อีกครั้ง",
+  "iris.sodium.failure.download": "ดาวน์โหลด Embeddium",
+  "iris.sodium.failure.reason.notFound": "Oculus ต้องใช้ Embeddium เพื่อประสิทธิภาพที่ดีขึ้น แต่ Embeddium ยังไม่ได้รับการติดตั้ง โปรดดาวน์โหลด Embeddium แล้ววางไว้ในโฟลเดอร์ mods เสร็จแล้วให้เปิดเกมใหม่อีกครั้ง",
+  "iris.sodium.failure.reason.incompatible": "Oculus ต้องใช้ Embeddium เพื่อประสิทธิภาพที่ดีขึ้น แต่พบเวอร์ชั่นของ Embeddium ที่ไม่สามารถใช้ร่วมกับ Oculus ได้ โปรดดาวน์โหลด Embeddium เวอร์ชั่นที่สามารถใช้กับ Oculus ได้ แล้ววางไว้ในโฟลเดอร์ mods ลบตัวเวอร์ชั่นที่ใช้ร่วมกันไม่ได้ออก เสร็จแล้วให้เปิดเกมใหม่อีกครั้ง",
 
   "options.iris.apply": "ปรับใช้",
   "options.iris.refresh": "รีเฟรช",
@@ -46,7 +46,7 @@
   "options.iris.shadowDistance.disabled": "แสงเงาของคุณใช้อยู่ได้รับการตั้งค่าระยะการเรนเดอร์เงามาเรียบร้อยแล้ว คุณไม่สามารถเปลี่ยนได้",
   "options.iris.shadowDistance.sodium_tooltip": "ระยะการเรนเดอร์เงา จะควบคุมว่าภูมิประเทศจะสามารถเรนเดอร์เป็นเงาได้ไกลมากน้อยแค่ไหน โดยค่าต่ำ ๆ หมายความว่าภูมิประเทศจะถูกเรนเดอร์ได้น้อย ช่วยเพิ่มอัตราเฟรมได้ ตัวเลือกนี้จะไม่สามารถเปลี่ยนบนแพ็คที่ได้กำหนดระยะการเรนเดอร์แสงเงามาแล้วอย่างชัดเจน ระยะการเรนเดอร์แสงเงาที่แท้จริงจะถูกจำกัดโดยตัวเลือกระยะการมองเห็น",
 
-  "pack.iris.select.title": "โปรดเลือก",                              
+  "pack.iris.select.title": "โปรดเลือก",
   "pack.iris.configure.title": "ปรับแต่งค่า",
   "pack.iris.list.label": "+ ลากไฟล์แสงเงามาที่นี่เพื่อเพิ่มแสงเงา",
 

@@ -38,9 +38,4 @@ public abstract class LayoutQualifierPart extends InnerASTNode {
   public LayoutQualifierPart cloneInto(Root root) {
     return (LayoutQualifierPart) super.cloneInto(root);
   }
-
-  @Override
-  public LayoutQualifierPart cloneSeparate() {
-    return (LayoutQualifierPart) super.cloneSeparate();
-  }
 }

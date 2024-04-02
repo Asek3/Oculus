@@ -53,9 +53,4 @@ public class MemberAccessExpression extends UnaryExpression {
   public MemberAccessExpression cloneInto(Root root) {
     return (MemberAccessExpression) super.cloneInto(root);
   }
-
-  @Override
-  public MemberAccessExpression cloneSeparate() {
-    return (MemberAccessExpression) super.cloneSeparate();
-  }
 }

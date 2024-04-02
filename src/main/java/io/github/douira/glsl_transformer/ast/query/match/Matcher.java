@@ -1,20 +1,11 @@
 package io.github.douira.glsl_transformer.ast.query.match;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Predicate;
 
-import repack.antlr.v4.runtime.ParserRuleContext;
-
-import io.github.douira.glsl_transformer.GLSLParser;
-import io.github.douira.glsl_transformer.GLSLParser.*;
-import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
 import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
-import io.github.douira.glsl_transformer.ast.node.expression.Expression;
-import io.github.douira.glsl_transformer.ast.node.external_declaration.ExternalDeclaration;
-import io.github.douira.glsl_transformer.ast.node.statement.Statement;
-import io.github.douira.glsl_transformer.ast.transform.*;
 import io.github.douira.glsl_transformer.ast.traversal.*;
-import io.github.douira.glsl_transformer.parser.EnhancedParser;
+import io.github.douira.glsl_transformer.parser.ParseShape;
 
 /**
  * Instances of the matcher can match a node against a stored pattern. This
@@ -57,71 +48,13 @@ public class Matcher<N extends ASTNode> {
     this(pattern, null);
   }
 
-  /**
-   * Creates a new matcher that matches the pattern parsed from the given string,
-   * parser method and visitor method. There is also a given wildcard prefix.
-   * 
-   * @param <C>            The type of the parser rule context
-   * @param input          The string to parse
-   * @param parseMethod    The parser method to use
-   * @param visitMethod    The build visitor method to use
-   * @param wildcardPrefix The wildcard prefix
-   */
-  public <C extends ParserRuleContext> Matcher(String input,
-      Function<GLSLParser, C> parseMethod,
-      BiFunction<ASTBuilder, C, N> visitMethod,
-      String wildcardPrefix) {
-    this(ASTBuilder.build(
-        EnhancedParser.getInternalInstance().parse(input, parseMethod),
-        visitMethod),
-        wildcardPrefix);
+  public Matcher(String input, ParseShape<?, N> parseShape, String wildcardPrefix) {
+    this(parseShape._parseNodeSeparateInternal(input), wildcardPrefix);
   }
 
-  /**
-   * Creates a new matcher that matches the pattern parsed from the given string,
-   * parser method and visitor method. There is no wildcard prefix.
-   * 
-   * @param <C>         The type of the parser rule context
-   * @param input       The string to parse
-   * @param parseMethod The parser method to use
-   * @param visitMethod The build visitor method to use
-   */
-  public <C extends ParserRuleContext> Matcher(String input,
-      Function<GLSLParser, C> parseMethod,
-      BiFunction<ASTBuilder, C, N> visitMethod) {
-    this(input, parseMethod, visitMethod, null);
+  public Matcher(String input, ParseShape<?, N> parseShape) {
+    this(input, parseShape, null);
   }
-
-  public Matcher(String input, Function<String, N> patternParser, String wildcardPrefix) {
-    this(patternParser.apply(input), wildcardPrefix);
-  }
-
-  public Matcher(String input, Function<String, N> patternParser) {
-    this(input, patternParser, null);
-  }
-
-  private static <C extends ParserRuleContext, N extends ASTNode> Function<String, N> makePatternParser(
-      Class<C> ruleType,
-      Function<GLSLParser, C> parseMethod,
-      BiFunction<ASTBuilder, C, N> visitMethod) {
-    return input -> ASTParser.getInternalInstance().parseNodeSeparate(input, ruleType, parseMethod, visitMethod);
-  }
-
-  public static final Function<String, TranslationUnit> translationUnitPattern = makePatternParser(
-      TranslationUnitContext.class,
-      GLSLParser::translationUnit, ASTBuilder::visitTranslationUnit);
-
-  public static final Function<String, ExternalDeclaration> externalDeclarationPattern = makePatternParser(
-      ExternalDeclarationContext.class,
-      GLSLParser::externalDeclaration, ASTBuilder::visitExternalDeclaration);
-
-  public static final Function<String, Expression> expressionPattern = makePatternParser(
-      ExpressionContext.class,
-      GLSLParser::expression, ASTBuilder::visitExpression);
-
-  public static final Function<String, Statement> statementPattern = makePatternParser(
-      StatementContext.class,
-      GLSLParser::statement, ASTBuilder::visitStatement);
 
   private ASTVisitor<?> matchVisitor = new ASTVoidVisitor() {
     @Override

@@ -28,9 +28,4 @@ public class DefaultStatement extends CaseLabelStatement {
   public DefaultStatement cloneInto(Root root) {
     return (DefaultStatement) super.cloneInto(root);
   }
-
-  @Override
-  public DefaultStatement cloneSeparate() {
-    return (DefaultStatement) super.cloneSeparate();
-  }
 }

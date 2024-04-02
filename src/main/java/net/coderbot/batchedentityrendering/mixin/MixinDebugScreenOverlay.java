@@ -2,6 +2,7 @@ package net.coderbot.batchedentityrendering.mixin;
 
 import net.coderbot.batchedentityrendering.impl.BatchingDebugMessageHelper;
 import net.coderbot.batchedentityrendering.impl.DrawCallTrackingRenderBuffers;
+import net.coderbot.iris.Iris;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,10 +23,12 @@ public abstract class MixinDebugScreenOverlay {
     private void batchedentityrendering$appendStats(CallbackInfoReturnable<List<String>> cir) {
         List<String> messages = cir.getReturnValue();
 
-		DrawCallTrackingRenderBuffers drawTracker = (DrawCallTrackingRenderBuffers) Minecraft.getInstance().renderBuffers();
+        DrawCallTrackingRenderBuffers drawTracker = (DrawCallTrackingRenderBuffers) Minecraft.getInstance().renderBuffers();
 
         // blank line separator
-        messages.add("");
-		messages.add("[Entity Batching] " + BatchingDebugMessageHelper.getDebugMessage(drawTracker));
+        if (Iris.getIrisConfig().areDebugOptionsEnabled()) {
+            messages.add("");
+            messages.add("[Entity Batching] " + BatchingDebugMessageHelper.getDebugMessage(drawTracker));
+        }
     }
 }

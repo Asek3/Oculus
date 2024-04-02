@@ -65,9 +65,4 @@ public class PrecisionDeclaration extends Declaration {
   public PrecisionDeclaration cloneInto(Root root) {
     return (PrecisionDeclaration) super.cloneInto(root);
   }
-
-  @Override
-  public PrecisionDeclaration cloneSeparate() {
-    return (PrecisionDeclaration) super.cloneSeparate();
-  }
 }

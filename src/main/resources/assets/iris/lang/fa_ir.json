@@ -4,7 +4,7 @@
   "iris.keybinds": "Oculus",
   "iris.shaders.reloaded.failure": "خطا در بارگیری مجدد shader ها ، علت : %s",
   "iris.sodium.failure.title": "Oculus اشکال در بارگذاری",
-  "iris.sodium.failure.reason": "شما Rubidium پرونده اجرایی را در پوشه mods بازی خود دارید، اما Oculus پرونده اجرایی Rubidium را به همراه دارد،‌ لطفا بازی را ببندید و پرونده اجرایی Rubidium را از پوشه mods بازی حذف کنید.",
+  "iris.sodium.failure.reason": "شما Embeddium پرونده اجرایی را در پوشه mods بازی خود دارید، اما Oculus پرونده اجرایی Embeddium را به همراه دارد،‌ لطفا بازی را ببندید و پرونده اجرایی Embeddium را از پوشه mods بازی حذف کنید.",
  "options.iris.shadowDistance": "حداکثر فاصله سایه ها",
   "options.iris.shadowDistance.enabled": "به شما قابلیت تغییر میزان حداکثر فاصله سایه ها را می‌دهد. موجودات خارج از این فاصله هیچ سایه ای نمی‌اندازند. کم کردن این گزینه می‌تواند تاثیر زیادی در عملکرد بهتر بازی داشته باشد.",
   "options.iris.shadowDistance.disabled": "Shaderpack انتخابی شما میزان حداکثر فاصله سایه ها را تایین کرده است و شما نمی توانید آن را تغییر دهد.",

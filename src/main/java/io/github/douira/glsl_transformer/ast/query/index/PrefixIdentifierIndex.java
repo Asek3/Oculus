@@ -24,11 +24,6 @@ public class PrefixIdentifierIndex<S extends Set<Identifier>, I extends Patricia
     return index.prefixMap(key).values().stream();
   }
 
-  @Override
-  public Stream<Identifier> prefixQueryFlat(String key) {
-    return prefixQuery(key).flatMap(Set::stream);
-  }
-
   public static PrefixIdentifierIndex<HashSet<Identifier>, PrefixTrie<HashSet<Identifier>, Identifier>> withPrefix() {
     return new PrefixIdentifierIndex<>(new PrefixTrie<>(), HashSet::new);
   }

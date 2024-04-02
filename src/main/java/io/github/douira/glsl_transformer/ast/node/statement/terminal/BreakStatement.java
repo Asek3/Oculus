@@ -26,9 +26,4 @@ public class BreakStatement extends TerminalStatement {
   public BreakStatement cloneInto(Root root) {
     return (BreakStatement) super.cloneInto(root);
   }
-
-  @Override
-  public BreakStatement cloneSeparate() {
-    return (BreakStatement) super.cloneSeparate();
-  }
 }

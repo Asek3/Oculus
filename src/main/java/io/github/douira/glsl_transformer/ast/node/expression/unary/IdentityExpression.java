@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.expression.unary;
 
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class IdentityExpression extends UnaryExpression {
   public IdentityExpression(Expression expression) {
@@ -39,10 +40,5 @@ public class IdentityExpression extends UnaryExpression {
   @Override
   public IdentityExpression cloneInto(Root root) {
     return (IdentityExpression) super.cloneInto(root);
-  }
-
-  @Override
-  public IdentityExpression cloneSeparate() {
-    return (IdentityExpression) super.cloneSeparate();
   }
 }

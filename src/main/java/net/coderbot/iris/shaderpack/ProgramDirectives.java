@@ -32,6 +32,7 @@ public class ProgramDirectives {
 	private final List<BufferBlendInformation> bufferBlendInformations;
 	private final ImmutableSet<Integer> mipmappedBuffers;
 	private final ImmutableMap<Integer, Boolean> explicitFlips;
+	private boolean unknownDrawBuffers;
 
 	private ProgramDirectives(int[] drawBuffers, float viewportScale, @Nullable AlphaTest alphaTestOverride,
 							  Optional<BlendModeOverride> blendModeOverride, List<BufferBlendInformation> bufferBlendInformations, ImmutableSet<Integer> mipmappedBuffers,
@@ -43,6 +44,7 @@ public class ProgramDirectives {
 		this.bufferBlendInformations = bufferBlendInformations;
 		this.mipmappedBuffers = mipmappedBuffers;
 		this.explicitFlips = explicitFlips;
+		this.unknownDrawBuffers = false;
 	}
 
 	ProgramDirectives(ProgramSource source, ShaderProperties properties, Set<Integer> supportedRenderTargets,
@@ -66,7 +68,10 @@ public class ProgramDirectives {
 			} else {
 				throw new IllegalStateException("Unhandled comment directive type!");
 			}
-		}).orElse(new int[] { 0 });
+		}).orElseGet(() -> {
+			unknownDrawBuffers = true;
+			return new int[] { 0 };
+		});
 
 		if (properties != null) {
 			viewportScale = properties.getViewportScaleOverrides().getOrDefault(source.getName(), 1.0f);
@@ -140,8 +145,8 @@ public class ProgramDirectives {
 
 	private static int[] parseDigitList(String digitListString) {
 		return Arrays.stream(digitListString.split(","))
-				.mapToInt(Integer::parseInt)
-				.toArray();
+					 .mapToInt(Integer::parseInt)
+					 .toArray();
 	}
 
 	private static Optional<CommentDirective> getAppliedDirective(Optional<CommentDirective> optionalDrawbuffersDirective, Optional<CommentDirective> optionalRendertargetsDirective) {
@@ -162,6 +167,10 @@ public class ProgramDirectives {
 
 	public int[] getDrawBuffers() {
 		return drawBuffers;
+	}
+
+	public boolean hasUnknownDrawBuffers() {
+		return unknownDrawBuffers;
 	}
 
 	public float getViewportScale() {

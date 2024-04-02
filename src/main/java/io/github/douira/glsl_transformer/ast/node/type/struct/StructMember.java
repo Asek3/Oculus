@@ -1,6 +1,5 @@
 package io.github.douira.glsl_transformer.ast.node.type.struct;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
@@ -27,7 +26,7 @@ public class StructMember extends InnerASTNode {
     this.type = type;
   }
 
-  public List<StructDeclarator> getDeclarators() {
+  public ChildNodeList<StructDeclarator> getDeclarators() {
     return declarators;
   }
 
@@ -54,10 +53,5 @@ public class StructMember extends InnerASTNode {
   @Override
   public StructMember cloneInto(Root root) {
     return (StructMember) super.cloneInto(root);
-  }
-
-  @Override
-  public StructMember cloneSeparate() {
-    return (StructMember) super.cloneSeparate();
   }
 }

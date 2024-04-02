@@ -69,9 +69,4 @@ public class WhileLoopStatement extends ConditionLoopStatement {
   public WhileLoopStatement cloneInto(Root root) {
     return (WhileLoopStatement) super.cloneInto(root);
   }
-
-  @Override
-  public WhileLoopStatement cloneSeparate() {
-    return (WhileLoopStatement) super.cloneSeparate();
-  }
 }

@@ -1,6 +1,5 @@
 package io.github.douira.glsl_transformer.ast.node.expression;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
@@ -16,11 +15,11 @@ public abstract class ManyExpression extends Expression implements ListNode<Expr
   }
 
   @Override
-  public List<Expression> getChildren() {
+  public ChildNodeList<Expression> getChildren() {
     return expressions;
   }
 
-  public List<Expression> getExpressions() {
+  public ChildNodeList<Expression> getExpressions() {
     return expressions;
   }
 
@@ -50,10 +49,5 @@ public abstract class ManyExpression extends Expression implements ListNode<Expr
   @Override
   public ManyExpression cloneInto(Root root) {
     return (ManyExpression) super.cloneInto(root);
-  }
-
-  @Override
-  public ManyExpression cloneSeparate() {
-    return (ManyExpression) super.cloneSeparate();
   }
 }

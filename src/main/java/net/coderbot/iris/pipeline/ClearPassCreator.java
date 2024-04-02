@@ -45,6 +45,7 @@ public class ClearPassCreator {
 				}
 
 				RenderTarget target = renderTargets.get(buffer);
+				if (target == null) return;
 				Vector4f clearColor = settings.getClearColor().orElse(defaultClearColor);
 				clearByColor.computeIfAbsent(new Vector2i(target.getWidth(), target.getHeight()), size -> new HashMap<>()).computeIfAbsent(new ClearPassInformation(clearColor, target.getWidth(), target.getHeight()), color -> new IntArrayList()).add(buffer);
 			}
@@ -82,18 +83,24 @@ public class ClearPassCreator {
 
 	public static ImmutableList<ClearPass> createShadowClearPasses(ShadowRenderTargets renderTargets, boolean fullClear,
 																   PackShadowDirectives renderTargetDirectives) {
+		if (renderTargets == null) {
+			return ImmutableList.of();
+		}
+
 		final int maxDrawBuffers = GlStateManager._getInteger(GL21C.GL_MAX_DRAW_BUFFERS);
 
 		// Sort buffers by their clear color so we can group up glClear calls.
 		Map<Vector4f, IntList> clearByColor = new HashMap<>();
 
-		for (int i = 0; i < renderTargetDirectives.getColorSamplingSettings().size(); i++) {
-			// unboxed
-			PackShadowDirectives.SamplingSettings settings = renderTargetDirectives.getColorSamplingSettings().get(i);
+		for (int i = 0; i < renderTargets.getRenderTargetCount(); i++) {
+			if (renderTargets.get(i) != null) {
+				// unboxed
+				PackShadowDirectives.SamplingSettings settings = renderTargetDirectives.getColorSamplingSettings().get(i);
 
-			if (fullClear || settings.getClear()) {
-				Vector4f clearColor = settings.getClearColor();
-				clearByColor.computeIfAbsent(clearColor, color -> new IntArrayList()).add(i);
+				if (fullClear || settings.getClear()) {
+					Vector4f clearColor = settings.getClearColor();
+					clearByColor.computeIfAbsent(clearColor, color -> new IntArrayList()).add(i);
+				}
 			}
 		}
 

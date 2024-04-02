@@ -51,9 +51,4 @@ public class ReferenceExpression extends TerminalExpression {
   public ReferenceExpression cloneInto(Root root) {
     return (ReferenceExpression) super.cloneInto(root);
   }
-
-  @Override
-  public ReferenceExpression cloneSeparate() {
-    return (ReferenceExpression) super.cloneSeparate();
-  }
 }

@@ -67,9 +67,4 @@ public class NamedLayoutQualifierPart extends LayoutQualifierPart {
   public NamedLayoutQualifierPart cloneInto(Root root) {
     return (NamedLayoutQualifierPart) super.cloneInto(root);
   }
-
-  @Override
-  public NamedLayoutQualifierPart cloneSeparate() {
-    return (NamedLayoutQualifierPart) super.cloneSeparate();
-  }
 }

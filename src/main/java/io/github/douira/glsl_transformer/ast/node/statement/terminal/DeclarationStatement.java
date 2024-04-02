@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.statement.terminal;
 
 import io.github.douira.glsl_transformer.ast.node.declaration.Declaration;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class DeclarationStatement extends SemiTerminalStatement {
   protected Declaration declaration;
@@ -50,10 +51,5 @@ public class DeclarationStatement extends SemiTerminalStatement {
   @Override
   public DeclarationStatement cloneInto(Root root) {
     return (DeclarationStatement) super.cloneInto(root);
-  }
-
-  @Override
-  public DeclarationStatement cloneSeparate() {
-    return (DeclarationStatement) super.cloneSeparate();
   }
 }

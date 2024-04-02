@@ -40,9 +40,4 @@ public class LengthAccessExpression extends UnaryExpression {
   public LengthAccessExpression cloneInto(Root root) {
     return (LengthAccessExpression) super.cloneInto(root);
   }
-
-  @Override
-  public LengthAccessExpression cloneSeparate() {
-    return (LengthAccessExpression) super.cloneSeparate();
-  }
 }

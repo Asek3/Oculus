@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.external_declaration;
 
 import io.github.douira.glsl_transformer.ast.node.declaration.Declaration;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class DeclarationExternalDeclaration extends ExternalDeclaration {
   protected Declaration declaration;
@@ -50,10 +51,5 @@ public class DeclarationExternalDeclaration extends ExternalDeclaration {
   @Override
   public DeclarationExternalDeclaration cloneInto(Root root) {
     return (DeclarationExternalDeclaration) super.cloneInto(root);
-  }
-
-  @Override
-  public DeclarationExternalDeclaration cloneSeparate() {
-    return (DeclarationExternalDeclaration) super.cloneSeparate();
   }
 }

@@ -68,9 +68,4 @@ public abstract class TernaryExpression extends Expression {
   public TernaryExpression cloneInto(Root root) {
     return (TernaryExpression) super.cloneInto(root);
   }
-
-  @Override
-  public TernaryExpression cloneSeparate() {
-    return (TernaryExpression) super.cloneSeparate();
-  }
 }

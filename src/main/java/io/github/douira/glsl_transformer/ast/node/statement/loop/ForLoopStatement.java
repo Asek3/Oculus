@@ -5,7 +5,8 @@ import io.github.douira.glsl_transformer.ast.node.declaration.Declaration;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.node.statement.Statement;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class ForLoopStatement extends LoopStatement {
   protected Expression initExpression; // TODO: nullable
@@ -159,10 +160,5 @@ public class ForLoopStatement extends LoopStatement {
   @Override
   public ForLoopStatement cloneInto(Root root) {
     return (ForLoopStatement) super.cloneInto(root);
-  }
-
-  @Override
-  public ForLoopStatement cloneSeparate() {
-    return (ForLoopStatement) super.cloneSeparate();
   }
 }

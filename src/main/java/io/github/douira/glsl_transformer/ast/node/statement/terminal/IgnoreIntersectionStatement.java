@@ -26,9 +26,4 @@ public class IgnoreIntersectionStatement extends TerminalStatement {
   public IgnoreIntersectionStatement cloneInto(Root root) {
     return (IgnoreIntersectionStatement) super.cloneInto(root);
   }
-
-  @Override
-  public IgnoreIntersectionStatement cloneSeparate() {
-    return (IgnoreIntersectionStatement) super.cloneSeparate();
-  }
 }

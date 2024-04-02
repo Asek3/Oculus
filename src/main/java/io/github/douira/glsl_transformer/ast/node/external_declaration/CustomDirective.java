@@ -1,18 +1,29 @@
 package io.github.douira.glsl_transformer.ast.node.external_declaration;
 
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class CustomDirective extends ExternalDeclaration {
-  public String content;
+  private String content;
 
   public CustomDirective(String content) {
     this.content = content;
   }
 
+  public String getContent() {
+    return content;
+  }
+
+  public void setContent(String content) {
+    getRoot().unregisterFastRename(this);
+    this.content = content;
+    getRoot().registerFastRename(this);
+  }
+
   @Override
   public ExternalDeclarationType getExternalDeclarationType() {
-    return ExternalDeclarationType.CUSTOM_DIRECTIVE_STATEMENT;
+    return ExternalDeclarationType.CUSTOM_DIRECTIVE;
   }
 
   @Override
@@ -40,10 +51,5 @@ public class CustomDirective extends ExternalDeclaration {
   @Override
   public CustomDirective cloneInto(Root root) {
     return (CustomDirective) super.cloneInto(root);
-  }
-
-  @Override
-  public CustomDirective cloneSeparate() {
-    return (CustomDirective) super.cloneSeparate();
   }
 }

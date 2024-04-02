@@ -1,8 +1,9 @@
 package io.github.douira.glsl_transformer.ast.traversal;
 
-import java.util.List;
+import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
+import io.github.douira.glsl_transformer.ast.node.abstract_node.ListNode;
 
-import io.github.douira.glsl_transformer.ast.node.abstract_node.*;
+import java.util.List;
 
 public interface GeneralASTVisitor<R> {
   default R startVisit(ASTNode node) {

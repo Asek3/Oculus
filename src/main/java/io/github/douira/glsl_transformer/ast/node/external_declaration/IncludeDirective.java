@@ -4,7 +4,7 @@ import io.github.douira.glsl_transformer.ast.query.Root;
 import io.github.douira.glsl_transformer.ast.traversal.*;
 
 public class IncludeDirective extends ExternalDeclaration {
-  public String content;
+  private String content;
   public boolean isAngleBrackets;
 
   public IncludeDirective(String content, boolean isAngleBrackets) {
@@ -16,9 +16,19 @@ public class IncludeDirective extends ExternalDeclaration {
     this(content, false);
   }
 
+  public String getContent() {
+    return content;
+  }
+
+  public void setContent(String content) {
+    getRoot().unregisterFastRename(this);
+    this.content = content;
+    getRoot().registerFastRename(this);
+  }
+
   @Override
   public ExternalDeclarationType getExternalDeclarationType() {
-    return ExternalDeclarationType.INCLUDE_STATEMENT;
+    return ExternalDeclarationType.INCLUDE_DIRECTIVE;
   }
 
   @Override
@@ -46,10 +56,5 @@ public class IncludeDirective extends ExternalDeclaration {
   @Override
   public IncludeDirective cloneInto(Root root) {
     return (IncludeDirective) super.cloneInto(root);
-  }
-
-  @Override
-  public IncludeDirective cloneSeparate() {
-    return (IncludeDirective) super.cloneSeparate();
   }
 }

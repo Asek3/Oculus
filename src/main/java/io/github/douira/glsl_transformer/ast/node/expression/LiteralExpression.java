@@ -285,9 +285,4 @@ public class LiteralExpression extends TerminalExpression {
   public LiteralExpression cloneInto(Root root) {
     return (LiteralExpression) super.cloneInto(root);
   }
-
-  @Override
-  public LiteralExpression cloneSeparate() {
-    return (LiteralExpression) super.cloneSeparate();
-  }
 }

@@ -1,20 +1,38 @@
 package io.github.douira.glsl_transformer.ast.traversal;
 
-import io.github.douira.glsl_transformer.ast.node.*;
+import io.github.douira.glsl_transformer.ast.node.IterationConditionInitializer;
+import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
 import io.github.douira.glsl_transformer.ast.node.declaration.*;
 import io.github.douira.glsl_transformer.ast.node.expression.*;
 import io.github.douira.glsl_transformer.ast.node.expression.binary.*;
 import io.github.douira.glsl_transformer.ast.node.expression.unary.*;
-import io.github.douira.glsl_transformer.ast.node.external_declaration.*;
-import io.github.douira.glsl_transformer.ast.node.statement.*;
-import io.github.douira.glsl_transformer.ast.node.statement.loop.*;
-import io.github.douira.glsl_transformer.ast.node.statement.selection.*;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.DeclarationExternalDeclaration;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.ExternalDeclaration;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.FunctionDefinition;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.LayoutDefaults;
+import io.github.douira.glsl_transformer.ast.node.statement.CompoundStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.ManyStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.Statement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.DoWhileLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.ForLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.LoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.WhileLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.selection.SelectionStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.selection.SwitchStatement;
 import io.github.douira.glsl_transformer.ast.node.statement.terminal.*;
 import io.github.douira.glsl_transformer.ast.node.type.FullySpecifiedType;
-import io.github.douira.glsl_transformer.ast.node.type.initializer.*;
+import io.github.douira.glsl_transformer.ast.node.type.initializer.ExpressionInitializer;
+import io.github.douira.glsl_transformer.ast.node.type.initializer.Initializer;
+import io.github.douira.glsl_transformer.ast.node.type.initializer.NestedInitializer;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.*;
-import io.github.douira.glsl_transformer.ast.node.type.specifier.*;
-import io.github.douira.glsl_transformer.ast.node.type.struct.*;
+import io.github.douira.glsl_transformer.ast.node.type.specifier.ArraySpecifier;
+import io.github.douira.glsl_transformer.ast.node.type.specifier.FunctionPrototype;
+import io.github.douira.glsl_transformer.ast.node.type.specifier.TypeReference;
+import io.github.douira.glsl_transformer.ast.node.type.specifier.TypeSpecifier;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructBody;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructDeclarator;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructMember;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructSpecifier;
 
 /**
  * The AST listener interface has a method for entering and exiting each

@@ -1,10 +1,13 @@
 package io.github.douira.glsl_transformer.ast.transform;
 
-import java.util.function.Predicate;
-
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
-import io.github.douira.glsl_transformer.ast.node.external_declaration.*;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.DeclarationExternalDeclaration;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.ExternalDeclaration;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.FunctionDefinition;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.LayoutDefaults;
 import io.github.douira.glsl_transformer.util.ExcludeFromJacocoGeneratedReport;
+
+import java.util.function.Predicate;
 
 public enum ASTInjectionPoint {
   /**

@@ -1,13 +1,8 @@
 package io.github.douira.glsl_transformer.ast.query.match;
 
-import java.util.function.*;
-
-import repack.antlr.v4.runtime.ParserRuleContext;
-
-import io.github.douira.glsl_transformer.GLSLParser;
 import io.github.douira.glsl_transformer.ast.node.Identifier;
 import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
-import io.github.douira.glsl_transformer.ast.transform.ASTBuilder;
+import io.github.douira.glsl_transformer.parser.ParseShape;
 
 /**
  * The auto-hinted matcher is a matcher that automatically determines the hint
@@ -16,12 +11,6 @@ import io.github.douira.glsl_transformer.ast.transform.ASTBuilder;
  * {@link HintedMatcher} should be used instead.
  */
 public class AutoHintedMatcher<N extends ASTNode> extends HintedMatcher<N> {
-  public <C extends ParserRuleContext> AutoHintedMatcher(String input,
-      Function<GLSLParser, C> parseMethod,
-      BiFunction<ASTBuilder, C, N> visitMethod, String wildcardPrefix) {
-    super(input, parseMethod, visitMethod, wildcardPrefix, null);
-  }
-
   public AutoHintedMatcher(N pattern, String wildcardPrefix) {
     super(pattern, wildcardPrefix, null);
   }
@@ -30,18 +19,12 @@ public class AutoHintedMatcher<N extends ASTNode> extends HintedMatcher<N> {
     super(pattern, null);
   }
 
-  public <C extends ParserRuleContext> AutoHintedMatcher(String input,
-      Function<GLSLParser, C> parseMethod,
-      BiFunction<ASTBuilder, C, N> visitMethod) {
-    super(input, parseMethod, visitMethod, null);
+  public AutoHintedMatcher(String input, ParseShape<?, N> parseShape, String wildcardPrefix) {
+    super(input, parseShape, wildcardPrefix, null);
   }
 
-  public AutoHintedMatcher(String input, Function<String, N> patternParser, String wildcardPrefix) {
-    super(input, patternParser, wildcardPrefix, null);
-  }
-
-  public AutoHintedMatcher(String input, Function<String, N> patternParser) {
-    super(input, patternParser, null);
+  public AutoHintedMatcher(String input, ParseShape<?, N> parseShape) {
+    super(input, parseShape, null);
   }
 
   private void determineHint() {

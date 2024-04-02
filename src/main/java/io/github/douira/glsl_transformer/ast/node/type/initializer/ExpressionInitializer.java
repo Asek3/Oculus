@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.type.initializer;
 
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class ExpressionInitializer extends Initializer {
   protected Expression expression;
@@ -50,10 +51,5 @@ public class ExpressionInitializer extends Initializer {
   @Override
   public ExpressionInitializer cloneInto(Root root) {
     return (ExpressionInitializer) super.cloneInto(root);
-  }
-
-  @Override
-  public ExpressionInitializer cloneSeparate() {
-    return (ExpressionInitializer) super.cloneSeparate();
   }
 }

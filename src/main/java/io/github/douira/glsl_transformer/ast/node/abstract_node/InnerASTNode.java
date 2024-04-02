@@ -15,9 +15,4 @@ public abstract class InnerASTNode extends ASTNode {
   public InnerASTNode cloneInto(Root root) {
     return (InnerASTNode) super.cloneInto(root);
   }
-
-  @Override
-  public InnerASTNode cloneSeparate() {
-    return (InnerASTNode) super.cloneSeparate();
-  }
 }

@@ -40,9 +40,4 @@ public class StructBody extends ListASTNode<StructMember> {
   public StructBody cloneInto(Root root) {
     return (StructBody) super.cloneInto(root);
   }
-
-  @Override
-  public StructBody cloneSeparate() {
-    return (StructBody) super.cloneSeparate();
-  }
 }

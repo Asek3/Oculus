@@ -3,7 +3,8 @@ package io.github.douira.glsl_transformer.ast.node.external_declaration;
 import io.github.douira.glsl_transformer.ast.node.statement.CompoundStatement;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.FunctionPrototype;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class FunctionDefinition extends ExternalDeclaration {
   protected FunctionPrototype functionPrototype;
@@ -62,10 +63,5 @@ public class FunctionDefinition extends ExternalDeclaration {
   @Override
   public FunctionDefinition cloneInto(Root root) {
     return (FunctionDefinition) super.cloneInto(root);
-  }
-
-  @Override
-  public FunctionDefinition cloneSeparate() {
-    return (FunctionDefinition) super.cloneSeparate();
   }
 }

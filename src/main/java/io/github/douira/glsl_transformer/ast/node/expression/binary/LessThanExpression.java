@@ -40,9 +40,4 @@ public class LessThanExpression extends BinaryExpression {
   public LessThanExpression cloneInto(Root root) {
     return (LessThanExpression) super.cloneInto(root);
   }
-
-  @Override
-  public LessThanExpression cloneSeparate() {
-    return (LessThanExpression) super.cloneSeparate();
-  }
 }

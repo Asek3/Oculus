@@ -3,8 +3,6 @@ package io.github.douira.glsl_transformer.ast.transform;
 import java.util.EnumMap;
 import java.util.function.Consumer;
 
-import repack.antlr.v4.runtime.RecognitionException;
-
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
 import io.github.douira.glsl_transformer.util.*;
 
@@ -97,26 +95,24 @@ public class TriASTTransformer<J extends JobParameters, E extends Enum<E>> exten
     throw new UnsupportedOperationException("The tri enum map types may not be changed.");
   }
 
-  public EnumMap<E, String> transform(String a, String b, String c)
-      throws RecognitionException {
+  public EnumMap<E, String> transform(String a, String b, String c) {
     var items = new EnumMap<E, String>(enumClass);
     items.put(aType, a);
     items.put(bType, b);
     items.put(cType, c);
-    return transform(items);
+    return transform(getRootSupplier(), items);
   }
 
-  public EnumMap<E, String> transform(String a, String b, String c, J parameters)
-      throws RecognitionException {
+  public EnumMap<E, String> transform(String a, String b, String c, J parameters) {
     return withJobParameters(parameters, () -> transform(a, b, c));
   }
 
-  public Triple<String> transform(Triple<String> str) throws RecognitionException {
+  public Triple<String> transform(Triple<String> str) {
     var result = transform(str.a, str.b, str.c);
     return new Triple<>(result.get(aType), result.get(bType), result.get(cType));
   }
 
-  public Triple<String> transform(Triple<String> str, J parameters) throws RecognitionException {
+  public Triple<String> transform(Triple<String> str, J parameters) {
     return withJobParameters(parameters, () -> transform(str));
   }
 }

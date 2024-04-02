@@ -123,9 +123,4 @@ public class InterfaceBlockDeclaration extends Declaration {
   public InterfaceBlockDeclaration cloneInto(Root root) {
     return (InterfaceBlockDeclaration) super.cloneInto(root);
   }
-
-  @Override
-  public InterfaceBlockDeclaration cloneSeparate() {
-    return (InterfaceBlockDeclaration) super.cloneSeparate();
-  }
 }

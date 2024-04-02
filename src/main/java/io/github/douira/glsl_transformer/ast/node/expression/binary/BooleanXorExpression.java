@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.expression.binary;
 
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class BooleanXorExpression extends BinaryExpression {
   public BooleanXorExpression(Expression left, Expression right) {
@@ -39,10 +40,5 @@ public class BooleanXorExpression extends BinaryExpression {
   @Override
   public BooleanXorExpression cloneInto(Root root) {
     return (BooleanXorExpression) super.cloneInto(root);
-  }
-
-  @Override
-  public BooleanXorExpression cloneSeparate() {
-    return (BooleanXorExpression) super.cloneSeparate();
   }
 }

@@ -1,29 +1,43 @@
 package io.github.douira.glsl_transformer.ast.print;
 
-import java.util.*;
-
 import io.github.douira.glsl_transformer.GLSLLexer;
-import io.github.douira.glsl_transformer.ast.node.*;
+import io.github.douira.glsl_transformer.ast.node.Identifier;
+import io.github.douira.glsl_transformer.ast.node.IterationConditionInitializer;
+import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
+import io.github.douira.glsl_transformer.ast.node.VersionStatement;
 import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
 import io.github.douira.glsl_transformer.ast.node.declaration.*;
-import io.github.douira.glsl_transformer.ast.node.expression.*;
+import io.github.douira.glsl_transformer.ast.node.expression.ConditionExpression;
+import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression.ExpressionType;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression.ExpressionType.OperandStructure;
+import io.github.douira.glsl_transformer.ast.node.expression.LiteralExpression;
+import io.github.douira.glsl_transformer.ast.node.expression.SequenceExpression;
 import io.github.douira.glsl_transformer.ast.node.expression.binary.*;
 import io.github.douira.glsl_transformer.ast.node.expression.unary.*;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.*;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.PragmaDirective.PragmaType;
-import io.github.douira.glsl_transformer.ast.node.statement.*;
-import io.github.douira.glsl_transformer.ast.node.statement.loop.*;
-import io.github.douira.glsl_transformer.ast.node.statement.selection.*;
+import io.github.douira.glsl_transformer.ast.node.statement.CompoundStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.Statement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.DoWhileLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.ForLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.WhileLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.selection.SelectionStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.selection.SwitchStatement;
 import io.github.douira.glsl_transformer.ast.node.statement.terminal.*;
 import io.github.douira.glsl_transformer.ast.node.type.FullySpecifiedType;
 import io.github.douira.glsl_transformer.ast.node.type.initializer.NestedInitializer;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.*;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.*;
-import io.github.douira.glsl_transformer.ast.node.type.struct.*;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructBody;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructDeclarator;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructMember;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructSpecifier;
 import io.github.douira.glsl_transformer.ast.print.token.EOFToken;
 import io.github.douira.glsl_transformer.util.Type.NumberType;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * The AST printer emits tokens to convert an AST node into a string with the
@@ -127,7 +141,7 @@ public class ASTPrinter extends ASTPrinterBase {
       emitExtendableSpace();
     }
     if (node.type == PragmaType.CUSTOM) {
-      emitLiteral(node.customName);
+      emitLiteral(node.getCustomName());
     } else {
       emitType(
           node.type.tokenType,
@@ -143,7 +157,7 @@ public class ASTPrinter extends ASTPrinterBase {
   public Void visitExtensionDirective(ExtensionDirective node) {
     emitType(GLSLLexer.NR, GLSLLexer.NR_EXTENSION);
     emitExtendableSpace();
-    emitLiteral(node.name);
+    emitLiteral(node.getName());
     if (node.behavior != null) {
       emitType(GLSLLexer.NR_COLON);
       emitExtendableSpace();
@@ -161,9 +175,10 @@ public class ASTPrinter extends ASTPrinterBase {
       return null;
     }
     emitType(GLSLLexer.NR, GLSLLexer.NR_CUSTOM);
-    if (node.content != null) {
+    var content = node.getContent();
+    if (content != null) {
       emitExtendableSpace();
-      emitLiteral(node.content);
+      emitLiteral(content);
     }
     emitExactNewline();
     return null;
@@ -174,8 +189,9 @@ public class ASTPrinter extends ASTPrinterBase {
     emitType(GLSLLexer.NR, GLSLLexer.NR_INCLUDE);
     emitExtendableSpace();
     emitType(node.isAngleBrackets ? GLSLLexer.NR_STRING_START_ANGLE : GLSLLexer.NR_STRING_START);
-    if (node.content != null) {
-      emitLiteral(node.content);
+    var content = node.getContent();
+    if (content != null) {
+      emitLiteral(content);
     }
     emitType(node.isAngleBrackets ? GLSLLexer.S_STRING_END_ANGLE : GLSLLexer.S_STRING_END);
     emitExactNewline();
@@ -819,7 +835,7 @@ public class ASTPrinter extends ASTPrinterBase {
    * * iterationCondition:
    * expression
    * | fullySpecifiedType IDENTIFIER ASSIGN_OP initializer;
-   * 
+   *
    * forStatement:
    * attribute? FOR LPAREN (
    * emptyStatement
@@ -827,7 +843,7 @@ public class ASTPrinter extends ASTPrinterBase {
    * | declarationStatement
    * ) condition = iterationCondition? SEMICOLON incrementer = expression? RPAREN
    * loopBody = statement;
-   * 
+   *
    */
   @Override
   public Void visitForLoopStatement(ForLoopStatement node) {

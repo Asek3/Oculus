@@ -1,11 +1,12 @@
 package io.github.douira.glsl_transformer.ast.node.external_declaration;
 
-import repack.antlr.v4.runtime.Token;
-
 import io.github.douira.glsl_transformer.GLSLLexer;
-import io.github.douira.glsl_transformer.ast.data.*;
+import io.github.douira.glsl_transformer.ast.data.TokenTyped;
+import io.github.douira.glsl_transformer.ast.data.TypeUtil;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
+import repack.antlr.v4.runtime.Token;
 
 public class ExtensionDirective extends ExternalDeclaration {
   public enum ExtensionBehavior implements TokenTyped {
@@ -30,7 +31,7 @@ public class ExtensionDirective extends ExternalDeclaration {
     }
   }
 
-  public String name;
+  private String name;
   public ExtensionBehavior behavior; // TODO: nullable
 
   public ExtensionDirective(String name, ExtensionBehavior behavior) {
@@ -42,9 +43,19 @@ public class ExtensionDirective extends ExternalDeclaration {
     this.name = name;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    getRoot().unregisterFastRename(this);
+    this.name = name;
+    getRoot().registerFastRename(this);
+  }
+
   @Override
   public ExternalDeclarationType getExternalDeclarationType() {
-    return ExternalDeclarationType.EXTENSION_STATEMENT;
+    return ExternalDeclarationType.EXTENSION_DIRECTIVE;
   }
 
   @Override
@@ -72,10 +83,5 @@ public class ExtensionDirective extends ExternalDeclaration {
   @Override
   public ExtensionDirective cloneInto(Root root) {
     return (ExtensionDirective) super.cloneInto(root);
-  }
-
-  @Override
-  public ExtensionDirective cloneSeparate() {
-    return (ExtensionDirective) super.cloneSeparate();
   }
 }

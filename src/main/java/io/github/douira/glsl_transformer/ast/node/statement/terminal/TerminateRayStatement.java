@@ -26,9 +26,4 @@ public class TerminateRayStatement extends TerminalStatement {
   public TerminateRayStatement cloneInto(Root root) {
     return (TerminateRayStatement) super.cloneInto(root);
   }
-
-  @Override
-  public TerminateRayStatement cloneSeparate() {
-    return (TerminateRayStatement) super.cloneSeparate();
-  }
 }

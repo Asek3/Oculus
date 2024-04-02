@@ -10,8 +10,6 @@ import net.coderbot.iris.gl.uniform.UniformType;
 import net.coderbot.iris.gl.uniform.UniformUpdateFrequency;
 import net.coderbot.iris.uniforms.custom.cached.*;
 import net.coderbot.iris.vendored.joml.*;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -105,6 +103,11 @@ public class CustomUniformFixedInputUniformsHolder {
 		@Override
 		public Builder uniform3f(UniformUpdateFrequency updateFrequency, String name, Supplier<Vector3f> value) {
 			return this.put(name, new Float3VectorCachedUniform(name, updateFrequency, value));
+		}
+
+		@Override
+		public Builder uniform3i(UniformUpdateFrequency updateFrequency, String name, Supplier<Vector3i> value) {
+			return this.put(name, new Int3VectorCachedUniform(name, updateFrequency, value));
 		}
 
 		@Override

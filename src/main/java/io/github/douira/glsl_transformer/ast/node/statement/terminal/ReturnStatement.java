@@ -42,9 +42,4 @@ public class ReturnStatement extends SemiTerminalStatement {
   public ReturnStatement cloneInto(Root root) {
     return (ReturnStatement) super.cloneInto(root);
   }
-
-  @Override
-  public ReturnStatement cloneSeparate() {
-    return (ReturnStatement) super.cloneSeparate();
-  }
 }

@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.expression.binary;
 
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class AdditionAssignmentExpression extends BinaryExpression {
   public AdditionAssignmentExpression(Expression left, Expression right) {
@@ -39,10 +40,5 @@ public class AdditionAssignmentExpression extends BinaryExpression {
   @Override
   public AdditionAssignmentExpression cloneInto(Root root) {
     return (AdditionAssignmentExpression) super.cloneInto(root);
-  }
-
-  @Override
-  public AdditionAssignmentExpression cloneSeparate() {
-    return (AdditionAssignmentExpression) super.cloneSeparate();
   }
 }

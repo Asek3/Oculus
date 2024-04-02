@@ -26,9 +26,4 @@ public class EmptyStatement extends SemiTerminalStatement {
   public EmptyStatement cloneInto(Root root) {
     return (EmptyStatement) super.cloneInto(root);
   }
-
-  @Override
-  public EmptyStatement cloneSeparate() {
-    return (EmptyStatement) super.cloneSeparate();
-  }
 }

@@ -32,9 +32,4 @@ public abstract class TerminalStatement extends Statement {
   public TerminalStatement cloneInto(Root root) {
     return (TerminalStatement) super.cloneInto(root);
   }
-
-  @Override
-  public TerminalStatement cloneSeparate() {
-    return (TerminalStatement) super.cloneSeparate();
-  }
 }

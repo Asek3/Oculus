@@ -35,9 +35,4 @@ public class InvariantQualifier extends TypeQualifierPart {
   public InvariantQualifier cloneInto(Root root) {
     return (InvariantQualifier) super.cloneInto(root);
   }
-
-  @Override
-  public InvariantQualifier cloneSeparate() {
-    return (InvariantQualifier) super.cloneSeparate();
-  }
 }

@@ -40,9 +40,4 @@ public class SubtractionAssignmentExpression extends BinaryExpression {
   public SubtractionAssignmentExpression cloneInto(Root root) {
     return (SubtractionAssignmentExpression) super.cloneInto(root);
   }
-
-  @Override
-  public SubtractionAssignmentExpression cloneSeparate() {
-    return (SubtractionAssignmentExpression) super.cloneSeparate();
-  }
 }

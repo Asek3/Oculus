@@ -1,10 +1,13 @@
 package net.coderbot.iris.mixin.fantastic;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import net.coderbot.iris.fantastic.ParticleRenderingPhase;
+import net.coderbot.iris.fantastic.PhasedParticleEngine;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraftforge.client.ForgeHooksClient;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,13 +15,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import com.google.common.collect.ImmutableList;
-
-import net.coderbot.iris.fantastic.ParticleRenderingPhase;
-import net.coderbot.iris.fantastic.PhasedParticleEngine;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.ParticleRenderType;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Extends the ParticleEngine class to allow multiple phases of particle rendering.
@@ -53,9 +52,9 @@ public class MixinParticleEngine implements PhasedParticleEngine {
 	@Shadow
 	@Final
 	private static List<ParticleRenderType> RENDER_ORDER;
-	
-	@Shadow 
-	@Final 
+
+	@Shadow
+	@Final
 	private Map<ParticleRenderType, Queue<Particle>> particles;
 
 	private static final List<ParticleRenderType> OPAQUE_PARTICLE_RENDER_TYPES;
@@ -71,7 +70,7 @@ public class MixinParticleEngine implements PhasedParticleEngine {
 
 	@Redirect(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/particle/ParticleEngine;particles:Ljava/util/Map;"))
 	private Map<ParticleRenderType, Queue<Particle>> iris$selectParticlesToRender(ParticleEngine instance) {
-		Map<ParticleRenderType, Queue<Particle>> toRender = new HashMap<>(particles);
+		Map<ParticleRenderType, Queue<Particle>> toRender = Maps.newTreeMap(ForgeHooksClient.makeParticleRenderTypeComparator(RENDER_ORDER));
 		if (phase == ParticleRenderingPhase.TRANSLUCENT) {
 			// Remove all known opaque particle texture sheets.
 			for(ParticleRenderType type : OPAQUE_PARTICLE_RENDER_TYPES)

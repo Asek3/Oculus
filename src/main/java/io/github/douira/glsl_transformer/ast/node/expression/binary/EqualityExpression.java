@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.expression.binary;
 
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class EqualityExpression extends BinaryExpression {
   public EqualityExpression(Expression left, Expression right) {
@@ -39,10 +40,5 @@ public class EqualityExpression extends BinaryExpression {
   @Override
   public EqualityExpression cloneInto(Root root) {
     return (EqualityExpression) super.cloneInto(root);
-  }
-
-  @Override
-  public EqualityExpression cloneSeparate() {
-    return (EqualityExpression) super.cloneSeparate();
   }
 }

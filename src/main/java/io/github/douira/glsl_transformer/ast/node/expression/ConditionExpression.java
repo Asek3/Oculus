@@ -1,7 +1,8 @@
 package io.github.douira.glsl_transformer.ast.node.expression;
 
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class ConditionExpression extends TernaryExpression {
   public ConditionExpression(Expression condition, Expression trueExpression, Expression falseExpression) {
@@ -50,10 +51,5 @@ public class ConditionExpression extends TernaryExpression {
   @Override
   public ConditionExpression cloneInto(Root root) {
     return (ConditionExpression) super.cloneInto(root);
-  }
-
-  @Override
-  public ConditionExpression cloneSeparate() {
-    return (ConditionExpression) super.cloneSeparate();
   }
 }

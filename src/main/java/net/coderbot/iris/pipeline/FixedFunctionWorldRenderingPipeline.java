@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import net.coderbot.iris.block_rendering.BlockRenderingSettings;
+import net.coderbot.iris.compat.dh.DHCompat;
+import net.coderbot.iris.features.FeatureFlags;
 import net.coderbot.iris.gbuffer_overrides.matching.InputAvailability;
 import net.coderbot.iris.gbuffer_overrides.matching.SpecialCondition;
 import net.coderbot.iris.gbuffer_overrides.state.RenderTargetStateListener;
@@ -24,9 +26,16 @@ public class FixedFunctionWorldRenderingPipeline implements WorldRenderingPipeli
 	public FixedFunctionWorldRenderingPipeline() {
 		BlockRenderingSettings.INSTANCE.setDisableDirectionalShading(shouldDisableDirectionalShading());
 		BlockRenderingSettings.INSTANCE.setUseSeparateAo(false);
+		BlockRenderingSettings.INSTANCE.setSeparateEntityDraws(false);
 		BlockRenderingSettings.INSTANCE.setAmbientOcclusionLevel(1.0f);
 		BlockRenderingSettings.INSTANCE.setUseExtendedVertexFormat(false);
+		BlockRenderingSettings.INSTANCE.setVoxelizeLightBlocks(false);
 		BlockRenderingSettings.INSTANCE.setBlockTypeIds(null);
+	}
+
+	@Override
+	public void onShadowBufferChange() {
+
 	}
 
 	@Override
@@ -132,6 +141,11 @@ public class FixedFunctionWorldRenderingPipeline implements WorldRenderingPipeli
 	}
 
 	@Override
+	public void finalizeGameRendering() {
+		// stub: nothing to do here
+	}
+
+	@Override
 	public void destroy() {
 		// stub: nothing to do here
 	}
@@ -155,6 +169,11 @@ public class FixedFunctionWorldRenderingPipeline implements WorldRenderingPipeli
 
 	@Override
 	public boolean shouldDisableDirectionalShading() {
+		return false;
+	}
+
+	@Override
+	public boolean shouldDisableFrustumCulling() {
 		return false;
 	}
 
@@ -199,8 +218,18 @@ public class FixedFunctionWorldRenderingPipeline implements WorldRenderingPipeli
 	}
 
 	@Override
+	public boolean hasFeature(FeatureFlags flags) {
+		return false;
+	}
+
+	@Override
 	public float getSunPathRotation() {
 		// No sun tilt
 		return 0;
+	}
+
+	@Override
+	public DHCompat getDHCompat() {
+		return null;
 	}
 }

@@ -1,21 +1,22 @@
 plugins {
-	id 'dev.architectury.loom' version '0.11.0-SNAPSHOT'
+	id 'dev.architectury.loom' version '1.5.+'
 	id 'maven-publish'
 }
 
 loom {
-    silentMojangMappingsLicense()
-	
+	silentMojangMappingsLicense()
+
 	forge {
 		mixinConfigs = [
 				"mixins.oculus.json",
+				"mixins.oculus.compat.dh.json",
+				"mixins.oculus.compat.sodium.json",
 				"mixins.oculus.fantastic.json",
 				"mixins.oculus.vertexformat.json",
 				"mixins.oculus.bettermipmaps.json",
 				"mixins.oculus.fixes.maxfpscrash.json",
 				"mixins.oculus.optimized-stitching.json",
-				"oculus-batched-entity-rendering.mixins.json",
-				"mixins.oculus.compat.sodium.json"
+				"oculus-batched-entity-rendering.mixins.json"
 		]
 	}
 }
@@ -29,33 +30,38 @@ group = project.maven_group
 
 repositories {
 	maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
-        }
-    }
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
+	mavenCentral()
 }
 
 configurations {
-    toJar
+	toJar
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings loom.officialMojangMappings()
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-	
+
+	compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5"))
+	implementation(include("io.github.llamalad7:mixinextras-forge:0.3.5"))
+
 	compileOnly files("libs/apache-ant-1.8.2.jar")
-	modImplementation "maven.modrinth:rubidium:0.5.4"
+	modImplementation files("libs/DistantHorizons-forge-2.0.2-a-dev-1.18.2.jar")
+	modImplementation "maven.modrinth:embeddium:0.3.10+mc1.18.2"
 }
 
 processResources {
 	inputs.property "version", project.version
 
 	filesMatching("META-INF/mods.toml") {
-        expand "version": project.version
-    }
+		expand "version": project.version
+	}
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -69,7 +75,7 @@ java {
 jar {
 	from { configurations.toJar.collect { it.isDirectory() ? it : zipTree(it) } }
 	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+		rename { "${it}_${project.archivesBaseName}" }
 	}
 }
 

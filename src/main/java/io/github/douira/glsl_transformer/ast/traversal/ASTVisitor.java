@@ -1,20 +1,34 @@
 package io.github.douira.glsl_transformer.ast.traversal;
 
-import io.github.douira.glsl_transformer.ast.node.*;
+import io.github.douira.glsl_transformer.ast.node.Identifier;
+import io.github.douira.glsl_transformer.ast.node.IterationConditionInitializer;
+import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
+import io.github.douira.glsl_transformer.ast.node.VersionStatement;
 import io.github.douira.glsl_transformer.ast.node.declaration.*;
 import io.github.douira.glsl_transformer.ast.node.expression.*;
 import io.github.douira.glsl_transformer.ast.node.expression.binary.*;
 import io.github.douira.glsl_transformer.ast.node.expression.unary.*;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.*;
-import io.github.douira.glsl_transformer.ast.node.statement.*;
-import io.github.douira.glsl_transformer.ast.node.statement.loop.*;
-import io.github.douira.glsl_transformer.ast.node.statement.selection.*;
+import io.github.douira.glsl_transformer.ast.node.statement.CompoundStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.ManyStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.Statement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.DoWhileLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.ForLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.LoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.WhileLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.selection.SelectionStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.selection.SwitchStatement;
 import io.github.douira.glsl_transformer.ast.node.statement.terminal.*;
 import io.github.douira.glsl_transformer.ast.node.type.FullySpecifiedType;
-import io.github.douira.glsl_transformer.ast.node.type.initializer.*;
+import io.github.douira.glsl_transformer.ast.node.type.initializer.ExpressionInitializer;
+import io.github.douira.glsl_transformer.ast.node.type.initializer.Initializer;
+import io.github.douira.glsl_transformer.ast.node.type.initializer.NestedInitializer;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.*;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.*;
-import io.github.douira.glsl_transformer.ast.node.type.struct.*;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructBody;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructDeclarator;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructMember;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructSpecifier;
 
 /**
  * The AST visitor knows how to traverse the AST and visit each node.
@@ -48,21 +62,21 @@ public interface ASTVisitor<R> extends GeneralASTVisitor<R> {
   default R visitPragmaDirective(PragmaDirective node) {
     var result = visitData(node.stdGL);
     result = visitData(result, node.type);
-    result = visitData(result, node.customName);
+    result = visitData(result, node.getCustomName());
     return visitData(result, node.state);
   }
 
   default R visitExtensionDirective(ExtensionDirective node) {
-    var result = visitData(superNodeTypeResult(), node.name);
+    var result = visitData(superNodeTypeResult(), node.getName());
     return visitData(result, node.behavior);
   }
 
   default R visitCustomDirective(CustomDirective node) {
-    return visitData(node.content);
+    return visitData(node.getContent());
   }
 
   default R visitIncludeDirective(IncludeDirective node) {
-    return visitData(node.content);
+    return visitData(node.getContent());
   }
 
   default R visitDeclarationExternalDeclaration(DeclarationExternalDeclaration node) {

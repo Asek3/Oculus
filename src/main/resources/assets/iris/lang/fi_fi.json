@@ -13,10 +13,10 @@
   "iris.shaders.reloaded.failure": "Shaderien lataus epäonnistui! Syy: %s",
   "iris.shaders.toggled.failure": "Shaderien käyttöönotto epäonnistui! Syy: %s",
   "iris.sodium.failure.title": "Iriksen lataus epäonnistui!",
-  "iris.sodium.failure.download": "Lataa Rubidium",
-  "iris.sodium.failure.reason.notFound": "Oculus vaatii Rubidiumin hyvän suorituskyvyn takaamiseksi, mutta Rubidiumia ei ole asennettu. Lataa Rubidium, laita se modit-kansioosi, ja käynnistä pelisi uudelleen.",
-  "iris.sodium.failure.reason.incompatible": "Oculus vaatii Rubidiumin hyvän suorituskyvyn takaamiseksi, mutta Rubidium versiosi on yhteensopimaton. Lataa yhteensopiva Rubidium versio, laita se modit-kansioosi ja poista yhteensopimaton versio, käynnistä sitten pelisi uudelleen.",
-  
+  "iris.sodium.failure.download": "Lataa Embeddium",
+  "iris.sodium.failure.reason.notFound": "Oculus vaatii Embeddiumin hyvän suorituskyvyn takaamiseksi, mutta Embeddiumia ei ole asennettu. Lataa Embeddium, laita se modit-kansioosi, ja käynnistä pelisi uudelleen.",
+  "iris.sodium.failure.reason.incompatible": "Oculus vaatii Embeddiumin hyvän suorituskyvyn takaamiseksi, mutta Embeddium versiosi on yhteensopimaton. Lataa yhteensopiva Embeddium versio, laita se modit-kansioosi ja poista yhteensopimaton versio, käynnistä sitten pelisi uudelleen.",
+
   "options.iris.apply": "Ota käyttöön",
   "options.iris.refresh": "Lataa uudelleen",
   "options.iris.openShaderPackFolder": "Avaa shader-pakettikansio...",
@@ -48,7 +48,7 @@
   "options.iris.profile.custom": "Mukautettu",
   "options.iris.shadowDistance": "Varjojen enimmäisetäisyys",
   "options.iris.shadowDistance.enabled": "Sallii varjojen enimmäisetäisyydeen määrittämisen. Maasto ja kohteet asetetun etäisyyden jälkeen eivät enää tuota varjoja. Varjoetäisyyden alentaminen saattaa nostaa pelin kuvataajuutta huomattavasti.",
-  "options.iris.shadowDistance.disabled": "Käyttöön ottamasi shader-paketti määrittää varjoetäisyyden jo; et voi muuttaa sitä.", 
+  "options.iris.shadowDistance.disabled": "Käyttöön ottamasi shader-paketti määrittää varjoetäisyyden jo; et voi muuttaa sitä.",
 
   "pack.iris.select.title": "Valitse",
   "pack.iris.configure.title": "Mukauta",

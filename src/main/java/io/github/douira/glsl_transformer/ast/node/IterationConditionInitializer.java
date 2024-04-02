@@ -68,9 +68,4 @@ public class IterationConditionInitializer extends InnerASTNode {
   public IterationConditionInitializer cloneInto(Root root) {
     return (IterationConditionInitializer) super.cloneInto(root);
   }
-
-  @Override
-  public IterationConditionInitializer cloneSeparate() {
-    return (IterationConditionInitializer) super.cloneSeparate();
-  }
 }

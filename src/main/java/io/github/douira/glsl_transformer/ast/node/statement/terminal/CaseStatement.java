@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.statement.terminal;
 
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class CaseStatement extends CaseLabelStatement {
   protected Expression expression;
@@ -55,10 +56,5 @@ public class CaseStatement extends CaseLabelStatement {
   @Override
   public CaseStatement cloneInto(Root root) {
     return (CaseStatement) super.cloneInto(root);
-  }
-
-  @Override
-  public CaseStatement cloneSeparate() {
-    return (CaseStatement) super.cloneSeparate();
   }
 }

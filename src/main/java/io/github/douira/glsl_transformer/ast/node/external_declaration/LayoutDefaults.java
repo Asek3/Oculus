@@ -79,9 +79,4 @@ public class LayoutDefaults extends ExternalDeclaration {
   public LayoutDefaults cloneInto(Root root) {
     return (LayoutDefaults) super.cloneInto(root);
   }
-
-  @Override
-  public LayoutDefaults cloneSeparate() {
-    return (LayoutDefaults) super.cloneSeparate();
-  }
 }
