@@ -24,16 +24,6 @@ public class MixinGlProgram extends GlObject implements ShaderBindingContextExt 
 		}
 	}
 
-	@Redirect(method = "bind", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL20C;glUseProgram(I)V"))
-	private void iris$useGlStateManager(int i) {
-		GlStateManager._glUseProgram(i);
-	}
-
-	@Redirect(method = "unbind", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL20C;glUseProgram(I)V"))
-	private void iris$useGlStateManager2(int i) {
-		GlStateManager._glUseProgram(i);
-	}
-
 	public GlUniformBlock bindUniformBlockIfPresent(String name, int bindingPoint) {
 		int index = IrisRenderSystem.getUniformBlockIndex(this.handle(), name);
 		if (index < 0) {
