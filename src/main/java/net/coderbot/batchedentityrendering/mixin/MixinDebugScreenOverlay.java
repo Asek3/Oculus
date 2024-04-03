@@ -23,12 +23,12 @@ public abstract class MixinDebugScreenOverlay {
     private void batchedentityrendering$appendStats(CallbackInfoReturnable<List<String>> cir) {
         List<String> messages = cir.getReturnValue();
 
-        DrawCallTrackingRenderBuffers drawTracker = (DrawCallTrackingRenderBuffers) Minecraft.getInstance().renderBuffers();
+		DrawCallTrackingRenderBuffers drawTracker = (DrawCallTrackingRenderBuffers) Minecraft.getInstance().renderBuffers();
 
         // blank line separator
-        if (Iris.getIrisConfig().areDebugOptionsEnabled()) {
-            messages.add("");
-            messages.add("[Entity Batching] " + BatchingDebugMessageHelper.getDebugMessage(drawTracker));
-        }
+		if (Iris.getIrisConfig().areDebugOptionsEnabled()) {
+			messages.add("");
+			messages.add("[Entity Batching] " + BatchingDebugMessageHelper.getDebugMessage(drawTracker));
+		}
     }
 }

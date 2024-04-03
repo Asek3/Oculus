@@ -1,18 +1,8 @@
 package net.coderbot.iris.mixin;
 
-import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.vertex.VertexFormat;
-
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.gl.blending.DepthColorStorage;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
@@ -94,7 +84,7 @@ public abstract class MixinShaderInstance implements ShaderInstanceInterface {
 
 	@Inject(method = "<init>(Lnet/minecraft/server/packs/resources/ResourceProvider;Lnet/minecraft/resources/ResourceLocation;Lcom/mojang/blaze3d/vertex/VertexFormat;)V", at = @At(value = "RETURN"))
 	public void oculus$setupGeometryShader(ResourceProvider resourceProvider, ResourceLocation location, VertexFormat vertexFormat, CallbackInfo ci) {
-        this.iris$createExtraShaders(resourceProvider, string);
+        this.iris$createExtraShaders(resourceProvider, location.getPath());
 	}
 
 	@Override

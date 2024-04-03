@@ -59,14 +59,21 @@ public class MixinGameRenderer {
 		Iris.getPipelineManager().getPipeline().ifPresent(WorldRenderingPipeline::finalizeGameRendering);
 	}
 
-	@Redirect(method = "reloadShaders", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;"))
-	private ArrayList<Program> iris$reloadGeometryShaders() {
-		ArrayList<Program> programs = Lists.newArrayList();
-		programs.addAll(IrisProgramTypes.GEOMETRY.getPrograms().values());
-		programs.addAll(IrisProgramTypes.TESS_CONTROL.getPrograms().values());
-		programs.addAll(IrisProgramTypes.TESS_EVAL.getPrograms().values());
-		return programs;
-	}
+    @Redirect(
+        method = "reloadShaders",
+        at = @At(
+            value = "INVOKE",
+            remap = false,
+            target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;"
+        )
+    )
+    private ArrayList<Program> iris$reloadGeometryShaders() {
+        ArrayList<Program> programs = Lists.newArrayList();
+        programs.addAll(IrisProgramTypes.GEOMETRY.getPrograms().values());
+        programs.addAll(IrisProgramTypes.TESS_CONTROL.getPrograms().values());
+        programs.addAll(IrisProgramTypes.TESS_EVAL.getPrograms().values());
+        return programs;
+    }
 
 	//TODO: check cloud phase
 

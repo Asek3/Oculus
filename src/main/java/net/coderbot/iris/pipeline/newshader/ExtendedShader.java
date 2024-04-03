@@ -1,21 +1,11 @@
 package net.coderbot.iris.pipeline.newshader;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.ARBTextureSwizzle;
-import org.lwjgl.opengl.GL30C;
-
 import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
-
 import net.coderbot.iris.gl.IrisRenderSystem;
 import net.coderbot.iris.gl.blending.AlphaTest;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
@@ -38,8 +28,16 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.ARBTextureSwizzle;
+import org.lwjgl.opengl.GL30C;
 import repack.joml.Matrix3f;
 import repack.joml.Matrix4f;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class ExtendedShader extends ShaderInstance implements ShaderInstanceInterface {
 	private final boolean intensitySwizzle;
@@ -248,7 +246,7 @@ public class ExtendedShader extends ShaderInstance implements ShaderInstanceInte
 	public void iris$createExtraShaders(ResourceProvider factory, String name) throws IOException {
 		Resource geometry = factory.getResource(new ResourceLocation("minecraft", name + "_geometry.gsh"));
 		if (geometry != null) {
-			this.geometry = Program.compileShader(IrisProgramTypes.GEOMETRY, name.getPath(), geometry.getInputStream(), geometry.getSourceName(), new GlslPreprocessor() {
+			this.geometry = Program.compileShader(IrisProgramTypes.GEOMETRY, name, geometry.getInputStream(), geometry.getSourceName(), new GlslPreprocessor() {
 				@Nullable
 				@Override
 				public String applyImport(boolean bl, String string) {
