@@ -35,9 +35,4 @@ public class SharedLayoutQualifierPart extends LayoutQualifierPart {
   public SharedLayoutQualifierPart cloneInto(Root root) {
     return (SharedLayoutQualifierPart) super.cloneInto(root);
   }
-
-  @Override
-  public SharedLayoutQualifierPart cloneSeparate() {
-    return (SharedLayoutQualifierPart) super.cloneSeparate();
-  }
 }

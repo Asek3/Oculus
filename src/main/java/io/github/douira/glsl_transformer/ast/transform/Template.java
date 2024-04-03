@@ -7,7 +7,8 @@ import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.ExternalDeclaration;
 import io.github.douira.glsl_transformer.ast.node.statement.Statement;
-import io.github.douira.glsl_transformer.ast.query.Root;
+import io.github.douira.glsl_transformer.ast.query.*;
+import io.github.douira.glsl_transformer.parser.ParseShape;
 
 public class Template<N extends ASTNode> {
   private final Map<ASTNode, Supplier<ASTNode>> replacements = new HashMap<>();
@@ -35,18 +36,8 @@ public class Template<N extends ASTNode> {
   }
 
   @SuppressWarnings("unchecked") // all ASTNodes clone themselves with the right type
-  public N getSeparateInstance() {
-    return (N) source.cloneSeparate();
-  }
-
-  @SuppressWarnings("unchecked") // all ASTNodes clone themselves with the right type
   public N getInstanceFor(Root root) {
     return (N) source.cloneInto(root);
-  }
-
-  @SuppressWarnings("unchecked") // all ASTNodes clone themselves with the right type
-  public N getInstanceFor(ASTNode treeMember) {
-    return (N) source.cloneInto(treeMember);
   }
 
   public void supplyLocalReplacements(List<ASTNode> replacements) {
@@ -68,24 +59,9 @@ public class Template<N extends ASTNode> {
     supplyLocalReplacements(Arrays.asList(replacements));
   }
 
-  public N getSeparateInstance(List<ASTNode> localReplacements) {
-    supplyLocalReplacements(localReplacements);
-    return getSeparateInstance();
-  }
-
   public N getInstanceFor(Root root, List<ASTNode> localReplacements) {
     supplyLocalReplacements(localReplacements);
     return getInstanceFor(root);
-  }
-
-  public N getInstanceFor(ASTNode treeMember, List<ASTNode> localReplacements) {
-    supplyLocalReplacements(localReplacements);
-    return getInstanceFor(treeMember);
-  }
-
-  public N getSeparateInstance(ASTNode localReplacement) {
-    supplyLocalReplacements(localReplacement);
-    return getSeparateInstance();
   }
 
   public N getInstanceFor(Root root, ASTNode localReplacement) {
@@ -93,24 +69,9 @@ public class Template<N extends ASTNode> {
     return getInstanceFor(root);
   }
 
-  public N getInstanceFor(ASTNode treeMember, ASTNode localReplacement) {
-    supplyLocalReplacements(localReplacement);
-    return getInstanceFor(treeMember);
-  }
-
-  public N getSeparateInstance(ASTNode... localReplacements) {
-    supplyLocalReplacements(localReplacements);
-    return getSeparateInstance();
-  }
-
   public N getInstanceFor(Root root, ASTNode... localReplacements) {
     supplyLocalReplacements(localReplacements);
     return getInstanceFor(root);
-  }
-
-  public N getInstanceFor(ASTNode treeMember, ASTNode... localReplacements) {
-    supplyLocalReplacements(localReplacements);
-    return getInstanceFor(treeMember);
   }
 
   public void markLocalReplacement(ASTNode original) {
@@ -144,18 +105,18 @@ public class Template<N extends ASTNode> {
 
   @SuppressWarnings("unchecked") // all ASTNodes clone themselves with the right type
   public static <N extends ASTNode> Template<N> ofCloned(N source) {
-    return new Template<N>((N) source.cloneSeparate());
+    return new Template<N>((N) source.cloneInto(RootSupplier.supplyDefault()));
   }
 
   public static Template<ExternalDeclaration> withExternalDeclaration(String input) {
-    return new Template<>(ASTParser.getInternalInstance().parseSeparateExternalDeclaration(input));
+    return new Template<>(ParseShape.EXTERNAL_DECLARATION._parseNodeSeparateInternal(input));
   }
 
   public static Template<Statement> withStatement(String input) {
-    return new Template<>(ASTParser.getInternalInstance().parseSeparateStatement(input));
+    return new Template<>(ParseShape.STATEMENT._parseNodeSeparateInternal(input));
   }
 
   public static Template<Expression> withExpression(String input) {
-    return new Template<>(ASTParser.getInternalInstance().parseSeparateExpression(input));
+    return new Template<>(ParseShape.EXPRESSION._parseNodeSeparateInternal(input));
   }
 }

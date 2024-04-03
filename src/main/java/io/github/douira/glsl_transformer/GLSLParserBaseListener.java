@@ -1,9 +1,6 @@
 // Generated from java-escape by ANTLR 4.11.1
 package io.github.douira.glsl_transformer;
 
-import io.github.douira.glsl_transformer.parser.ExtendedParser;
-
-
 import repack.antlr.v4.runtime.ParserRuleContext;
 import repack.antlr.v4.runtime.tree.ErrorNode;
 import repack.antlr.v4.runtime.tree.TerminalNode;

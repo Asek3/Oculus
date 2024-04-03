@@ -1,6 +1,5 @@
 package io.github.douira.glsl_transformer.ast.node.abstract_node;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
@@ -16,7 +15,7 @@ public abstract class ListASTNode<Child extends ASTNode>
   }
 
   @Override
-  public List<Child> getChildren() {
+  public ChildNodeList<Child> getChildren() {
     return children;
   }
 
@@ -24,12 +23,6 @@ public abstract class ListASTNode<Child extends ASTNode>
   @SuppressWarnings("unchecked")
   public ListASTNode<Child> cloneInto(Root root) {
     return (ListASTNode<Child>) super.cloneInto(root);
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public ListASTNode<Child> cloneSeparate() {
-    return (ListASTNode<Child>) super.cloneSeparate();
   }
 
   public Stream<Child> getClonedChildren() {

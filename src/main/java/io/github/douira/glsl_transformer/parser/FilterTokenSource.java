@@ -1,8 +1,10 @@
 package io.github.douira.glsl_transformer.parser;
 
-import repack.antlr.v4.runtime.*;
-
 import io.github.douira.glsl_transformer.token_filter.TokenFilter;
+import repack.antlr.v4.runtime.CharStream;
+import repack.antlr.v4.runtime.Token;
+import repack.antlr.v4.runtime.TokenFactory;
+import repack.antlr.v4.runtime.TokenSource;
 
 /**
  * The filter token source wraps another token source but reads tokens from it
@@ -15,7 +17,7 @@ public class FilterTokenSource implements TokenSource {
 
   /**
    * Creates a new filtering token source with a given token source to wrap.
-   * 
+   *
    * @param tokenSource The real token source to get tokens from
    */
   public FilterTokenSource(TokenSource tokenSource) {
@@ -26,7 +28,7 @@ public class FilterTokenSource implements TokenSource {
    * Sets the token filter on this filtering token source wrapper. Set to
    * {@code null} to effectively disable any manipulation of the tokens generated
    * by the contained token source.
-   * 
+   *
    * @param tokenFilter The new token filter
    */
   public void setTokenFilter(TokenFilter<?> tokenFilter) {
@@ -47,7 +49,7 @@ public class FilterTokenSource implements TokenSource {
    * Uses {@link repack.antlr.v4.runtime.TokenSource#nextToken()} on the real token
    * source to filter to get tokens and then filters them with the contained token
    * filter if there is one.
-   * 
+   *
    * {@inheritDoc}
    */
   @Override

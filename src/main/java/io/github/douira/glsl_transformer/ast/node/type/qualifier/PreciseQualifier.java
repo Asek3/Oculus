@@ -35,9 +35,4 @@ public class PreciseQualifier extends TypeQualifierPart {
   public PreciseQualifier cloneInto(Root root) {
     return (PreciseQualifier) super.cloneInto(root);
   }
-
-  @Override
-  public PreciseQualifier cloneSeparate() {
-    return (PreciseQualifier) super.cloneSeparate();
-  }
 }

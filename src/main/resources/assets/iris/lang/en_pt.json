@@ -8,7 +8,7 @@
   "iris.shaders.reloaded.failure": "Failed to clean ye Glass eyes! Reason: %s",
   "iris.shaders.toggled.failure": "Failed to place ye Glass eyes back in! Reason: %s",
   "iris.sodium.failure.title": "Oculus failed to load!",
-  "iris.sodium.failure.reason": "Yee 'ave Rubidium in yer mods folder, however Oculus includes it. Please close the game 'n remove Rubidium from yer mods Coffer.",
+  "iris.sodium.failure.reason": "Yee 'ave Embeddium in yer mods folder, however Oculus includes it. Please close the game 'n remove Embeddium from yer mods Coffer.",
 
   "options.iris.apply": "Apply",
   "options.iris.refresh": "Refresh",
@@ -30,7 +30,7 @@
 
   "pack.iris.select.title": "Select",
   "pack.iris.list.label": "+ Drop yer Glass eye files in this ole window t' add yer Glass eyes",
-  "iris.sodium.failure.download": "Download Rubidium",
-  "iris.sodium.failure.reason.notFound": "Oculus needs e' Rubidium for smooth sailin', but Rubidium ain't found. Find the Rubidium, add it to t'mods, and open the game.",
-  "iris.sodium.failure.reason.incompatible": "Oculus needs e' Rubidium for smooth sailin', but the one here ain't it. Find t'correct Rubidium, add it to t'mods, throw overboard t'old one, and open the game."
+  "iris.sodium.failure.download": "Download Embeddium",
+  "iris.sodium.failure.reason.notFound": "Oculus needs e' Embeddium for smooth sailin', but Embeddium ain't found. Find the Embeddium, add it to t'mods, and open the game.",
+  "iris.sodium.failure.reason.incompatible": "Oculus needs e' Embeddium for smooth sailin', but the one here ain't it. Find t'correct Embeddium, add it to t'mods, throw overboard t'old one, and open the game."
 }

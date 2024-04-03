@@ -2,15 +2,18 @@
 package io.github.douira.glsl_transformer;
 
 import io.github.douira.glsl_transformer.parser.ExtendedParser;
-
-import repack.antlr.v4.runtime.atn.*;
-import repack.antlr.v4.runtime.dfa.DFA;
 import repack.antlr.v4.runtime.*;
-import repack.antlr.v4.runtime.misc.*;
-import repack.antlr.v4.runtime.tree.*;
-import java.util.List;
-import java.util.Iterator;
+import repack.antlr.v4.runtime.atn.ATN;
+import repack.antlr.v4.runtime.atn.ATNDeserializer;
+import repack.antlr.v4.runtime.atn.ParserATNSimulator;
+import repack.antlr.v4.runtime.atn.PredictionContextCache;
+import repack.antlr.v4.runtime.dfa.DFA;
+import repack.antlr.v4.runtime.tree.ParseTreeListener;
+import repack.antlr.v4.runtime.tree.ParseTreeVisitor;
+import repack.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class GLSLParser extends ExtendedParser {
@@ -20,106 +23,106 @@ public class GLSLParser extends ExtendedParser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		COLON=1, UNIFORM=2, BUFFER=3, IN=4, OUT=5, INOUT=6, HIGHP=7, MEDIUMP=8, 
-		LOWP=9, PRECISION=10, CONST=11, PRECISE=12, INVARIANT=13, SMOOTH=14, FLAT=15, 
-		CENTROID=16, ATTRIBUTE=17, VOLATILE=18, VARYING=19, SHARED=20, LAYOUT=21, 
-		DOT_LENGTH_METHOD_CALL=22, NOPERSPECTIVE=23, SAMPLE=24, PATCH=25, COHERENT=26, 
-		RESTRICT=27, READONLY=28, WRITEONLY=29, SUBROUTINE=30, DEVICECOHERENT=31, 
-		QUEUEFAMILYCOHERENT=32, WORKGROUPCOHERENT=33, SUBGROUPCOHERENT=34, NONPRIVATE=35, 
-		RAY_PAYLOAD_EXT=36, RAY_PAYLOAD_IN_EXT=37, HIT_ATTRIBUTE_EXT=38, CALLABLE_DATA_EXT=39, 
-		CALLABLE_DATA_IN_EXT=40, IGNORE_INTERSECTION_EXT=41, TERMINATE_RAY_EXT=42, 
-		ACCELERATION_STRUCTURE_EXT=43, ATOMIC_UINT=44, STRUCT=45, IF=46, ELSE=47, 
-		SWITCH=48, CASE=49, DEFAULT=50, WHILE=51, DO=52, FOR=53, CONTINUE=54, 
-		BREAK=55, RETURN=56, DISCARD=57, DEMOTE=58, UINT16CONSTANT=59, INT16CONSTANT=60, 
-		UINT32CONSTANT=61, INT32CONSTANT=62, UINT64CONSTANT=63, INT64CONSTANT=64, 
-		FLOAT16CONSTANT=65, FLOAT32CONSTANT=66, FLOAT64CONSTANT=67, BOOLCONSTANT=68, 
-		BOOL=69, BVEC2=70, BVEC3=71, BVEC4=72, INT8=73, I8VEC2=74, I8VEC3=75, 
-		I8VEC4=76, UINT8=77, U8VEC2=78, U8VEC3=79, U8VEC4=80, INT16=81, I16VEC2=82, 
-		I16VEC3=83, I16VEC4=84, UINT16=85, U16VEC2=86, U16VEC3=87, U16VEC4=88, 
-		INT32=89, I32VEC2=90, I32VEC3=91, I32VEC4=92, UINT32=93, U32VEC2=94, U32VEC3=95, 
-		U32VEC4=96, INT64=97, I64VEC2=98, I64VEC3=99, I64VEC4=100, UINT64=101, 
-		U64VEC2=102, U64VEC3=103, U64VEC4=104, FLOAT16=105, F16VEC2=106, F16VEC3=107, 
-		F16VEC4=108, F16MAT2X2=109, F16MAT2X3=110, F16MAT2X4=111, F16MAT3X2=112, 
-		F16MAT3X3=113, F16MAT3X4=114, F16MAT4X2=115, F16MAT4X3=116, F16MAT4X4=117, 
-		FLOAT32=118, F32VEC2=119, F32VEC3=120, F32VEC4=121, F32MAT2X2=122, F32MAT2X3=123, 
-		F32MAT2X4=124, F32MAT3X2=125, F32MAT3X3=126, F32MAT3X4=127, F32MAT4X2=128, 
-		F32MAT4X3=129, F32MAT4X4=130, FLOAT64=131, F64VEC2=132, F64VEC3=133, F64VEC4=134, 
-		F64MAT2X2=135, F64MAT2X3=136, F64MAT2X4=137, F64MAT3X2=138, F64MAT3X3=139, 
-		F64MAT3X4=140, F64MAT4X2=141, F64MAT4X3=142, F64MAT4X4=143, IMAGE1D=144, 
-		IMAGE2D=145, IMAGE3D=146, UIMAGE1D=147, UIMAGE2D=148, UIMAGE3D=149, IIMAGE1D=150, 
-		IIMAGE2D=151, IIMAGE3D=152, SAMPLER1D=153, SAMPLER2D=154, SAMPLER3D=155, 
-		SAMPLER2DRECT=156, SAMPLER1DSHADOW=157, SAMPLER2DSHADOW=158, SAMPLER2DRECTSHADOW=159, 
-		SAMPLER1DARRAY=160, SAMPLER2DARRAY=161, SAMPLER1DARRAYSHADOW=162, SAMPLER2DARRAYSHADOW=163, 
-		ISAMPLER1D=164, ISAMPLER2D=165, ISAMPLER2DRECT=166, ISAMPLER3D=167, ISAMPLER1DARRAY=168, 
-		ISAMPLER2DARRAY=169, USAMPLER1D=170, USAMPLER2D=171, USAMPLER2DRECT=172, 
-		USAMPLER3D=173, USAMPLER1DARRAY=174, USAMPLER2DARRAY=175, SAMPLER2DMS=176, 
-		ISAMPLER2DMS=177, USAMPLER2DMS=178, SAMPLER2DMSARRAY=179, ISAMPLER2DMSARRAY=180, 
-		USAMPLER2DMSARRAY=181, IMAGE2DRECT=182, IMAGE1DARRAY=183, IMAGE2DARRAY=184, 
-		IMAGE2DMS=185, IMAGE2DMSARRAY=186, IIMAGE2DRECT=187, IIMAGE1DARRAY=188, 
-		IIMAGE2DARRAY=189, IIMAGE2DMS=190, IIMAGE2DMSARRAY=191, UIMAGE2DRECT=192, 
-		UIMAGE1DARRAY=193, UIMAGE2DARRAY=194, UIMAGE2DMS=195, UIMAGE2DMSARRAY=196, 
-		SAMPLERCUBESHADOW=197, SAMPLERCUBEARRAYSHADOW=198, SAMPLERCUBE=199, ISAMPLERCUBE=200, 
-		USAMPLERCUBE=201, SAMPLERBUFFER=202, ISAMPLERBUFFER=203, USAMPLERBUFFER=204, 
-		SAMPLERCUBEARRAY=205, ISAMPLERCUBEARRAY=206, USAMPLERCUBEARRAY=207, IMAGECUBE=208, 
-		UIMAGECUBE=209, IIMAGECUBE=210, IMAGEBUFFER=211, IIMAGEBUFFER=212, UIMAGEBUFFER=213, 
-		IMAGECUBEARRAY=214, IIMAGECUBEARRAY=215, UIMAGECUBEARRAY=216, INC_OP=217, 
-		DEC_OP=218, VOID=219, LEFT_OP=220, RIGHT_OP=221, LE_OP=222, GE_OP=223, 
-		EQ_OP=224, NE_OP=225, LOGICAL_AND_OP=226, LOGICAL_XOR_OP=227, LOGICAL_OR_OP=228, 
-		MUL_ASSIGN=229, DIV_ASSIGN=230, MOD_ASSIGN=231, ADD_ASSIGN=232, SUB_ASSIGN=233, 
-		LEFT_ASSIGN=234, RIGHT_ASSIGN=235, AND_ASSIGN=236, XOR_ASSIGN=237, OR_ASSIGN=238, 
-		LPAREN=239, RPAREN=240, LBRACE=241, RBRACE=242, SEMICOLON=243, LBRACKET=244, 
-		RBRACKET=245, COMMA=246, DOT=247, PLUS_OP=248, MINUS_OP=249, LOGICAL_NOT_OP=250, 
-		BITWISE_NEG_OP=251, TIMES_OP=252, DIV_OP=253, MOD_OP=254, LT_OP=255, GT_OP=256, 
-		BITWISE_AND_OP=257, BITWISE_OR_OP=258, BITWISE_XOR_OP=259, QUERY_OP=260, 
-		ASSIGN_OP=261, PP_ENTER_MODE=262, PP_EMPTY=263, NR_LINE=264, NR=265, IDENTIFIER=266, 
-		LINE_CONTINUE=267, LINE_COMMENT=268, BLOCK_COMMENT=269, WS=270, EOL=271, 
-		NR_EXTENSION=272, NR_VERSION=273, NR_CUSTOM=274, NR_INCLUDE=275, NR_PRAGMA=276, 
-		NR_PRAGMA_DEBUG=277, NR_PRAGMA_OPTIMIZE=278, NR_PRAGMA_INVARIANT=279, 
-		NR_ON=280, NR_OFF=281, NR_ALL=282, NR_REQUIRE=283, NR_ENABLE=284, NR_WARN=285, 
-		NR_DISABLE=286, NR_COLON=287, NR_LPAREN=288, NR_RPAREN=289, NR_STDGL=290, 
-		NR_CORE=291, NR_COMPATIBILITY=292, NR_ES=293, NR_GLSL_110=294, NR_GLSL_120=295, 
-		NR_GLSLES_100=296, NR_GLSL_130=297, NR_GLSL_140=298, NR_GLSL_150=299, 
-		NR_GLSL_330=300, NR_GLSLES_300=301, NR_GLSLES_310=302, NR_GLSLES_320=303, 
-		NR_GLSL_400=304, NR_GLSL_410=305, NR_GLSL_420=306, NR_GLSL_430=307, NR_GLSL_440=308, 
-		NR_GLSL_450=309, NR_GLSL_460=310, NR_STRING_START=311, NR_STRING_START_ANGLE=312, 
-		NR_INTCONSTANT=313, NR_IDENTIFIER=314, NR_LINE_CONTINUE=315, NR_LINE_COMMENT=316, 
-		NR_BLOCK_COMMENT=317, NR_EOL=318, NR_WS=319, S_CONTENT=320, S_STRING_END=321, 
-		S_CONTENT_ANGLE=322, S_STRING_END_ANGLE=323, C_LINE_COMMENT=324, C_BLOCK_COMMENT=325, 
-		C_EOL=326, C_WS=327, C_CONTENT=328, PP_LINE_CONTINUE=329, PP_LINE_COMMENT=330, 
+		COLON=1, UNIFORM=2, BUFFER=3, IN=4, OUT=5, INOUT=6, HIGHP=7, MEDIUMP=8,
+		LOWP=9, PRECISION=10, CONST=11, PRECISE=12, INVARIANT=13, SMOOTH=14, FLAT=15,
+		CENTROID=16, ATTRIBUTE=17, VOLATILE=18, VARYING=19, SHARED=20, LAYOUT=21,
+		DOT_LENGTH_METHOD_CALL=22, NOPERSPECTIVE=23, SAMPLE=24, PATCH=25, COHERENT=26,
+		RESTRICT=27, READONLY=28, WRITEONLY=29, SUBROUTINE=30, DEVICECOHERENT=31,
+		QUEUEFAMILYCOHERENT=32, WORKGROUPCOHERENT=33, SUBGROUPCOHERENT=34, NONPRIVATE=35,
+		RAY_PAYLOAD_EXT=36, RAY_PAYLOAD_IN_EXT=37, HIT_ATTRIBUTE_EXT=38, CALLABLE_DATA_EXT=39,
+		CALLABLE_DATA_IN_EXT=40, IGNORE_INTERSECTION_EXT=41, TERMINATE_RAY_EXT=42,
+		ACCELERATION_STRUCTURE_EXT=43, ATOMIC_UINT=44, STRUCT=45, IF=46, ELSE=47,
+		SWITCH=48, CASE=49, DEFAULT=50, WHILE=51, DO=52, FOR=53, CONTINUE=54,
+		BREAK=55, RETURN=56, DISCARD=57, DEMOTE=58, UINT16CONSTANT=59, INT16CONSTANT=60,
+		UINT32CONSTANT=61, INT32CONSTANT=62, UINT64CONSTANT=63, INT64CONSTANT=64,
+		FLOAT16CONSTANT=65, FLOAT32CONSTANT=66, FLOAT64CONSTANT=67, BOOLCONSTANT=68,
+		BOOL=69, BVEC2=70, BVEC3=71, BVEC4=72, INT8=73, I8VEC2=74, I8VEC3=75,
+		I8VEC4=76, UINT8=77, U8VEC2=78, U8VEC3=79, U8VEC4=80, INT16=81, I16VEC2=82,
+		I16VEC3=83, I16VEC4=84, UINT16=85, U16VEC2=86, U16VEC3=87, U16VEC4=88,
+		INT32=89, I32VEC2=90, I32VEC3=91, I32VEC4=92, UINT32=93, U32VEC2=94, U32VEC3=95,
+		U32VEC4=96, INT64=97, I64VEC2=98, I64VEC3=99, I64VEC4=100, UINT64=101,
+		U64VEC2=102, U64VEC3=103, U64VEC4=104, FLOAT16=105, F16VEC2=106, F16VEC3=107,
+		F16VEC4=108, F16MAT2X2=109, F16MAT2X3=110, F16MAT2X4=111, F16MAT3X2=112,
+		F16MAT3X3=113, F16MAT3X4=114, F16MAT4X2=115, F16MAT4X3=116, F16MAT4X4=117,
+		FLOAT32=118, F32VEC2=119, F32VEC3=120, F32VEC4=121, F32MAT2X2=122, F32MAT2X3=123,
+		F32MAT2X4=124, F32MAT3X2=125, F32MAT3X3=126, F32MAT3X4=127, F32MAT4X2=128,
+		F32MAT4X3=129, F32MAT4X4=130, FLOAT64=131, F64VEC2=132, F64VEC3=133, F64VEC4=134,
+		F64MAT2X2=135, F64MAT2X3=136, F64MAT2X4=137, F64MAT3X2=138, F64MAT3X3=139,
+		F64MAT3X4=140, F64MAT4X2=141, F64MAT4X3=142, F64MAT4X4=143, IMAGE1D=144,
+		IMAGE2D=145, IMAGE3D=146, UIMAGE1D=147, UIMAGE2D=148, UIMAGE3D=149, IIMAGE1D=150,
+		IIMAGE2D=151, IIMAGE3D=152, SAMPLER1D=153, SAMPLER2D=154, SAMPLER3D=155,
+		SAMPLER2DRECT=156, SAMPLER1DSHADOW=157, SAMPLER2DSHADOW=158, SAMPLER2DRECTSHADOW=159,
+		SAMPLER1DARRAY=160, SAMPLER2DARRAY=161, SAMPLER1DARRAYSHADOW=162, SAMPLER2DARRAYSHADOW=163,
+		ISAMPLER1D=164, ISAMPLER2D=165, ISAMPLER2DRECT=166, ISAMPLER3D=167, ISAMPLER1DARRAY=168,
+		ISAMPLER2DARRAY=169, USAMPLER1D=170, USAMPLER2D=171, USAMPLER2DRECT=172,
+		USAMPLER3D=173, USAMPLER1DARRAY=174, USAMPLER2DARRAY=175, SAMPLER2DMS=176,
+		ISAMPLER2DMS=177, USAMPLER2DMS=178, SAMPLER2DMSARRAY=179, ISAMPLER2DMSARRAY=180,
+		USAMPLER2DMSARRAY=181, IMAGE2DRECT=182, IMAGE1DARRAY=183, IMAGE2DARRAY=184,
+		IMAGE2DMS=185, IMAGE2DMSARRAY=186, IIMAGE2DRECT=187, IIMAGE1DARRAY=188,
+		IIMAGE2DARRAY=189, IIMAGE2DMS=190, IIMAGE2DMSARRAY=191, UIMAGE2DRECT=192,
+		UIMAGE1DARRAY=193, UIMAGE2DARRAY=194, UIMAGE2DMS=195, UIMAGE2DMSARRAY=196,
+		SAMPLERCUBESHADOW=197, SAMPLERCUBEARRAYSHADOW=198, SAMPLERCUBE=199, ISAMPLERCUBE=200,
+		USAMPLERCUBE=201, SAMPLERBUFFER=202, ISAMPLERBUFFER=203, USAMPLERBUFFER=204,
+		SAMPLERCUBEARRAY=205, ISAMPLERCUBEARRAY=206, USAMPLERCUBEARRAY=207, IMAGECUBE=208,
+		UIMAGECUBE=209, IIMAGECUBE=210, IMAGEBUFFER=211, IIMAGEBUFFER=212, UIMAGEBUFFER=213,
+		IMAGECUBEARRAY=214, IIMAGECUBEARRAY=215, UIMAGECUBEARRAY=216, INC_OP=217,
+		DEC_OP=218, VOID=219, LEFT_OP=220, RIGHT_OP=221, LE_OP=222, GE_OP=223,
+		EQ_OP=224, NE_OP=225, LOGICAL_AND_OP=226, LOGICAL_XOR_OP=227, LOGICAL_OR_OP=228,
+		MUL_ASSIGN=229, DIV_ASSIGN=230, MOD_ASSIGN=231, ADD_ASSIGN=232, SUB_ASSIGN=233,
+		LEFT_ASSIGN=234, RIGHT_ASSIGN=235, AND_ASSIGN=236, XOR_ASSIGN=237, OR_ASSIGN=238,
+		LPAREN=239, RPAREN=240, LBRACE=241, RBRACE=242, SEMICOLON=243, LBRACKET=244,
+		RBRACKET=245, COMMA=246, DOT=247, PLUS_OP=248, MINUS_OP=249, LOGICAL_NOT_OP=250,
+		BITWISE_NEG_OP=251, TIMES_OP=252, DIV_OP=253, MOD_OP=254, LT_OP=255, GT_OP=256,
+		BITWISE_AND_OP=257, BITWISE_OR_OP=258, BITWISE_XOR_OP=259, QUERY_OP=260,
+		ASSIGN_OP=261, PP_ENTER_MODE=262, PP_EMPTY=263, NR_LINE=264, NR=265, IDENTIFIER=266,
+		LINE_CONTINUE=267, LINE_COMMENT=268, BLOCK_COMMENT=269, WS=270, EOL=271,
+		NR_EXTENSION=272, NR_VERSION=273, NR_CUSTOM=274, NR_INCLUDE=275, NR_PRAGMA=276,
+		NR_PRAGMA_DEBUG=277, NR_PRAGMA_OPTIMIZE=278, NR_PRAGMA_INVARIANT=279,
+		NR_ON=280, NR_OFF=281, NR_ALL=282, NR_REQUIRE=283, NR_ENABLE=284, NR_WARN=285,
+		NR_DISABLE=286, NR_COLON=287, NR_LPAREN=288, NR_RPAREN=289, NR_STDGL=290,
+		NR_CORE=291, NR_COMPATIBILITY=292, NR_ES=293, NR_GLSL_110=294, NR_GLSL_120=295,
+		NR_GLSLES_100=296, NR_GLSL_130=297, NR_GLSL_140=298, NR_GLSL_150=299,
+		NR_GLSL_330=300, NR_GLSLES_300=301, NR_GLSLES_310=302, NR_GLSLES_320=303,
+		NR_GLSL_400=304, NR_GLSL_410=305, NR_GLSL_420=306, NR_GLSL_430=307, NR_GLSL_440=308,
+		NR_GLSL_450=309, NR_GLSL_460=310, NR_STRING_START=311, NR_STRING_START_ANGLE=312,
+		NR_INTCONSTANT=313, NR_IDENTIFIER=314, NR_LINE_CONTINUE=315, NR_LINE_COMMENT=316,
+		NR_BLOCK_COMMENT=317, NR_EOL=318, NR_WS=319, S_CONTENT=320, S_STRING_END=321,
+		S_CONTENT_ANGLE=322, S_STRING_END_ANGLE=323, C_LINE_COMMENT=324, C_BLOCK_COMMENT=325,
+		C_EOL=326, C_WS=327, C_CONTENT=328, PP_LINE_CONTINUE=329, PP_LINE_COMMENT=330,
 		PP_BLOCK_COMMENT=331, PP_EOL=332, PP_CONTENT=333;
 	public static final int
-		RULE_translationUnit = 0, RULE_versionStatement = 1, RULE_externalDeclaration = 2, 
-		RULE_emptyDeclaration = 3, RULE_pragmaDirective = 4, RULE_extensionDirective = 5, 
-		RULE_customDirective = 6, RULE_includeDirective = 7, RULE_layoutDefaults = 8, 
-		RULE_functionDefinition = 9, RULE_finiteExpression = 10, RULE_expression = 11, 
-		RULE_declaration = 12, RULE_functionPrototype = 13, RULE_functionParameterList = 14, 
-		RULE_parameterDeclaration = 15, RULE_attribute = 16, RULE_singleAttribute = 17, 
-		RULE_declarationMember = 18, RULE_fullySpecifiedType = 19, RULE_storageQualifier = 20, 
-		RULE_layoutQualifier = 21, RULE_layoutQualifierId = 22, RULE_precisionQualifier = 23, 
-		RULE_interpolationQualifier = 24, RULE_invariantQualifier = 25, RULE_preciseQualifier = 26, 
-		RULE_typeQualifier = 27, RULE_typeSpecifier = 28, RULE_arraySpecifier = 29, 
-		RULE_arraySpecifierSegment = 30, RULE_builtinTypeSpecifierParseable = 31, 
-		RULE_builtinTypeSpecifierFixed = 32, RULE_structSpecifier = 33, RULE_structBody = 34, 
-		RULE_structMember = 35, RULE_structDeclarator = 36, RULE_initializer = 37, 
-		RULE_statement = 38, RULE_compoundStatement = 39, RULE_declarationStatement = 40, 
-		RULE_expressionStatement = 41, RULE_emptyStatement = 42, RULE_selectionStatement = 43, 
-		RULE_iterationCondition = 44, RULE_switchStatement = 45, RULE_caseLabel = 46, 
-		RULE_whileStatement = 47, RULE_doWhileStatement = 48, RULE_forStatement = 49, 
+		RULE_translationUnit = 0, RULE_versionStatement = 1, RULE_externalDeclaration = 2,
+		RULE_emptyDeclaration = 3, RULE_pragmaDirective = 4, RULE_extensionDirective = 5,
+		RULE_customDirective = 6, RULE_includeDirective = 7, RULE_layoutDefaults = 8,
+		RULE_functionDefinition = 9, RULE_finiteExpression = 10, RULE_expression = 11,
+		RULE_declaration = 12, RULE_functionPrototype = 13, RULE_functionParameterList = 14,
+		RULE_parameterDeclaration = 15, RULE_attribute = 16, RULE_singleAttribute = 17,
+		RULE_declarationMember = 18, RULE_fullySpecifiedType = 19, RULE_storageQualifier = 20,
+		RULE_layoutQualifier = 21, RULE_layoutQualifierId = 22, RULE_precisionQualifier = 23,
+		RULE_interpolationQualifier = 24, RULE_invariantQualifier = 25, RULE_preciseQualifier = 26,
+		RULE_typeQualifier = 27, RULE_typeSpecifier = 28, RULE_arraySpecifier = 29,
+		RULE_arraySpecifierSegment = 30, RULE_builtinTypeSpecifierParseable = 31,
+		RULE_builtinTypeSpecifierFixed = 32, RULE_structSpecifier = 33, RULE_structBody = 34,
+		RULE_structMember = 35, RULE_structDeclarator = 36, RULE_initializer = 37,
+		RULE_statement = 38, RULE_compoundStatement = 39, RULE_declarationStatement = 40,
+		RULE_expressionStatement = 41, RULE_emptyStatement = 42, RULE_selectionStatement = 43,
+		RULE_iterationCondition = 44, RULE_switchStatement = 45, RULE_caseLabel = 46,
+		RULE_whileStatement = 47, RULE_doWhileStatement = 48, RULE_forStatement = 49,
 		RULE_jumpStatement = 50, RULE_demoteStatement = 51;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"translationUnit", "versionStatement", "externalDeclaration", "emptyDeclaration", 
-			"pragmaDirective", "extensionDirective", "customDirective", "includeDirective", 
-			"layoutDefaults", "functionDefinition", "finiteExpression", "expression", 
-			"declaration", "functionPrototype", "functionParameterList", "parameterDeclaration", 
-			"attribute", "singleAttribute", "declarationMember", "fullySpecifiedType", 
-			"storageQualifier", "layoutQualifier", "layoutQualifierId", "precisionQualifier", 
-			"interpolationQualifier", "invariantQualifier", "preciseQualifier", "typeQualifier", 
-			"typeSpecifier", "arraySpecifier", "arraySpecifierSegment", "builtinTypeSpecifierParseable", 
-			"builtinTypeSpecifierFixed", "structSpecifier", "structBody", "structMember", 
-			"structDeclarator", "initializer", "statement", "compoundStatement", 
-			"declarationStatement", "expressionStatement", "emptyStatement", "selectionStatement", 
-			"iterationCondition", "switchStatement", "caseLabel", "whileStatement", 
+			"translationUnit", "versionStatement", "externalDeclaration", "emptyDeclaration",
+			"pragmaDirective", "extensionDirective", "customDirective", "includeDirective",
+			"layoutDefaults", "functionDefinition", "finiteExpression", "expression",
+			"declaration", "functionPrototype", "functionParameterList", "parameterDeclaration",
+			"attribute", "singleAttribute", "declarationMember", "fullySpecifiedType",
+			"storageQualifier", "layoutQualifier", "layoutQualifierId", "precisionQualifier",
+			"interpolationQualifier", "invariantQualifier", "preciseQualifier", "typeQualifier",
+			"typeSpecifier", "arraySpecifier", "arraySpecifierSegment", "builtinTypeSpecifierParseable",
+			"builtinTypeSpecifierFixed", "structSpecifier", "structBody", "structMember",
+			"structDeclarator", "initializer", "statement", "compoundStatement",
+			"declarationStatement", "expressionStatement", "emptyStatement", "selectionStatement",
+			"iterationCondition", "switchStatement", "caseLabel", "whileStatement",
 			"doWhileStatement", "forStatement", "jumpStatement", "demoteStatement"
 		};
 	}
@@ -127,122 +130,122 @@ public class GLSLParser extends ExtendedParser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, null, "'uniform'", "'buffer'", "'in'", "'out'", "'inout'", "'highp'", 
-			"'mediump'", "'lowp'", "'precision'", "'const'", "'precise'", null, "'smooth'", 
-			"'flat'", "'centroid'", "'attribute'", "'volatile'", "'varying'", "'shared'", 
-			"'layout'", "'.length()'", "'noperspective'", "'sample'", "'patch'", 
-			"'coherent'", "'restrict'", "'readonly'", "'writeonly'", "'subroutine'", 
-			"'devicecoherent'", "'queuefamilycoherent'", "'workgroupcoherent'", "'subgroupcoherent'", 
-			"'nonprivate'", "'rayPayloadEXT'", "'rayPayloadInEXT'", "'hitAttributeEXT'", 
-			"'callableDataEXT'", "'callableDataInEXT'", "'ignoreIntersectionEXT'", 
-			"'terminateRayEXT'", "'accelerationStructureEXT'", "'atomic_uint'", "'struct'", 
-			"'if'", "'else'", "'switch'", "'case'", "'default'", "'while'", "'do'", 
-			"'for'", "'continue'", "'break'", "'return'", "'discard'", "'demote'", 
-			null, null, null, null, null, null, null, null, null, null, "'bool'", 
-			"'bvec2'", "'bvec3'", "'bvec4'", "'int8_t'", "'i8vec2'", "'i8vec3'", 
-			"'i8vec4'", "'uint8_t'", "'u8vec2'", "'u8vec3'", "'u8vec4'", "'int16_t'", 
-			"'i16vec2'", "'i16vec3'", "'i16vec4'", "'uint16_t'", "'u16vec2'", "'u16vec3'", 
-			"'u16vec4'", null, null, null, null, null, null, null, null, "'int64_t'", 
-			"'i64vec2'", "'i64vec3'", "'i64vec4'", "'uint64_t'", "'u64vec2'", "'u64vec3'", 
-			"'u64vec4'", "'float16_t'", "'f16vec2'", "'f16vec3'", "'f16vec4'", null, 
-			"'f16mat2x3'", "'f16mat2x4'", "'f16mat3x2'", null, "'f16mat3x4'", "'f16mat4x2'", 
-			"'f16mat4x3'", null, null, null, null, null, null, null, null, null, 
-			null, null, null, null, null, null, null, null, null, null, null, null, 
-			null, null, null, null, null, null, "'image1D'", "'image2D'", "'image3D'", 
-			"'uimage1D'", "'uimage2D'", "'uimage3D'", "'iimage1D'", "'iimage2D'", 
-			"'iimage3D'", "'sampler1D'", "'sampler2D'", "'sampler3D'", "'sampler2DRect'", 
-			"'sampler1DShadow'", "'sampler2DShadow'", "'sampler2DRectShadow'", "'sampler1DArray'", 
-			"'sampler2DArray'", "'sampler1DArrayShadow'", "'sampler2DArrayShadow'", 
-			"'isampler1D'", "'isampler2D'", "'isampler2DRect'", "'isampler3D'", "'isampler1DArray'", 
-			"'isampler2DArray'", "'usampler1D'", "'usampler2D'", "'usampler2DRect'", 
-			"'usampler3D'", "'usampler1DArray'", "'usampler2DArray'", "'sampler2DMS'", 
-			"'isampler2DMS'", "'usampler2DMS'", "'sampler2DMSArray'", "'isampler2DMSArray'", 
-			"'usampler2DMSArray'", "'image2DRect'", "'image1DArray'", "'image2DArray'", 
-			"'image2DMS'", "'image2DMSArray'", "'iimage2DRect'", "'iimage1DArray'", 
-			"'iimage2DArray'", "'iimage2DMS'", "'iimage2DMSArray'", "'uimage2DRect'", 
-			"'uimage1DArray'", "'uimage2DArray'", "'uimage2DMS'", "'uimage2DMSArray'", 
-			"'samplerCubeShadow'", "'samplerCubeArrayShadow'", "'samplerCube'", "'isamplerCube'", 
-			"'usamplerCube'", "'samplerBuffer'", "'isamplerBuffer'", "'usamplerBuffer'", 
-			"'samplerCubeArray'", "'isamplerCubeArray'", "'usamplerCubeArray'", "'imageCube'", 
-			"'uimageCube'", "'iimageCube'", "'imageBuffer'", "'iimageBuffer'", "'uimageBuffer'", 
-			"'imageCubeArray'", "'iimageCubeArray'", "'uimageCubeArray'", "'++'", 
-			"'--'", "'void'", "'<<'", "'>>'", "'<='", "'>='", "'=='", "'!='", "'&&'", 
-			"'^^'", "'||'", "'*='", "'/='", "'%='", "'+='", "'-='", "'<<='", "'>>='", 
-			"'&='", "'^='", "'|='", null, null, "'{'", "'}'", "';'", "'['", "']'", 
-			"','", "'.'", "'+'", "'-'", "'!'", "'~'", "'*'", "'/'", "'%'", "'<'", 
-			null, "'&'", "'|'", "'^'", "'?'", "'='", null, null, null, "'#'", null, 
-			null, null, null, null, null, "'extension'", "'version'", null, "'include'", 
-			"'pragma'", "'debug'", "'optimize'", null, "'on'", "'off'", "'all'", 
-			"'require'", "'enable'", "'warn'", "'disable'", null, null, null, "'STDGL'", 
-			"'core'", "'compatibility'", "'es'", "'110'", "'120'", "'100'", "'130'", 
-			"'140'", "'150'", "'330'", "'300'", "'310'", "'320'", "'400'", "'410'", 
-			"'420'", "'430'", "'440'", "'450'", "'460'", null, null, null, null, 
+			null, null, "'uniform'", "'buffer'", "'in'", "'out'", "'inout'", "'highp'",
+			"'mediump'", "'lowp'", "'precision'", "'const'", "'precise'", null, "'smooth'",
+			"'flat'", "'centroid'", "'attribute'", "'volatile'", "'varying'", "'shared'",
+			"'layout'", "'.length()'", "'noperspective'", "'sample'", "'patch'",
+			"'coherent'", "'restrict'", "'readonly'", "'writeonly'", "'subroutine'",
+			"'devicecoherent'", "'queuefamilycoherent'", "'workgroupcoherent'", "'subgroupcoherent'",
+			"'nonprivate'", "'rayPayloadEXT'", "'rayPayloadInEXT'", "'hitAttributeEXT'",
+			"'callableDataEXT'", "'callableDataInEXT'", "'ignoreIntersectionEXT'",
+			"'terminateRayEXT'", "'accelerationStructureEXT'", "'atomic_uint'", "'struct'",
+			"'if'", "'else'", "'switch'", "'case'", "'default'", "'while'", "'do'",
+			"'for'", "'continue'", "'break'", "'return'", "'discard'", "'demote'",
+			null, null, null, null, null, null, null, null, null, null, "'bool'",
+			"'bvec2'", "'bvec3'", "'bvec4'", "'int8_t'", "'i8vec2'", "'i8vec3'",
+			"'i8vec4'", "'uint8_t'", "'u8vec2'", "'u8vec3'", "'u8vec4'", "'int16_t'",
+			"'i16vec2'", "'i16vec3'", "'i16vec4'", "'uint16_t'", "'u16vec2'", "'u16vec3'",
+			"'u16vec4'", null, null, null, null, null, null, null, null, "'int64_t'",
+			"'i64vec2'", "'i64vec3'", "'i64vec4'", "'uint64_t'", "'u64vec2'", "'u64vec3'",
+			"'u64vec4'", "'float16_t'", "'f16vec2'", "'f16vec3'", "'f16vec4'", null,
+			"'f16mat2x3'", "'f16mat2x4'", "'f16mat3x2'", null, "'f16mat3x4'", "'f16mat4x2'",
+			"'f16mat4x3'", null, null, null, null, null, null, null, null, null,
+			null, null, null, null, null, null, null, null, null, null, null, null,
+			null, null, null, null, null, null, "'image1D'", "'image2D'", "'image3D'",
+			"'uimage1D'", "'uimage2D'", "'uimage3D'", "'iimage1D'", "'iimage2D'",
+			"'iimage3D'", "'sampler1D'", "'sampler2D'", "'sampler3D'", "'sampler2DRect'",
+			"'sampler1DShadow'", "'sampler2DShadow'", "'sampler2DRectShadow'", "'sampler1DArray'",
+			"'sampler2DArray'", "'sampler1DArrayShadow'", "'sampler2DArrayShadow'",
+			"'isampler1D'", "'isampler2D'", "'isampler2DRect'", "'isampler3D'", "'isampler1DArray'",
+			"'isampler2DArray'", "'usampler1D'", "'usampler2D'", "'usampler2DRect'",
+			"'usampler3D'", "'usampler1DArray'", "'usampler2DArray'", "'sampler2DMS'",
+			"'isampler2DMS'", "'usampler2DMS'", "'sampler2DMSArray'", "'isampler2DMSArray'",
+			"'usampler2DMSArray'", "'image2DRect'", "'image1DArray'", "'image2DArray'",
+			"'image2DMS'", "'image2DMSArray'", "'iimage2DRect'", "'iimage1DArray'",
+			"'iimage2DArray'", "'iimage2DMS'", "'iimage2DMSArray'", "'uimage2DRect'",
+			"'uimage1DArray'", "'uimage2DArray'", "'uimage2DMS'", "'uimage2DMSArray'",
+			"'samplerCubeShadow'", "'samplerCubeArrayShadow'", "'samplerCube'", "'isamplerCube'",
+			"'usamplerCube'", "'samplerBuffer'", "'isamplerBuffer'", "'usamplerBuffer'",
+			"'samplerCubeArray'", "'isamplerCubeArray'", "'usamplerCubeArray'", "'imageCube'",
+			"'uimageCube'", "'iimageCube'", "'imageBuffer'", "'iimageBuffer'", "'uimageBuffer'",
+			"'imageCubeArray'", "'iimageCubeArray'", "'uimageCubeArray'", "'++'",
+			"'--'", "'void'", "'<<'", "'>>'", "'<='", "'>='", "'=='", "'!='", "'&&'",
+			"'^^'", "'||'", "'*='", "'/='", "'%='", "'+='", "'-='", "'<<='", "'>>='",
+			"'&='", "'^='", "'|='", null, null, "'{'", "'}'", "';'", "'['", "']'",
+			"','", "'.'", "'+'", "'-'", "'!'", "'~'", "'*'", "'/'", "'%'", "'<'",
+			null, "'&'", "'|'", "'^'", "'?'", "'='", null, null, null, "'#'", null,
+			null, null, null, null, null, "'extension'", "'version'", null, "'include'",
+			"'pragma'", "'debug'", "'optimize'", null, "'on'", "'off'", "'all'",
+			"'require'", "'enable'", "'warn'", "'disable'", null, null, null, "'STDGL'",
+			"'core'", "'compatibility'", "'es'", "'110'", "'120'", "'100'", "'130'",
+			"'140'", "'150'", "'330'", "'300'", "'310'", "'320'", "'400'", "'410'",
+			"'420'", "'430'", "'440'", "'450'", "'460'", null, null, null, null,
 			null, null, null, null, null, null, "'\"'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "COLON", "UNIFORM", "BUFFER", "IN", "OUT", "INOUT", "HIGHP", "MEDIUMP", 
-			"LOWP", "PRECISION", "CONST", "PRECISE", "INVARIANT", "SMOOTH", "FLAT", 
-			"CENTROID", "ATTRIBUTE", "VOLATILE", "VARYING", "SHARED", "LAYOUT", "DOT_LENGTH_METHOD_CALL", 
-			"NOPERSPECTIVE", "SAMPLE", "PATCH", "COHERENT", "RESTRICT", "READONLY", 
-			"WRITEONLY", "SUBROUTINE", "DEVICECOHERENT", "QUEUEFAMILYCOHERENT", "WORKGROUPCOHERENT", 
-			"SUBGROUPCOHERENT", "NONPRIVATE", "RAY_PAYLOAD_EXT", "RAY_PAYLOAD_IN_EXT", 
-			"HIT_ATTRIBUTE_EXT", "CALLABLE_DATA_EXT", "CALLABLE_DATA_IN_EXT", "IGNORE_INTERSECTION_EXT", 
-			"TERMINATE_RAY_EXT", "ACCELERATION_STRUCTURE_EXT", "ATOMIC_UINT", "STRUCT", 
-			"IF", "ELSE", "SWITCH", "CASE", "DEFAULT", "WHILE", "DO", "FOR", "CONTINUE", 
-			"BREAK", "RETURN", "DISCARD", "DEMOTE", "UINT16CONSTANT", "INT16CONSTANT", 
-			"UINT32CONSTANT", "INT32CONSTANT", "UINT64CONSTANT", "INT64CONSTANT", 
-			"FLOAT16CONSTANT", "FLOAT32CONSTANT", "FLOAT64CONSTANT", "BOOLCONSTANT", 
-			"BOOL", "BVEC2", "BVEC3", "BVEC4", "INT8", "I8VEC2", "I8VEC3", "I8VEC4", 
-			"UINT8", "U8VEC2", "U8VEC3", "U8VEC4", "INT16", "I16VEC2", "I16VEC3", 
-			"I16VEC4", "UINT16", "U16VEC2", "U16VEC3", "U16VEC4", "INT32", "I32VEC2", 
-			"I32VEC3", "I32VEC4", "UINT32", "U32VEC2", "U32VEC3", "U32VEC4", "INT64", 
-			"I64VEC2", "I64VEC3", "I64VEC4", "UINT64", "U64VEC2", "U64VEC3", "U64VEC4", 
-			"FLOAT16", "F16VEC2", "F16VEC3", "F16VEC4", "F16MAT2X2", "F16MAT2X3", 
-			"F16MAT2X4", "F16MAT3X2", "F16MAT3X3", "F16MAT3X4", "F16MAT4X2", "F16MAT4X3", 
-			"F16MAT4X4", "FLOAT32", "F32VEC2", "F32VEC3", "F32VEC4", "F32MAT2X2", 
-			"F32MAT2X3", "F32MAT2X4", "F32MAT3X2", "F32MAT3X3", "F32MAT3X4", "F32MAT4X2", 
-			"F32MAT4X3", "F32MAT4X4", "FLOAT64", "F64VEC2", "F64VEC3", "F64VEC4", 
-			"F64MAT2X2", "F64MAT2X3", "F64MAT2X4", "F64MAT3X2", "F64MAT3X3", "F64MAT3X4", 
-			"F64MAT4X2", "F64MAT4X3", "F64MAT4X4", "IMAGE1D", "IMAGE2D", "IMAGE3D", 
-			"UIMAGE1D", "UIMAGE2D", "UIMAGE3D", "IIMAGE1D", "IIMAGE2D", "IIMAGE3D", 
-			"SAMPLER1D", "SAMPLER2D", "SAMPLER3D", "SAMPLER2DRECT", "SAMPLER1DSHADOW", 
-			"SAMPLER2DSHADOW", "SAMPLER2DRECTSHADOW", "SAMPLER1DARRAY", "SAMPLER2DARRAY", 
-			"SAMPLER1DARRAYSHADOW", "SAMPLER2DARRAYSHADOW", "ISAMPLER1D", "ISAMPLER2D", 
-			"ISAMPLER2DRECT", "ISAMPLER3D", "ISAMPLER1DARRAY", "ISAMPLER2DARRAY", 
-			"USAMPLER1D", "USAMPLER2D", "USAMPLER2DRECT", "USAMPLER3D", "USAMPLER1DARRAY", 
-			"USAMPLER2DARRAY", "SAMPLER2DMS", "ISAMPLER2DMS", "USAMPLER2DMS", "SAMPLER2DMSARRAY", 
-			"ISAMPLER2DMSARRAY", "USAMPLER2DMSARRAY", "IMAGE2DRECT", "IMAGE1DARRAY", 
-			"IMAGE2DARRAY", "IMAGE2DMS", "IMAGE2DMSARRAY", "IIMAGE2DRECT", "IIMAGE1DARRAY", 
-			"IIMAGE2DARRAY", "IIMAGE2DMS", "IIMAGE2DMSARRAY", "UIMAGE2DRECT", "UIMAGE1DARRAY", 
-			"UIMAGE2DARRAY", "UIMAGE2DMS", "UIMAGE2DMSARRAY", "SAMPLERCUBESHADOW", 
-			"SAMPLERCUBEARRAYSHADOW", "SAMPLERCUBE", "ISAMPLERCUBE", "USAMPLERCUBE", 
-			"SAMPLERBUFFER", "ISAMPLERBUFFER", "USAMPLERBUFFER", "SAMPLERCUBEARRAY", 
-			"ISAMPLERCUBEARRAY", "USAMPLERCUBEARRAY", "IMAGECUBE", "UIMAGECUBE", 
-			"IIMAGECUBE", "IMAGEBUFFER", "IIMAGEBUFFER", "UIMAGEBUFFER", "IMAGECUBEARRAY", 
-			"IIMAGECUBEARRAY", "UIMAGECUBEARRAY", "INC_OP", "DEC_OP", "VOID", "LEFT_OP", 
-			"RIGHT_OP", "LE_OP", "GE_OP", "EQ_OP", "NE_OP", "LOGICAL_AND_OP", "LOGICAL_XOR_OP", 
-			"LOGICAL_OR_OP", "MUL_ASSIGN", "DIV_ASSIGN", "MOD_ASSIGN", "ADD_ASSIGN", 
-			"SUB_ASSIGN", "LEFT_ASSIGN", "RIGHT_ASSIGN", "AND_ASSIGN", "XOR_ASSIGN", 
-			"OR_ASSIGN", "LPAREN", "RPAREN", "LBRACE", "RBRACE", "SEMICOLON", "LBRACKET", 
-			"RBRACKET", "COMMA", "DOT", "PLUS_OP", "MINUS_OP", "LOGICAL_NOT_OP", 
-			"BITWISE_NEG_OP", "TIMES_OP", "DIV_OP", "MOD_OP", "LT_OP", "GT_OP", "BITWISE_AND_OP", 
-			"BITWISE_OR_OP", "BITWISE_XOR_OP", "QUERY_OP", "ASSIGN_OP", "PP_ENTER_MODE", 
-			"PP_EMPTY", "NR_LINE", "NR", "IDENTIFIER", "LINE_CONTINUE", "LINE_COMMENT", 
-			"BLOCK_COMMENT", "WS", "EOL", "NR_EXTENSION", "NR_VERSION", "NR_CUSTOM", 
-			"NR_INCLUDE", "NR_PRAGMA", "NR_PRAGMA_DEBUG", "NR_PRAGMA_OPTIMIZE", "NR_PRAGMA_INVARIANT", 
-			"NR_ON", "NR_OFF", "NR_ALL", "NR_REQUIRE", "NR_ENABLE", "NR_WARN", "NR_DISABLE", 
-			"NR_COLON", "NR_LPAREN", "NR_RPAREN", "NR_STDGL", "NR_CORE", "NR_COMPATIBILITY", 
-			"NR_ES", "NR_GLSL_110", "NR_GLSL_120", "NR_GLSLES_100", "NR_GLSL_130", 
-			"NR_GLSL_140", "NR_GLSL_150", "NR_GLSL_330", "NR_GLSLES_300", "NR_GLSLES_310", 
-			"NR_GLSLES_320", "NR_GLSL_400", "NR_GLSL_410", "NR_GLSL_420", "NR_GLSL_430", 
-			"NR_GLSL_440", "NR_GLSL_450", "NR_GLSL_460", "NR_STRING_START", "NR_STRING_START_ANGLE", 
-			"NR_INTCONSTANT", "NR_IDENTIFIER", "NR_LINE_CONTINUE", "NR_LINE_COMMENT", 
-			"NR_BLOCK_COMMENT", "NR_EOL", "NR_WS", "S_CONTENT", "S_STRING_END", "S_CONTENT_ANGLE", 
-			"S_STRING_END_ANGLE", "C_LINE_COMMENT", "C_BLOCK_COMMENT", "C_EOL", "C_WS", 
-			"C_CONTENT", "PP_LINE_CONTINUE", "PP_LINE_COMMENT", "PP_BLOCK_COMMENT", 
+			null, "COLON", "UNIFORM", "BUFFER", "IN", "OUT", "INOUT", "HIGHP", "MEDIUMP",
+			"LOWP", "PRECISION", "CONST", "PRECISE", "INVARIANT", "SMOOTH", "FLAT",
+			"CENTROID", "ATTRIBUTE", "VOLATILE", "VARYING", "SHARED", "LAYOUT", "DOT_LENGTH_METHOD_CALL",
+			"NOPERSPECTIVE", "SAMPLE", "PATCH", "COHERENT", "RESTRICT", "READONLY",
+			"WRITEONLY", "SUBROUTINE", "DEVICECOHERENT", "QUEUEFAMILYCOHERENT", "WORKGROUPCOHERENT",
+			"SUBGROUPCOHERENT", "NONPRIVATE", "RAY_PAYLOAD_EXT", "RAY_PAYLOAD_IN_EXT",
+			"HIT_ATTRIBUTE_EXT", "CALLABLE_DATA_EXT", "CALLABLE_DATA_IN_EXT", "IGNORE_INTERSECTION_EXT",
+			"TERMINATE_RAY_EXT", "ACCELERATION_STRUCTURE_EXT", "ATOMIC_UINT", "STRUCT",
+			"IF", "ELSE", "SWITCH", "CASE", "DEFAULT", "WHILE", "DO", "FOR", "CONTINUE",
+			"BREAK", "RETURN", "DISCARD", "DEMOTE", "UINT16CONSTANT", "INT16CONSTANT",
+			"UINT32CONSTANT", "INT32CONSTANT", "UINT64CONSTANT", "INT64CONSTANT",
+			"FLOAT16CONSTANT", "FLOAT32CONSTANT", "FLOAT64CONSTANT", "BOOLCONSTANT",
+			"BOOL", "BVEC2", "BVEC3", "BVEC4", "INT8", "I8VEC2", "I8VEC3", "I8VEC4",
+			"UINT8", "U8VEC2", "U8VEC3", "U8VEC4", "INT16", "I16VEC2", "I16VEC3",
+			"I16VEC4", "UINT16", "U16VEC2", "U16VEC3", "U16VEC4", "INT32", "I32VEC2",
+			"I32VEC3", "I32VEC4", "UINT32", "U32VEC2", "U32VEC3", "U32VEC4", "INT64",
+			"I64VEC2", "I64VEC3", "I64VEC4", "UINT64", "U64VEC2", "U64VEC3", "U64VEC4",
+			"FLOAT16", "F16VEC2", "F16VEC3", "F16VEC4", "F16MAT2X2", "F16MAT2X3",
+			"F16MAT2X4", "F16MAT3X2", "F16MAT3X3", "F16MAT3X4", "F16MAT4X2", "F16MAT4X3",
+			"F16MAT4X4", "FLOAT32", "F32VEC2", "F32VEC3", "F32VEC4", "F32MAT2X2",
+			"F32MAT2X3", "F32MAT2X4", "F32MAT3X2", "F32MAT3X3", "F32MAT3X4", "F32MAT4X2",
+			"F32MAT4X3", "F32MAT4X4", "FLOAT64", "F64VEC2", "F64VEC3", "F64VEC4",
+			"F64MAT2X2", "F64MAT2X3", "F64MAT2X4", "F64MAT3X2", "F64MAT3X3", "F64MAT3X4",
+			"F64MAT4X2", "F64MAT4X3", "F64MAT4X4", "IMAGE1D", "IMAGE2D", "IMAGE3D",
+			"UIMAGE1D", "UIMAGE2D", "UIMAGE3D", "IIMAGE1D", "IIMAGE2D", "IIMAGE3D",
+			"SAMPLER1D", "SAMPLER2D", "SAMPLER3D", "SAMPLER2DRECT", "SAMPLER1DSHADOW",
+			"SAMPLER2DSHADOW", "SAMPLER2DRECTSHADOW", "SAMPLER1DARRAY", "SAMPLER2DARRAY",
+			"SAMPLER1DARRAYSHADOW", "SAMPLER2DARRAYSHADOW", "ISAMPLER1D", "ISAMPLER2D",
+			"ISAMPLER2DRECT", "ISAMPLER3D", "ISAMPLER1DARRAY", "ISAMPLER2DARRAY",
+			"USAMPLER1D", "USAMPLER2D", "USAMPLER2DRECT", "USAMPLER3D", "USAMPLER1DARRAY",
+			"USAMPLER2DARRAY", "SAMPLER2DMS", "ISAMPLER2DMS", "USAMPLER2DMS", "SAMPLER2DMSARRAY",
+			"ISAMPLER2DMSARRAY", "USAMPLER2DMSARRAY", "IMAGE2DRECT", "IMAGE1DARRAY",
+			"IMAGE2DARRAY", "IMAGE2DMS", "IMAGE2DMSARRAY", "IIMAGE2DRECT", "IIMAGE1DARRAY",
+			"IIMAGE2DARRAY", "IIMAGE2DMS", "IIMAGE2DMSARRAY", "UIMAGE2DRECT", "UIMAGE1DARRAY",
+			"UIMAGE2DARRAY", "UIMAGE2DMS", "UIMAGE2DMSARRAY", "SAMPLERCUBESHADOW",
+			"SAMPLERCUBEARRAYSHADOW", "SAMPLERCUBE", "ISAMPLERCUBE", "USAMPLERCUBE",
+			"SAMPLERBUFFER", "ISAMPLERBUFFER", "USAMPLERBUFFER", "SAMPLERCUBEARRAY",
+			"ISAMPLERCUBEARRAY", "USAMPLERCUBEARRAY", "IMAGECUBE", "UIMAGECUBE",
+			"IIMAGECUBE", "IMAGEBUFFER", "IIMAGEBUFFER", "UIMAGEBUFFER", "IMAGECUBEARRAY",
+			"IIMAGECUBEARRAY", "UIMAGECUBEARRAY", "INC_OP", "DEC_OP", "VOID", "LEFT_OP",
+			"RIGHT_OP", "LE_OP", "GE_OP", "EQ_OP", "NE_OP", "LOGICAL_AND_OP", "LOGICAL_XOR_OP",
+			"LOGICAL_OR_OP", "MUL_ASSIGN", "DIV_ASSIGN", "MOD_ASSIGN", "ADD_ASSIGN",
+			"SUB_ASSIGN", "LEFT_ASSIGN", "RIGHT_ASSIGN", "AND_ASSIGN", "XOR_ASSIGN",
+			"OR_ASSIGN", "LPAREN", "RPAREN", "LBRACE", "RBRACE", "SEMICOLON", "LBRACKET",
+			"RBRACKET", "COMMA", "DOT", "PLUS_OP", "MINUS_OP", "LOGICAL_NOT_OP",
+			"BITWISE_NEG_OP", "TIMES_OP", "DIV_OP", "MOD_OP", "LT_OP", "GT_OP", "BITWISE_AND_OP",
+			"BITWISE_OR_OP", "BITWISE_XOR_OP", "QUERY_OP", "ASSIGN_OP", "PP_ENTER_MODE",
+			"PP_EMPTY", "NR_LINE", "NR", "IDENTIFIER", "LINE_CONTINUE", "LINE_COMMENT",
+			"BLOCK_COMMENT", "WS", "EOL", "NR_EXTENSION", "NR_VERSION", "NR_CUSTOM",
+			"NR_INCLUDE", "NR_PRAGMA", "NR_PRAGMA_DEBUG", "NR_PRAGMA_OPTIMIZE", "NR_PRAGMA_INVARIANT",
+			"NR_ON", "NR_OFF", "NR_ALL", "NR_REQUIRE", "NR_ENABLE", "NR_WARN", "NR_DISABLE",
+			"NR_COLON", "NR_LPAREN", "NR_RPAREN", "NR_STDGL", "NR_CORE", "NR_COMPATIBILITY",
+			"NR_ES", "NR_GLSL_110", "NR_GLSL_120", "NR_GLSLES_100", "NR_GLSL_130",
+			"NR_GLSL_140", "NR_GLSL_150", "NR_GLSL_330", "NR_GLSLES_300", "NR_GLSLES_310",
+			"NR_GLSLES_320", "NR_GLSL_400", "NR_GLSL_410", "NR_GLSL_420", "NR_GLSL_430",
+			"NR_GLSL_440", "NR_GLSL_450", "NR_GLSL_460", "NR_STRING_START", "NR_STRING_START_ANGLE",
+			"NR_INTCONSTANT", "NR_IDENTIFIER", "NR_LINE_CONTINUE", "NR_LINE_COMMENT",
+			"NR_BLOCK_COMMENT", "NR_EOL", "NR_WS", "S_CONTENT", "S_STRING_END", "S_CONTENT_ANGLE",
+			"S_STRING_END_ANGLE", "C_LINE_COMMENT", "C_BLOCK_COMMENT", "C_EOL", "C_WS",
+			"C_CONTENT", "PP_LINE_CONTINUE", "PP_LINE_COMMENT", "PP_BLOCK_COMMENT",
 			"PP_EOL", "PP_CONTENT"
 		};
 	}
@@ -1132,7 +1135,7 @@ public class GLSLParser extends ExtendedParser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_finiteExpression; }
-	 
+
 		public FiniteExpressionContext() { }
 		public void copyFrom(FiniteExpressionContext ctx) {
 			super.copyFrom(ctx);
@@ -2182,7 +2185,7 @@ public class GLSLParser extends ExtendedParser {
 						}
 						break;
 					}
-					} 
+					}
 				}
 				setState(279);
 				_errHandler.sync(this);
@@ -2257,7 +2260,7 @@ public class GLSLParser extends ExtendedParser {
 					((ExpressionContext)_localctx).finiteExpression = finiteExpression(0);
 					((ExpressionContext)_localctx).items.add(((ExpressionContext)_localctx).finiteExpression);
 					}
-					} 
+					}
 				}
 				setState(287);
 				_errHandler.sync(this);
@@ -2282,7 +2285,7 @@ public class GLSLParser extends ExtendedParser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_declaration; }
-	 
+
 		public DeclarationContext() { }
 		public void copyFrom(DeclarationContext ctx) {
 			super.copyFrom(ctx);
@@ -3533,7 +3536,7 @@ public class GLSLParser extends ExtendedParser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_layoutQualifierId; }
-	 
+
 		public LayoutQualifierIdContext() { }
 		public void copyFrom(LayoutQualifierIdContext ctx) {
 			super.copyFrom(ctx);
@@ -3889,7 +3892,7 @@ public class GLSLParser extends ExtendedParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(477); 
+			setState(477);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
@@ -3968,7 +3971,7 @@ public class GLSLParser extends ExtendedParser {
 					throw new NoViableAltException(this);
 				}
 				}
-				setState(479); 
+				setState(479);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			} while ( ((_la) & ~0x3f) == 0 && ((1L << _la) & 2199019060220L) != 0 );
@@ -4262,7 +4265,7 @@ public class GLSLParser extends ExtendedParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(491); 
+			setState(491);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
@@ -4272,7 +4275,7 @@ public class GLSLParser extends ExtendedParser {
 				arraySpecifierSegment();
 				}
 				}
-				setState(493); 
+				setState(493);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			} while ( _la==LBRACKET );
@@ -4702,7 +4705,7 @@ public class GLSLParser extends ExtendedParser {
 			{
 			setState(511);
 			match(LBRACE);
-			setState(513); 
+			setState(513);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
@@ -4712,7 +4715,7 @@ public class GLSLParser extends ExtendedParser {
 				structMember();
 				}
 				}
-				setState(515); 
+				setState(515);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			} while ( ((_la) & ~0x3f) == 0 && ((1L << _la) & 63771670215676L) != 0 || (((_la - 69)) & ~0x3f) == 0 && ((1L << (_la - 69)) & -1L) != 0 || (((_la - 133)) & ~0x3f) == 0 && ((1L << (_la - 133)) & -1L) != 0 || (((_la - 197)) & ~0x3f) == 0 && ((1L << (_la - 197)) & 5242879L) != 0 || _la==IDENTIFIER );
@@ -4873,8 +4876,8 @@ public class GLSLParser extends ExtendedParser {
 	public static class InitializerContext extends ParserRuleContext {
 		public InitializerContext initializer;
 		public List<InitializerContext> initializers = new ArrayList<InitializerContext>();
-		public ExpressionContext expression() {
-			return getRuleContext(ExpressionContext.class,0);
+		public FiniteExpressionContext finiteExpression() {
+			return getRuleContext(FiniteExpressionContext.class,0);
 		}
 		public TerminalNode LBRACE() { return getToken(GLSLParser.LBRACE, 0); }
 		public TerminalNode RBRACE() { return getToken(GLSLParser.RBRACE, 0); }
@@ -5089,7 +5092,7 @@ public class GLSLParser extends ExtendedParser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(534);
-				expression();
+				finiteExpression(0);
 				}
 				break;
 			case LBRACE:
@@ -5118,7 +5121,7 @@ public class GLSLParser extends ExtendedParser {
 							((InitializerContext)_localctx).initializer = initializer();
 							((InitializerContext)_localctx).initializers.add(((InitializerContext)_localctx).initializer);
 							}
-							} 
+							}
 						}
 						setState(543);
 						_errHandler.sync(this);
@@ -5749,7 +5752,7 @@ public class GLSLParser extends ExtendedParser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_caseLabel; }
-	 
+
 		public CaseLabelContext() { }
 		public void copyFrom(CaseLabelContext ctx) {
 			super.copyFrom(ctx);
@@ -6162,7 +6165,7 @@ public class GLSLParser extends ExtendedParser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_jumpStatement; }
-	 
+
 		public JumpStatementContext() { }
 		public void copyFrom(JumpStatementContext ctx) {
 			super.copyFrom(ctx);
@@ -6854,7 +6857,7 @@ public class GLSLParser extends ExtendedParser {
 		"\u0000\u0000\u0210\u0211\u0005\u00f3\u0000\u0000\u0211G\u0001\u0000\u0000"+
 		"\u0000\u0212\u0214\u0005\u010a\u0000\u0000\u0213\u0215\u0003:\u001d\u0000"+
 		"\u0214\u0213\u0001\u0000\u0000\u0000\u0214\u0215\u0001\u0000\u0000\u0000"+
-		"\u0215I\u0001\u0000\u0000\u0000\u0216\u0227\u0003\u0016\u000b\u0000\u0217"+
+		"\u0215I\u0001\u0000\u0000\u0000\u0216\u0227\u0003\u0014\n\u0000\u0217"+
 		"\u0223\u0005\u00f1\u0000\u0000\u0218\u021d\u0003J%\u0000\u0219\u021a\u0005"+
 		"\u00f6\u0000\u0000\u021a\u021c\u0003J%\u0000\u021b\u0219\u0001\u0000\u0000"+
 		"\u0000\u021c\u021f\u0001\u0000\u0000\u0000\u021d\u021b\u0001\u0000\u0000"+

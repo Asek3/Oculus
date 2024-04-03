@@ -1,6 +1,8 @@
 package net.coderbot.iris.pipeline;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import net.coderbot.iris.compat.dh.DHCompat;
+import net.coderbot.iris.features.FeatureFlags;
 import net.coderbot.iris.gbuffer_overrides.matching.SpecialCondition;
 import net.coderbot.iris.gbuffer_overrides.state.RenderTargetStateListener;
 import net.coderbot.iris.gl.texture.TextureType;
@@ -16,7 +18,9 @@ import java.util.List;
 import java.util.OptionalInt;
 
 public interface WorldRenderingPipeline {
-	void beginLevelRendering();
+    void onShadowBufferChange();
+
+    void beginLevelRendering();
 	void renderShadows(LevelRendererAccessor worldRenderer, Camera camera);
 	void addDebugText(List<String> messages);
 	OptionalInt getForcedShadowRenderDistanceChunksForDisplay();
@@ -41,6 +45,7 @@ public interface WorldRenderingPipeline {
 
 	void beginTranslucents();
 	void finalizeLevelRendering();
+	void finalizeGameRendering();
 	void destroy();
 
 	SodiumTerrainPipeline getSodiumTerrainPipeline();
@@ -48,6 +53,7 @@ public interface WorldRenderingPipeline {
 
 	boolean shouldDisableVanillaEntityShadows();
 	boolean shouldDisableDirectionalShading();
+	boolean shouldDisableFrustumCulling();
 	CloudSetting getCloudSetting();
 	boolean shouldRenderUnderwaterOverlay();
 	boolean shouldRenderVignette();
@@ -56,6 +62,9 @@ public interface WorldRenderingPipeline {
 	boolean shouldWriteRainAndSnowToDepthBuffer();
 	ParticleRenderingSettings getParticleRenderingSettings();
 	boolean allowConcurrentCompute();
+	boolean hasFeature(FeatureFlags flags);
 
 	float getSunPathRotation();
+
+    DHCompat getDHCompat();
 }

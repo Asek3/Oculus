@@ -10,13 +10,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.profiling.ProfilerFiller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class FullyBufferedMultiBufferSource extends MultiBufferSource.BufferSource implements MemoryTrackingBuffer, Groupable, WrappingMultiBufferSource {
@@ -55,8 +49,14 @@ public class FullyBufferedMultiBufferSource extends MultiBufferSource.BufferSour
 		this.wrappingFunctionStack = new ArrayList<>();
 	}
 
+	private boolean isReady;
+	private Map<RenderType, List<BufferSegment>> typeToSegment = new HashMap<>();
+	private List<RenderType> renderOrder = new ArrayList<>();
+
 	@Override
 	public VertexConsumer getBuffer(RenderType renderType) {
+		removeReady();
+
 		if (wrappingFunction != null) {
 			renderType = wrappingFunction.apply(renderType);
 		}
@@ -87,13 +87,18 @@ public class FullyBufferedMultiBufferSource extends MultiBufferSource.BufferSour
 		return builders[affinity].getBuffer(renderType);
 	}
 
-	@Override
-	public void endBatch() {
+	private void removeReady() {
+		isReady = false;
+		typeToSegment.clear();
+		renderOrder.clear();
+	}
+
+	public void readyUp() {
+		isReady = true;
+
 		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
 
 		profiler.push("collect");
-
-		Map<RenderType, List<BufferSegment>> typeToSegment = new HashMap<>();
 
 		for (SegmentedBufferBuilder builder : builders) {
 			List<BufferSegment> segments = builder.getSegments();
@@ -105,9 +110,21 @@ public class FullyBufferedMultiBufferSource extends MultiBufferSource.BufferSour
 
 		profiler.popPush("resolve ordering");
 
-		Iterable<RenderType> renderOrder = renderOrderManager.getRenderOrder();
+		renderOrder = renderOrderManager.getRenderOrder();
 
-		profiler.popPush("draw buffers");
+		renderOrderManager.reset();
+		affinities.clear();
+
+		profiler.pop();
+	}
+
+	@Override
+	public void endBatch() {
+		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+
+		if (!isReady) readyUp();
+
+		profiler.push("draw buffers");
 
 		for (RenderType type : renderOrder) {
 			type.setupRenderState();
@@ -124,8 +141,44 @@ public class FullyBufferedMultiBufferSource extends MultiBufferSource.BufferSour
 
 		profiler.popPush("reset");
 
-		renderOrderManager.reset();
-		affinities.clear();
+		removeReady();
+
+		profiler.pop();
+	}
+
+	public void endBatchWithType(TransparencyType transparencyType) {
+		ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+
+		if (!isReady) readyUp();
+
+		profiler.push("draw buffers");
+
+		List<RenderType> types = new ArrayList<>();
+
+		for (RenderType type : renderOrder) {
+			if (((BlendingStateHolder) type).getTransparencyType() != transparencyType) {
+				continue;
+			}
+
+			types.add(type);
+
+			type.setupRenderState();
+
+			renderTypes += 1;
+
+			for (BufferSegment segment : typeToSegment.getOrDefault(type, Collections.emptyList())) {
+				segmentRenderer.drawInner(segment);
+				drawCalls += 1;
+			}
+
+			typeToSegment.remove(type);
+
+			type.clearRenderState();
+		}
+
+		profiler.popPush("reset type " + transparencyType);
+
+		renderOrder.removeAll(types);
 
 		profiler.pop();
 	}

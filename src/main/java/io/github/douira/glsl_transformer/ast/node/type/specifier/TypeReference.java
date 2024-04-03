@@ -56,9 +56,4 @@ public class TypeReference extends TypeSpecifier {
   public TypeReference cloneInto(Root root) {
     return (TypeReference) super.cloneInto(root);
   }
-
-  @Override
-  public TypeReference cloneSeparate() {
-    return (TypeReference) super.cloneSeparate();
-  }
 }

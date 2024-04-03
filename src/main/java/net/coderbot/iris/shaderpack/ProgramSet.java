@@ -1,6 +1,7 @@
 package net.coderbot.iris.shaderpack;
 
 import net.coderbot.iris.Iris;
+import net.coderbot.iris.features.FeatureFlags;
 import net.coderbot.iris.gl.blending.BlendMode;
 import net.coderbot.iris.gl.blending.BlendModeFunction;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class ProgramSet {
+public class ProgramSet implements ProgramSetInterface {
 	private final PackDirectives packDirectives;
 
 	private final ProgramSource shadow;
@@ -23,8 +24,11 @@ public class ProgramSet {
 
 	private final ProgramSource[] shadowcomp;
 	private final ComputeSource[][] shadowCompCompute;
+	private final ProgramSource[] begin;
+	private final ComputeSource[][] beginCompute;
 	private final ProgramSource[] prepare;
 	private final ComputeSource[][] prepareCompute;
+	private final ComputeSource[] setup;
 
 	private final ProgramSource gbuffersBasic;
 	private final ProgramSource gbuffersLine;
@@ -32,6 +36,8 @@ public class ProgramSet {
 	private final ProgramSource gbuffersTextured;
 	private final ProgramSource gbuffersTexturedLit;
 	private final ProgramSource gbuffersTerrain;
+	private final ProgramSource gbuffersTerrainSolid;
+	private final ProgramSource gbuffersTerrainCutout;
 	private ProgramSource gbuffersDamagedBlock;
 	private final ProgramSource gbuffersSkyBasic;
 	private final ProgramSource gbuffersSkyTextured;
@@ -39,10 +45,13 @@ public class ProgramSet {
 	private final ProgramSource gbuffersWeather;
 	private final ProgramSource gbuffersEntities;
 	private final ProgramSource gbuffersEntitiesTrans;
+	private final ProgramSource gbuffersParticles;
+	private final ProgramSource gbuffersParticlesTrans;
 	private final ProgramSource gbuffersEntitiesGlowing;
 	private final ProgramSource gbuffersGlint;
 	private final ProgramSource gbuffersEntityEyes;
 	private final ProgramSource gbuffersBlock;
+	private final ProgramSource gbuffersBlockTrans;
 	private final ProgramSource gbuffersHand;
 
 	private final ProgramSource[] deferred;
@@ -74,58 +83,73 @@ public class ProgramSet {
 		//
 		// - https://github.com/IrisShaders/Iris/issues/483
 		// - https://github.com/IrisShaders/Iris/issues/987
-		this.shadow = readProgramSource(directory, sourceProvider, "shadow", this, shaderProperties,
-				BlendModeOverride.OFF);
-		this.shadowCompute = readComputeArray(directory, sourceProvider, "shadow");
+		boolean readTesselation = pack.hasFeature(FeatureFlags.TESSELATION_SHADERS);
 
-		this.shadowcomp = readProgramArray(directory, sourceProvider, "shadowcomp", shaderProperties);
+		this.shadow = readProgramSource(directory, sourceProvider, "shadow", this, shaderProperties,
+				BlendModeOverride.OFF, readTesselation);
+		this.shadowCompute = readComputeArray(directory, sourceProvider, "shadow", shaderProperties);
+
+		this.shadowcomp = readProgramArray(directory, sourceProvider, "shadowcomp", shaderProperties, readTesselation);
 
 		this.shadowCompCompute = new ComputeSource[shadowcomp.length][];
 		for (int i = 0; i < shadowcomp.length; i++) {
-			this.shadowCompCompute[i] = readComputeArray(directory, sourceProvider, "shadowcomp" + ((i == 0) ? "" : i));
+			this.shadowCompCompute[i] = readComputeArray(directory, sourceProvider, "shadowcomp" + ((i == 0) ? "" : i), shaderProperties);
 		}
 
-		this.prepare = readProgramArray(directory, sourceProvider, "prepare", shaderProperties);
+		this.setup = readProgramArray(directory, sourceProvider, "setup", shaderProperties);
+
+		this.begin = readProgramArray(directory, sourceProvider, "begin", shaderProperties, readTesselation);
+		this.beginCompute = new ComputeSource[begin.length][];
+		for (int i = 0; i < begin.length; i++) {
+			this.beginCompute[i] = readComputeArray(directory, sourceProvider, "begin" + ((i == 0) ? "" : i), shaderProperties);
+		}
+
+		this.prepare = readProgramArray(directory, sourceProvider, "prepare", shaderProperties, readTesselation);
 		this.prepareCompute = new ComputeSource[prepare.length][];
 		for (int i = 0; i < prepare.length; i++) {
-			this.prepareCompute[i] = readComputeArray(directory, sourceProvider, "prepare" + ((i == 0) ? "" : i));
+			this.prepareCompute[i] = readComputeArray(directory, sourceProvider, "prepare" + ((i == 0) ? "" : i), shaderProperties);
 		}
 
-		this.gbuffersBasic = readProgramSource(directory, sourceProvider, "gbuffers_basic", this, shaderProperties);
-		this.gbuffersLine = readProgramSource(directory, sourceProvider, "gbuffers_line", this, shaderProperties);
-		this.gbuffersBeaconBeam = readProgramSource(directory, sourceProvider, "gbuffers_beaconbeam", this, shaderProperties);
-		this.gbuffersTextured = readProgramSource(directory, sourceProvider, "gbuffers_textured", this, shaderProperties);
-		this.gbuffersTexturedLit = readProgramSource(directory, sourceProvider, "gbuffers_textured_lit", this, shaderProperties);
-		this.gbuffersTerrain = readProgramSource(directory, sourceProvider, "gbuffers_terrain", this, shaderProperties);
-		this.gbuffersDamagedBlock = readProgramSource(directory, sourceProvider, "gbuffers_damagedblock", this, shaderProperties);
-		this.gbuffersSkyBasic = readProgramSource(directory, sourceProvider, "gbuffers_skybasic", this, shaderProperties);
-		this.gbuffersSkyTextured = readProgramSource(directory, sourceProvider, "gbuffers_skytextured", this, shaderProperties);
-		this.gbuffersClouds = readProgramSource(directory, sourceProvider, "gbuffers_clouds", this, shaderProperties);
-		this.gbuffersWeather = readProgramSource(directory, sourceProvider, "gbuffers_weather", this, shaderProperties);
-		this.gbuffersEntities = readProgramSource(directory, sourceProvider, "gbuffers_entities", this, shaderProperties);
-		this.gbuffersEntitiesTrans = readProgramSource(directory, sourceProvider, "gbuffers_entities_translucent", this, shaderProperties);
-		this.gbuffersEntitiesGlowing = readProgramSource(directory, sourceProvider, "gbuffers_entities_glowing", this, shaderProperties);
-		this.gbuffersGlint = readProgramSource(directory, sourceProvider, "gbuffers_armor_glint", this, shaderProperties);
-		this.gbuffersEntityEyes = readProgramSource(directory, sourceProvider, "gbuffers_spidereyes", this, shaderProperties);
-		this.gbuffersBlock = readProgramSource(directory, sourceProvider, "gbuffers_block", this, shaderProperties);
-		this.gbuffersHand = readProgramSource(directory, sourceProvider, "gbuffers_hand", this, shaderProperties);
+		this.gbuffersBasic = readProgramSource(directory, sourceProvider, "gbuffers_basic", this, shaderProperties, readTesselation);
+		this.gbuffersLine = readProgramSource(directory, sourceProvider, "gbuffers_line", this, shaderProperties, readTesselation);
+		this.gbuffersBeaconBeam = readProgramSource(directory, sourceProvider, "gbuffers_beaconbeam", this, shaderProperties, readTesselation);
+		this.gbuffersTextured = readProgramSource(directory, sourceProvider, "gbuffers_textured", this, shaderProperties, readTesselation);
+		this.gbuffersTexturedLit = readProgramSource(directory, sourceProvider, "gbuffers_textured_lit", this, shaderProperties, readTesselation);
+		this.gbuffersTerrain = readProgramSource(directory, sourceProvider, "gbuffers_terrain", this, shaderProperties, readTesselation);
+		this.gbuffersTerrainSolid = readProgramSource(directory, sourceProvider, "gbuffers_terrain_solid", this, shaderProperties, readTesselation);
+		this.gbuffersTerrainCutout = readProgramSource(directory, sourceProvider, "gbuffers_terrain_cutout", this, shaderProperties, readTesselation);
+		this.gbuffersDamagedBlock = readProgramSource(directory, sourceProvider, "gbuffers_damagedblock", this, shaderProperties, readTesselation);
+		this.gbuffersSkyBasic = readProgramSource(directory, sourceProvider, "gbuffers_skybasic", this, shaderProperties, readTesselation);
+		this.gbuffersSkyTextured = readProgramSource(directory, sourceProvider, "gbuffers_skytextured", this, shaderProperties, readTesselation);
+		this.gbuffersClouds = readProgramSource(directory, sourceProvider, "gbuffers_clouds", this, shaderProperties, readTesselation);
+		this.gbuffersWeather = readProgramSource(directory, sourceProvider, "gbuffers_weather", this, shaderProperties, readTesselation);
+		this.gbuffersEntities = readProgramSource(directory, sourceProvider, "gbuffers_entities", this, shaderProperties, readTesselation);
+		this.gbuffersEntitiesTrans = readProgramSource(directory, sourceProvider, "gbuffers_entities_translucent", this, shaderProperties, readTesselation);
+		this.gbuffersParticles = readProgramSource(directory, sourceProvider, "gbuffers_particles", this, shaderProperties, readTesselation);
+		this.gbuffersParticlesTrans = readProgramSource(directory, sourceProvider, "gbuffers_particles_translucent", this, shaderProperties, readTesselation);
+		this.gbuffersEntitiesGlowing = readProgramSource(directory, sourceProvider, "gbuffers_entities_glowing", this, shaderProperties, readTesselation);
+		this.gbuffersGlint = readProgramSource(directory, sourceProvider, "gbuffers_armor_glint", this, shaderProperties, readTesselation);
+		this.gbuffersEntityEyes = readProgramSource(directory, sourceProvider, "gbuffers_spidereyes", this, shaderProperties, readTesselation);
+		this.gbuffersBlock = readProgramSource(directory, sourceProvider, "gbuffers_block", this, shaderProperties, readTesselation);
+		this.gbuffersBlockTrans = readProgramSource(directory, sourceProvider, "gbuffers_block_translucent", this, shaderProperties, readTesselation);
+		this.gbuffersHand = readProgramSource(directory, sourceProvider, "gbuffers_hand", this, shaderProperties, readTesselation);
 
-		this.deferred = readProgramArray(directory, sourceProvider, "deferred", shaderProperties);
+		this.deferred = readProgramArray(directory, sourceProvider, "deferred", shaderProperties, readTesselation);
 		this.deferredCompute = new ComputeSource[deferred.length][];
 		for (int i = 0; i < deferred.length; i++) {
-			this.deferredCompute[i] = readComputeArray(directory, sourceProvider, "deferred" + ((i == 0) ? "" : i));
+			this.deferredCompute[i] = readComputeArray(directory, sourceProvider, "deferred" + ((i == 0) ? "" : i), shaderProperties);
 		}
 
-		this.gbuffersWater = readProgramSource(directory, sourceProvider, "gbuffers_water", this, shaderProperties);
-		this.gbuffersHandWater = readProgramSource(directory, sourceProvider, "gbuffers_hand_water", this, shaderProperties);
+		this.gbuffersWater = readProgramSource(directory, sourceProvider, "gbuffers_water", this, shaderProperties, readTesselation);
+		this.gbuffersHandWater = readProgramSource(directory, sourceProvider, "gbuffers_hand_water", this, shaderProperties, readTesselation);
 
-		this.composite = readProgramArray(directory, sourceProvider, "composite", shaderProperties);
+		this.composite = readProgramArray(directory, sourceProvider, "composite", shaderProperties, readTesselation);
 		this.compositeCompute = new ComputeSource[composite.length][];
 		for (int i = 0; i < deferred.length; i++) {
-			this.compositeCompute[i] = readComputeArray(directory, sourceProvider, "composite" + ((i == 0) ? "" : i));
+			this.compositeCompute[i] = readComputeArray(directory, sourceProvider, "composite" + ((i == 0) ? "" : i), shaderProperties);
 		}
-		this.compositeFinal = readProgramSource(directory, sourceProvider, "final", this, shaderProperties);
-		this.finalCompute = readComputeArray(directory, sourceProvider, "final");
+		this.compositeFinal = readProgramSource(directory, sourceProvider, "final", this, shaderProperties, readTesselation);
+		this.finalCompute = readComputeArray(directory, sourceProvider, "final", shaderProperties);
 
 		locateDirectives();
 
@@ -153,28 +177,41 @@ public class ProgramSet {
 
 	private ProgramSource[] readProgramArray(AbsolutePackPath directory,
 											 Function<AbsolutePackPath, String> sourceProvider, String name,
-											 ShaderProperties shaderProperties) {
-		ProgramSource[] programs = new ProgramSource[99];
+											 ShaderProperties shaderProperties, boolean readTesselation) {
+		ProgramSource[] programs = new ProgramSource[100];
 
 		for (int i = 0; i < programs.length; i++) {
 			String suffix = i == 0 ? "" : Integer.toString(i);
 
-			programs[i] = readProgramSource(directory, sourceProvider, name + suffix, this, shaderProperties);
+			programs[i] = readProgramSource(directory, sourceProvider, name + suffix, this, shaderProperties, readTesselation);
+		}
+
+		return programs;
+	}
+
+	private ComputeSource[] readProgramArray(AbsolutePackPath directory,
+											 Function<AbsolutePackPath, String> sourceProvider, String name, ShaderProperties properties) {
+		ComputeSource[] programs = new ComputeSource[100];
+
+		for (int i = 0; i < programs.length; i++) {
+			String suffix = i == 0 ? "" : Integer.toString(i);
+
+			programs[i] = readComputeSource(directory, sourceProvider, name + suffix, this, properties);
 		}
 
 		return programs;
 	}
 
 	private ComputeSource[] readComputeArray(AbsolutePackPath directory,
-											 Function<AbsolutePackPath, String> sourceProvider, String name) {
+											 Function<AbsolutePackPath, String> sourceProvider, String name, ShaderProperties properties) {
 		ComputeSource[] programs = new ComputeSource[27];
 
-		programs[0] = readComputeSource(directory, sourceProvider, name, this);
+		programs[0] = readComputeSource(directory, sourceProvider, name, this, properties);
 
 		for (char c = 'a'; c <= 'z'; ++c) {
 			String suffix = "_" + c;
 
-			programs[c - 96] = readComputeSource(directory, sourceProvider, name + suffix, this);
+			programs[c - 96] = readComputeSource(directory, sourceProvider, name + suffix, this, properties);
 
 			if (programs[c - 96] == null) {
 				break;
@@ -190,14 +227,25 @@ public class ProgramSet {
 
 		programs.add(shadow);
 		programs.addAll(Arrays.asList(shadowcomp));
+		programs.addAll(Arrays.asList(begin));
 		programs.addAll(Arrays.asList(prepare));
 
 		programs.addAll (Arrays.asList(
-				gbuffersBasic, gbuffersBeaconBeam, gbuffersTextured, gbuffersTexturedLit, gbuffersTerrain,
+				gbuffersBasic, gbuffersBeaconBeam, gbuffersTextured, gbuffersTexturedLit, gbuffersTerrain, gbuffersTerrainSolid, gbuffersTerrainCutout,
 				gbuffersDamagedBlock, gbuffersSkyBasic, gbuffersSkyTextured, gbuffersClouds, gbuffersWeather,
-				gbuffersEntities, gbuffersEntitiesTrans, gbuffersEntitiesGlowing, gbuffersGlint, gbuffersEntityEyes, gbuffersBlock,
+				gbuffersEntities, gbuffersEntitiesTrans, gbuffersEntitiesGlowing, gbuffersGlint, gbuffersEntityEyes, gbuffersBlock, gbuffersBlockTrans,
 				gbuffersHand
 		));
+
+		for (ComputeSource computeSource : setup) {
+			if (computeSource != null) {
+				computes.add(computeSource);
+			}
+		}
+
+		for (ComputeSource[] computeSources : beginCompute) {
+			computes.addAll(Arrays.asList(computeSources));
+		}
 
 		for (ComputeSource[] computeSources : compositeCompute) {
 			computes.addAll(Arrays.asList(computeSources));
@@ -266,8 +314,16 @@ public class ProgramSet {
 		return shadowcomp;
 	}
 
+	public ProgramSource[] getBegin() {
+		return begin;
+	}
+
 	public ProgramSource[] getPrepare() {
 		return prepare;
+	}
+
+	public ComputeSource[] getSetup() {
+		return setup;
 	}
 
 	public Optional<ProgramSource> getGbuffersBasic() {
@@ -288,6 +344,14 @@ public class ProgramSet {
 
 	public Optional<ProgramSource> getGbuffersTerrain() {
 		return gbuffersTerrain.requireValid();
+	}
+
+	public Optional<ProgramSource> getGbuffersTerrainSolid() {
+		return gbuffersTerrainSolid.requireValid();
+	}
+
+	public Optional<ProgramSource> getGbuffersTerrainCutout() {
+		return gbuffersTerrainCutout.requireValid();
 	}
 
 	public Optional<ProgramSource> getGbuffersDamagedBlock() {
@@ -318,6 +382,14 @@ public class ProgramSet {
 		return gbuffersEntitiesTrans.requireValid();
 	}
 
+	public Optional<ProgramSource> getGbuffersParticles() {
+		return gbuffersParticles.requireValid();
+	}
+
+	public Optional<ProgramSource> getGbuffersParticlesTrans() {
+		return gbuffersParticlesTrans.requireValid();
+	}
+
 	public Optional<ProgramSource> getGbuffersEntitiesGlowing() {
 		return gbuffersEntitiesGlowing.requireValid();
 	}
@@ -332,6 +404,10 @@ public class ProgramSet {
 
 	public Optional<ProgramSource> getGbuffersBlock() {
 		return gbuffersBlock.requireValid();
+	}
+
+	public Optional<ProgramSource> getGbuffersBlockTrans() {
+		return gbuffersBlockTrans.requireValid();
 	}
 
 	public Optional<ProgramSource> getGbuffersHand() {
@@ -349,11 +425,16 @@ public class ProgramSet {
 			case SkyTextured: return getGbuffersSkyTextured();
 			case Clouds: return getGbuffersClouds();
 			case Terrain: return getGbuffersTerrain();
+			case TerrainSolid: return getGbuffersTerrainSolid();
+			case TerrainCutout: return getGbuffersTerrainCutout();
 			case DamagedBlock: return getGbuffersDamagedBlock();
 			case Block: return getGbuffersBlock();
+			case BlockTrans: return getGbuffersBlockTrans();
 			case BeaconBeam: return getGbuffersBeaconBeam();
 			case Entities: return getGbuffersEntities();
 			case EntitiesTrans: return getGbuffersEntitiesTrans();
+			case Particles: return getGbuffersParticles();
+			case ParticlesTrans: return getGbuffersParticlesTrans();
 			case EntitiesGlowing: return getGbuffersEntitiesGlowing();
 			case ArmorGlint: return getGbuffersGlint();
 			case SpiderEyes: return getGbuffersEntityEyes();
@@ -394,6 +475,10 @@ public class ProgramSet {
 		return shadowCompCompute;
 	}
 
+	public ComputeSource[][] getBeginCompute() {
+		return beginCompute;
+	}
+
 	public ComputeSource[][] getPrepareCompute() {
 		return prepareCompute;
 	}
@@ -420,30 +505,60 @@ public class ProgramSet {
 
 	private static ProgramSource readProgramSource(AbsolutePackPath directory,
 												   Function<AbsolutePackPath, String> sourceProvider, String program,
-												   ProgramSet programSet, ShaderProperties properties) {
-		return readProgramSource(directory, sourceProvider, program, programSet, properties, null);
+												   ProgramSet programSet, ShaderProperties properties, boolean readTesselation) {
+		return readProgramSource(directory, sourceProvider, program, programSet, properties, null, readTesselation);
 	}
 
 	private static ProgramSource readProgramSource(AbsolutePackPath directory,
 												   Function<AbsolutePackPath, String> sourceProvider, String program,
 												   ProgramSet programSet, ShaderProperties properties,
-												   BlendModeOverride defaultBlendModeOverride) {
+												   BlendModeOverride defaultBlendModeOverride, boolean readTesselation) {
 		AbsolutePackPath vertexPath = directory.resolve(program + ".vsh");
 		String vertexSource = sourceProvider.apply(vertexPath);
 
 		AbsolutePackPath geometryPath = directory.resolve(program + ".gsh");
 		String geometrySource = sourceProvider.apply(geometryPath);
 
+		String tessControlSource = null;
+		String tessEvalSource = null;
+
+		if (readTesselation) {
+			AbsolutePackPath tessControlPath = directory.resolve(program + ".tcs");
+			tessControlSource = sourceProvider.apply(tessControlPath);
+
+			AbsolutePackPath tessEvalPath = directory.resolve(program + ".tes");
+			tessEvalSource = sourceProvider.apply(tessEvalPath);
+		}
+
 		AbsolutePackPath fragmentPath = directory.resolve(program + ".fsh");
 		String fragmentSource = sourceProvider.apply(fragmentPath);
 
-		return new ProgramSource(program, vertexSource, geometrySource, fragmentSource, programSet, properties,
+		if (vertexSource == null && fragmentSource != null) {
+			// This is for really old packs that do not use a vertex shader.
+			Iris.logger.warn("Found a program (" + program + ") that has a fragment shader but no vertex shader? This is very legacy behavior and might not work right.");
+			vertexSource = """
+				#version 120
+
+				varying vec4 irs_texCoords[3];
+				varying vec4 irs_Color;
+
+				void main() {
+					gl_Position = ftransform();
+					irs_texCoords[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+					irs_texCoords[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+					irs_texCoords[2] = gl_TextureMatrix[1] * gl_MultiTexCoord2;
+					irs_Color = gl_Color;
+				}
+				""";
+		}
+
+		return new ProgramSource(program, vertexSource, geometrySource, tessControlSource, tessEvalSource, fragmentSource, programSet, properties,
 				defaultBlendModeOverride);
 	}
 
 	private static ComputeSource readComputeSource(AbsolutePackPath directory,
 												   Function<AbsolutePackPath, String> sourceProvider, String program,
-												   ProgramSet programSet) {
+												   ProgramSet programSet, ShaderProperties properties) {
 		AbsolutePackPath computePath = directory.resolve(program + ".csh");
 		String computeSource = sourceProvider.apply(computePath);
 
@@ -451,6 +566,6 @@ public class ProgramSet {
 			return null;
 		}
 
-		return new ComputeSource(program, computeSource, programSet);
+		return new ComputeSource(program, computeSource, programSet, properties);
 	}
 }

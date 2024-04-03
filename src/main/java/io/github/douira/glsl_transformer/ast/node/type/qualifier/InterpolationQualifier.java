@@ -66,9 +66,4 @@ public class InterpolationQualifier extends TypeQualifierPart {
   public InterpolationQualifier cloneInto(Root root) {
     return (InterpolationQualifier) super.cloneInto(root);
   }
-
-  @Override
-  public InterpolationQualifier cloneSeparate() {
-    return (InterpolationQualifier) super.cloneSeparate();
-  }
 }

@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.statement.terminal;
 
 import io.github.douira.glsl_transformer.ast.node.statement.Statement;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public abstract class CaseLabelStatement extends Statement {
   public enum CaseLabelType {
@@ -38,10 +39,5 @@ public abstract class CaseLabelStatement extends Statement {
   @Override
   public CaseLabelStatement cloneInto(Root root) {
     return (CaseLabelStatement) super.cloneInto(root);
-  }
-
-  @Override
-  public CaseLabelStatement cloneSeparate() {
-    return (CaseLabelStatement) super.cloneSeparate();
   }
 }

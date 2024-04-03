@@ -1,5 +1,33 @@
 package net.coderbot.iris.gui.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.coderbot.iris.Iris;
+import net.coderbot.iris.gui.GuiUtil;
+import net.coderbot.iris.gui.NavigationController;
+import net.coderbot.iris.gui.element.ShaderPackOptionList;
+import net.coderbot.iris.gui.element.ShaderPackSelectionList;
+import net.coderbot.iris.gui.element.widget.AbstractElementWidget;
+import net.coderbot.iris.gui.element.widget.CommentedElementWidget;
+import net.coderbot.iris.shaderpack.ShaderPack;
+import net.irisshaders.iris.api.v0.IrisApi;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -14,32 +42,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
-
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.gui.GuiUtil;
-import net.coderbot.iris.gui.NavigationController;
-import net.coderbot.iris.gui.element.ShaderPackOptionList;
-import net.coderbot.iris.gui.element.ShaderPackSelectionList;
-import net.coderbot.iris.gui.element.widget.AbstractElementWidget;
-import net.coderbot.iris.gui.element.widget.CommentedElementWidget;
-import net.coderbot.iris.shaderpack.ShaderPack;
-import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.FormattedCharSequence;
 
 public class ShaderPackScreen extends Screen implements HudHideable {
 	/**
@@ -73,6 +75,7 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 	private boolean dropChanges = false;
 	private static String development = "Development Environment";
 	private MutableComponent developmentComponent;
+	private MutableComponent updateComponent;
 
 	private boolean guiHidden = false;
 	private float guiButtonHoverTimer = 0.0f;
@@ -100,6 +103,16 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 			this.renderBackground(poseStack);
 		} else if (!this.guiHidden) {
 			this.fillGradient(poseStack, 0, 0, width, height, 0x4F232323, 0x4F232323);
+		}
+
+		if (Screen.hasControlDown() && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_D)) {
+			Minecraft.getInstance().setScreen(new ConfirmScreen((option) -> {
+				Iris.setDebug(option);
+				Minecraft.getInstance().setScreen(this);
+			}, new TextComponent("Shader debug mode toggle"),
+				new TextComponent("Debug mode helps investigate problems and shows shader errors. Would you like to enable it?"),
+				new TextComponent("Yes"),
+				new TextComponent("No")));
 		}
 
 		if (!this.guiHidden) {
@@ -153,6 +166,9 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 
 		if (this.developmentComponent != null) {
 			this.font.drawShadow(poseStack, developmentComponent, 2, this.height - 10, 0xFFFFFF);
+			this.font.drawShadow(poseStack, irisTextComponent, 2, this.height - 20, 0xFFFFFF);
+		} else if (this.updateComponent != null) {
+			this.font.drawShadow(poseStack, updateComponent, 2, this.height - 10, 0xFFFFFF);
 			this.font.drawShadow(poseStack, irisTextComponent, 2, this.height - 20, 0xFFFFFF);
 		} else {
 			this.font.drawShadow(poseStack, irisTextComponent, 2, this.height - 10, 0xFFFFFF);

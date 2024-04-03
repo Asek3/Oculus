@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.pipeline.HandRenderer;
 import net.coderbot.iris.pipeline.ShadowRenderer;
@@ -13,23 +12,21 @@ import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.pipeline.newshader.CoreWorldRenderingPipeline;
 import net.coderbot.iris.pipeline.newshader.IrisProgramTypes;
 import net.coderbot.iris.pipeline.newshader.ShaderKey;
-
 import net.irisshaders.iris.api.v0.IrisApi;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
@@ -57,12 +54,26 @@ public class MixinGameRenderer {
 		itemInHandRenderer.renderHandsWithItems(tickDelta, poseStack, bufferSource, localPlayer, light);
 	}
 
-	@Redirect(method = "reloadShaders", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;"))
-	private ArrayList<Program> iris$reloadGeometryShaders() {
-		ArrayList<Program> programs = Lists.newArrayList();
-		programs.addAll(IrisProgramTypes.GEOMETRY.getPrograms().values());
-		return programs;
+	@Inject(method = "renderLevel", at = @At("TAIL"))
+	private void iris$runColorSpace(float pGameRenderer0, long pLong1, PoseStack pPoseStack2, CallbackInfo ci) {
+		Iris.getPipelineManager().getPipeline().ifPresent(WorldRenderingPipeline::finalizeGameRendering);
 	}
+
+    @Redirect(
+        method = "reloadShaders",
+        at = @At(
+            value = "INVOKE",
+            remap = false,
+            target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;"
+        )
+    )
+    private ArrayList<Program> iris$reloadGeometryShaders() {
+        ArrayList<Program> programs = Lists.newArrayList();
+        programs.addAll(IrisProgramTypes.GEOMETRY.getPrograms().values());
+        programs.addAll(IrisProgramTypes.TESS_CONTROL.getPrograms().values());
+        programs.addAll(IrisProgramTypes.TESS_EVAL.getPrograms().values());
+        return programs;
+    }
 
 	//TODO: check cloud phase
 
@@ -164,19 +175,10 @@ public class MixinGameRenderer {
 		}
 	}
 
-	@Inject(method = "getRendertypeCutoutMippedShader", at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideCutoutMippedShader(CallbackInfoReturnable<ShaderInstance> cir) {
-		if (ShadowRenderer.ACTIVE) {
-			// TODO: Wrong program
-			override(ShaderKey.SHADOW_TERRAIN_CUTOUT, cir);
-		} else if (isBlockEntities() || isEntities()) {
-			override(ShaderKey.MOVING_BLOCK, cir);
-		} else if (shouldOverrideShaders()) {
-			override(ShaderKey.TERRAIN_CUTOUT_MIPPED, cir);
-		}
-	}
-
-	@Inject(method = "getRendertypeCutoutShader", at = @At("HEAD"), cancellable = true)
+	@Inject(method = {
+		"getRendertypeCutoutShader",
+		"getRendertypeCutoutMippedShader"
+	}, at = @At("HEAD"), cancellable = true)
 	private static void iris$overrideCutoutShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_TERRAIN_CUTOUT, cir);
@@ -229,6 +231,7 @@ public class MixinGameRenderer {
 		"getRendertypeEntityTranslucentShader",
 		"getRendertypeEntityTranslucentCullShader",
 		"getRendertypeItemEntityTranslucentCullShader",
+		"getRendertypeEntityNoOutlineShader"
 	}, at = @At("HEAD"), cancellable = true)
 	private static void iris$overrideEntityTranslucentShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
@@ -236,16 +239,17 @@ public class MixinGameRenderer {
 		} else if (HandRenderer.INSTANCE.isActive()) {
 			override(HandRenderer.INSTANCE.isRenderingSolid() ? ShaderKey.HAND_CUTOUT_DIFFUSE : ShaderKey.HAND_WATER_DIFFUSE, cir);
 		} else if (isBlockEntities()) {
-			override(ShaderKey.BLOCK_ENTITY_DIFFUSE, cir);
+			override(ShaderKey.BE_TRANSLUCENT, cir);
 		} else if (shouldOverrideShaders()) {
 			override(ShaderKey.ENTITIES_TRANSLUCENT, cir);
 		}
 	}
 
 		@Inject(method = {
-			"getRendertypeEnergySwirlShader"
-	}, at = @At("HEAD"), cancellable = true)
-	private static void iris$overrideEnergySwirlShader(CallbackInfoReturnable<ShaderInstance> cir) {
+			"getRendertypeEnergySwirlShader",
+			"getRendertypeEntityShadowShader"
+		}, at = @At("HEAD"), cancellable = true)
+	private static void iris$overrideEnergySwirlShadowShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			// TODO: Wrong program
 			override(ShaderKey.SHADOW_ENTITIES_CUTOUT, cir);
@@ -274,8 +278,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = {
-			"getRendertypeEntitySolidShader",
-			"getRendertypeEntityNoOutlineShader",
+			"getRendertypeEntitySolidShader"
 	}, at = @At("HEAD"), cancellable = true)
 	private static void iris$overrideEntitySolidDiffuseShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
@@ -291,8 +294,7 @@ public class MixinGameRenderer {
 	}
 
 	@Inject(method = {
-			"getRendertypeWaterMaskShader",
-			"getRendertypeEntityShadowShader"
+			"getRendertypeWaterMaskShader"
 	}, at = @At("HEAD"), cancellable = true)
 	private static void iris$overrideEntitySolidShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {

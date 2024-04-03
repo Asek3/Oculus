@@ -61,9 +61,4 @@ public class StructDeclarator extends InnerASTNode {
   public StructDeclarator cloneInto(Root root) {
     return (StructDeclarator) super.cloneInto(root);
   }
-
-  @Override
-  public StructDeclarator cloneSeparate() {
-    return (StructDeclarator) super.cloneSeparate();
-  }
 }

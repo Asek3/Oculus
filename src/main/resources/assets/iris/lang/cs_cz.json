@@ -8,9 +8,9 @@
   "iris.shaders.reloaded.failure": "Nepodařilo se znovu načíst shadery! Důvod: %s",
   "iris.shaders.toggled.failure": "Nepodařilo se přepnout shadery! Důvod: %s",
   "iris.sodium.failure.title": "Nepodařilo se načíst Oculus!",
-  "iris.sodium.failure.download": "Stáhnout Rubidium",
-  "iris.sodium.failure.reason.notFound": "Pro dobrý výkon vyžaduje Oculus modifikaci Rubidium, která ale není nainstalovaná. Stáhněte si prosím Rubidium, vložte jej do vaší složky mods a restartujte hru.",
-  "iris.sodium.failure.reason.incompatible": "Pro dobrý výkon vyžaduje Oculus modifikaci Rubidium, ale byla nalezena její nekompatibilní verze. Stáhněte si prosím správnou verzi Sodia, vložte jej do vaší složky mods, odeberte nesprávnou verzi a restartujte hru.",
+  "iris.sodium.failure.download": "Stáhnout Embeddium",
+  "iris.sodium.failure.reason.notFound": "Pro dobrý výkon vyžaduje Oculus modifikaci Embeddium, která ale není nainstalovaná. Stáhněte si prosím Embeddium, vložte jej do vaší složky mods a restartujte hru.",
+  "iris.sodium.failure.reason.incompatible": "Pro dobrý výkon vyžaduje Oculus modifikaci Embeddium, ale byla nalezena její nekompatibilní verze. Stáhněte si prosím správnou verzi Sodia, vložte jej do vaší složky mods, odeberte nesprávnou verzi a restartujte hru.",
 
   "options.iris.apply": "Použít",
   "options.iris.refresh": "Obnovit",

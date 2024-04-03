@@ -70,9 +70,4 @@ public abstract class Statement extends InnerASTNode {
   public Statement cloneInto(Root root) {
     return (Statement) super.cloneInto(root);
   }
-
-  @Override
-  public Statement cloneSeparate() {
-    return (Statement) super.cloneSeparate();
-  }
 }

@@ -1,14 +1,9 @@
 package io.github.douira.glsl_transformer.ast.transform;
 
-import java.util.*;
-import java.util.function.*;
-import java.util.regex.*;
-
-import repack.antlr.v4.runtime.*;
-import repack.antlr.v4.runtime.tree.*;
-
-import io.github.douira.glsl_transformer.*;
+import io.github.douira.glsl_transformer.GLSLLexer;
+import io.github.douira.glsl_transformer.GLSLParser;
 import io.github.douira.glsl_transformer.GLSLParser.*;
+import io.github.douira.glsl_transformer.GLSLParserBaseVisitor;
 import io.github.douira.glsl_transformer.ast.node.*;
 import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
 import io.github.douira.glsl_transformer.ast.node.declaration.*;
@@ -19,23 +14,46 @@ import io.github.douira.glsl_transformer.ast.node.expression.unary.*;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.*;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.ExtensionDirective.ExtensionBehavior;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.LayoutDefaults.LayoutMode;
-import io.github.douira.glsl_transformer.ast.node.external_declaration.PragmaDirective.*;
-import io.github.douira.glsl_transformer.ast.node.statement.*;
-import io.github.douira.glsl_transformer.ast.node.statement.loop.*;
-import io.github.douira.glsl_transformer.ast.node.statement.selection.*;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.PragmaDirective.PragmaState;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.PragmaDirective.PragmaType;
+import io.github.douira.glsl_transformer.ast.node.statement.CompoundStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.Statement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.DoWhileLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.ForLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.loop.WhileLoopStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.selection.SelectionStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.selection.SwitchStatement;
 import io.github.douira.glsl_transformer.ast.node.statement.terminal.*;
 import io.github.douira.glsl_transformer.ast.node.type.FullySpecifiedType;
-import io.github.douira.glsl_transformer.ast.node.type.initializer.*;
+import io.github.douira.glsl_transformer.ast.node.type.initializer.ExpressionInitializer;
+import io.github.douira.glsl_transformer.ast.node.type.initializer.Initializer;
+import io.github.douira.glsl_transformer.ast.node.type.initializer.NestedInitializer;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.*;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.InterpolationQualifier.InterpolationType;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.PrecisionQualifier.PrecisionLevel;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.StorageQualifier.StorageType;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.*;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.BuiltinFixedTypeSpecifier.BuiltinType;
-import io.github.douira.glsl_transformer.ast.node.type.struct.*;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructBody;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructDeclarator;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructMember;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructSpecifier;
 import io.github.douira.glsl_transformer.ast.query.Root;
 import io.github.douira.glsl_transformer.util.Type;
 import io.github.douira.glsl_transformer.util.Type.NumberType;
+import repack.antlr.v4.runtime.BufferedTokenStream;
+import repack.antlr.v4.runtime.ParserRuleContext;
+import repack.antlr.v4.runtime.Token;
+import repack.antlr.v4.runtime.tree.ParseTree;
+import repack.antlr.v4.runtime.tree.TerminalNode;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The AST builder is a visitor of the parse tree (not an AST visitor) that
@@ -58,75 +76,59 @@ public class ASTBuilder extends GLSLParserBaseVisitor<ASTNode> {
   }
 
   /**
-   * Builds an AST from the given parse tree with a new root.
-   * 
-   * @param ctx The parse tree
-   * @return The built AST
-   */
-  public static ASTNode build(ParseTree ctx) {
-    return Root.indexNodes(() -> buildInternal(ctx));
-  }
-
-  /**
    * Builds an AST from the given parse tree with the given root.
-   * 
+   *
    * @param rootInstance The root instance
    * @param ctx          The parse tree
    * @return The built AST
    */
   public static ASTNode build(Root rootInstance, ParseTree ctx) {
-    return Root.indexNodes(rootInstance, () -> buildInternal(ctx));
+    return rootInstance.indexNodes(() -> buildInternal(ctx));
   }
 
   /**
-   * Builds an AST of a specific type from the given parse tree with a new root.
-   * 
-   * @param <T>         The type of the parse tree
-   * @param <N>         The type of the AST node
-   * @param ctx         The parse tree
-   * @param visitMethod The build method reference to this class
+   * Builds an AST of a specific type from the given parse tree with a given root.
+   *
+   * @param <T>          The type of the parse tree
+   * @param <N>          The type of the AST node
+   * @param rootInstance The root instance
+   * @param ctx          The parse tree
+   * @param visitMethod  The build method reference to this class
    * @return The built AST
    */
-  public static <T extends ParseTree, N extends ASTNode> N build(
-      T ctx,
-      BiFunction<ASTBuilder, T, N> visitMethod) {
-    return Root.indexNodes(() -> buildInternal(ctx, visitMethod));
-  }
-
   public static <T extends ParseTree, N extends ASTNode> N build(
       Root rootInstance,
       T ctx,
       BiFunction<ASTBuilder, T, N> visitMethod) {
-    return Root.indexNodes(rootInstance, () -> buildInternal(ctx, visitMethod));
+    return rootInstance.indexNodes(() -> buildInternal(ctx, visitMethod));
   }
 
   /**
-   * Builds a subtree that has the same root as the given AST node.
-   * 
-   * @param parentTreeMember The parent tree member
-   * @param ctx              The parse tree
+   * Builds a subtree with the given root.
+   *
+   * @param rootInstance The root instance
+   * @param ctx          The parse tree
    * @return The built AST
    */
-  public static ASTNode buildSubtree(ASTNode parentTreeMember, ParseTree ctx) {
-    return Root.indexNodes(parentTreeMember, () -> buildInternal(ctx));
+  public static ASTNode buildSubtree(Root rootInstance, ParseTree ctx) {
+    return rootInstance.indexNodes(() -> buildInternal(ctx));
   }
 
   /**
-   * Builds a subtree of a specific type that has the same root as the given AST
-   * node.
-   * 
-   * @param <T>              The type of the parse tree
-   * @param <N>              The type of the AST node
-   * @param parentTreeMember The parent tree member
-   * @param ctx              The parse tree
-   * @param visitMethod      The build method reference to this class
+   * Builds a subtree of a specific type with a given root instance.
+   *
+   * @param <T>          The type of the parse tree
+   * @param <N>          The type of the AST node
+   * @param rootInstance The root instance
+   * @param ctx          The parse tree
+   * @param visitMethod  The build method reference to this class
    * @return The built AST
    */
   public static <T extends ParseTree, N extends ASTNode> N buildSubtree(
-      ASTNode parentTreeMember,
+      Root rootInstance,
       T ctx,
       BiFunction<ASTBuilder, T, N> visitMethod) {
-    return Root.indexNodes(parentTreeMember, () -> buildInternal(ctx, visitMethod));
+    return rootInstance.indexNodes(() -> buildInternal(ctx, visitMethod));
   }
 
   private static ASTNode buildInternal(ParseTree ctx) {
@@ -779,7 +781,7 @@ public class ASTBuilder extends GLSLParserBaseVisitor<ASTNode> {
 
   @Override
   public Initializer visitInitializer(InitializerContext ctx) {
-    var expressionContext = ctx.expression();
+    var expressionContext = ctx.finiteExpression();
     if (expressionContext != null) {
       return new ExpressionInitializer(visitExpression(expressionContext));
     }

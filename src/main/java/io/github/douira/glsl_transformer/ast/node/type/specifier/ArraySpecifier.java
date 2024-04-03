@@ -1,12 +1,13 @@
 package io.github.douira.glsl_transformer.ast.node.type.specifier;
 
-import java.util.List;
-import java.util.stream.Stream;
-
 import io.github.douira.glsl_transformer.ast.node.abstract_node.ListASTNode;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 //TODO: any of these expressions can be null
 public class ArraySpecifier extends ListASTNode<Expression> {
@@ -41,10 +42,5 @@ public class ArraySpecifier extends ListASTNode<Expression> {
   @Override
   public ArraySpecifier cloneInto(Root root) {
     return (ArraySpecifier) super.cloneInto(root);
-  }
-
-  @Override
-  public ArraySpecifier cloneSeparate() {
-    return (ArraySpecifier) super.cloneSeparate();
   }
 }

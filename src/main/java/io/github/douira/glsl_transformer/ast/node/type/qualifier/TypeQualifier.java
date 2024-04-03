@@ -40,9 +40,4 @@ public class TypeQualifier extends ListASTNode<TypeQualifierPart> {
   public TypeQualifier cloneInto(Root root) {
     return (TypeQualifier) super.cloneInto(root);
   }
-
-  @Override
-  public TypeQualifier cloneSeparate() {
-    return (TypeQualifier) super.cloneSeparate();
-  }
 }

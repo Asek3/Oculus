@@ -31,9 +31,4 @@ public abstract class TerminalExpression extends Expression {
   public TerminalExpression cloneInto(Root root) {
     return (TerminalExpression) super.cloneInto(root);
   }
-
-  @Override
-  public TerminalExpression cloneSeparate() {
-    return (TerminalExpression) super.cloneSeparate();
-  }
 }

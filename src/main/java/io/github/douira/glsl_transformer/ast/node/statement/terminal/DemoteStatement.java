@@ -26,9 +26,4 @@ public class DemoteStatement extends TerminalStatement {
   public DemoteStatement cloneInto(Root root) {
     return (DemoteStatement) super.cloneInto(root);
   }
-
-  @Override
-  public DemoteStatement cloneSeparate() {
-    return (DemoteStatement) super.cloneSeparate();
-  }
 }

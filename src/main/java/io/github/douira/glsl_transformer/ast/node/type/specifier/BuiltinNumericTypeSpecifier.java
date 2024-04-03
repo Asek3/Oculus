@@ -1,7 +1,8 @@
 package io.github.douira.glsl_transformer.ast.node.type.specifier;
 
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 import io.github.douira.glsl_transformer.util.Type;
 
 public class BuiltinNumericTypeSpecifier extends TypeSpecifier {
@@ -46,10 +47,5 @@ public class BuiltinNumericTypeSpecifier extends TypeSpecifier {
   @Override
   public BuiltinNumericTypeSpecifier cloneInto(Root root) {
     return (BuiltinNumericTypeSpecifier) super.cloneInto(root);
-  }
-
-  @Override
-  public BuiltinNumericTypeSpecifier cloneSeparate() {
-    return (BuiltinNumericTypeSpecifier) super.cloneSeparate();
   }
 }

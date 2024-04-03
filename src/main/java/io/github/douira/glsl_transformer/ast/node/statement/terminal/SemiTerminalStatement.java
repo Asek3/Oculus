@@ -35,9 +35,4 @@ public abstract class SemiTerminalStatement extends Statement {
   public SemiTerminalStatement cloneInto(Root root) {
     return (SemiTerminalStatement) super.cloneInto(root);
   }
-
-  @Override
-  public SemiTerminalStatement cloneSeparate() {
-    return (SemiTerminalStatement) super.cloneSeparate();
-  }
 }

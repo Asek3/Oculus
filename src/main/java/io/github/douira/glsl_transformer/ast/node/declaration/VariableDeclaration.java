@@ -1,6 +1,5 @@
 package io.github.douira.glsl_transformer.ast.node.declaration;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
@@ -31,7 +30,7 @@ public class VariableDeclaration extends Declaration {
     this.typeQualifier = typeQualifier;
   }
 
-  public List<Identifier> getNames() {
+  public ChildNodeList<Identifier> getNames() {
     return names;
   }
 
@@ -65,10 +64,5 @@ public class VariableDeclaration extends Declaration {
   @Override
   public VariableDeclaration cloneInto(Root root) {
     return (VariableDeclaration) super.cloneInto(root);
-  }
-
-  @Override
-  public VariableDeclaration cloneSeparate() {
-    return (VariableDeclaration) super.cloneSeparate();
   }
 }

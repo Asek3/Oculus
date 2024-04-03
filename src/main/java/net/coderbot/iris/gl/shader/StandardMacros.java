@@ -14,14 +14,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -37,7 +30,7 @@ public class StandardMacros {
 		defines.add(new StringPair(key, value));
 	}
 
-	public static Iterable<StringPair> createStandardEnvironmentDefines() {
+	public static ImmutableList<StringPair> createStandardEnvironmentDefines() {
 		ArrayList<StringPair> standardDefines = new ArrayList<>();
 
 		define(standardDefines, "MC_VERSION", getMcVersion());
@@ -46,6 +39,7 @@ public class StandardMacros {
 		define(standardDefines, getOsString());
 		define(standardDefines, getVendor());
 		define(standardDefines, getRenderer());
+		define(standardDefines, "IS_IRIS");
 
 		for (String glExtension : getGlExtensions()) {
 			define(standardDefines, glExtension);
@@ -81,9 +75,9 @@ public class StandardMacros {
 	 */
 	public static String getMcVersion() {
 		String version = SharedConstants.getCurrentVersion().getReleaseTarget();
-			// release target so snapshots are set to the higher version
-			//
-			// For example if we were running iris on 21w07a, getReleaseTarget() would return 1.17
+		// release target so snapshots are set to the higher version
+		//
+		// For example if we were running iris on 21w07a, getReleaseTarget() would return 1.17
 
 		if (version == null) {
 			throw new IllegalStateException("Could not get the current minecraft version!");

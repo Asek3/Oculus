@@ -2,7 +2,8 @@ package io.github.douira.glsl_transformer.ast.node.declaration;
 
 import io.github.douira.glsl_transformer.ast.node.abstract_node.InnerASTNode;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public abstract class Declaration extends InnerASTNode {
   public enum DeclarationType {
@@ -40,10 +41,5 @@ public abstract class Declaration extends InnerASTNode {
   @Override
   public Declaration cloneInto(Root root) {
     return (Declaration) super.cloneInto(root);
-  }
-
-  @Override
-  public Declaration cloneSeparate() {
-    return (Declaration) super.cloneSeparate();
   }
 }

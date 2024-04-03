@@ -26,9 +26,4 @@ public class DiscardStatement extends TerminalStatement {
   public DiscardStatement cloneInto(Root root) {
     return (DiscardStatement) super.cloneInto(root);
   }
-
-  @Override
-  public DiscardStatement cloneSeparate() {
-    return (DiscardStatement) super.cloneSeparate();
-  }
 }

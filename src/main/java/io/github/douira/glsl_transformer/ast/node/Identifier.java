@@ -1,10 +1,9 @@
 package io.github.douira.glsl_transformer.ast.node;
 
-import repack.antlr.v4.runtime.Token;
-
 import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
 import io.github.douira.glsl_transformer.ast.query.Root;
 import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
+import repack.antlr.v4.runtime.Token;
 
 public class Identifier extends ASTNode {
   private String name;
@@ -36,11 +35,13 @@ public class Identifier extends ASTNode {
    * Sets the name of this identifier without performing validation or registering
    * this change in the index. This method should only be called internally. Using
    * it otherwise will lead to inconsistencies.
-   * 
+   *
    * @param name The new name of this identifier.
    */
   public void _setNameInternal(String name) {
+    getRoot().unregisterFastRename(this);
     this.name = name;
+    getRoot().registerFastRename(this);
   }
 
   public static final void validateContents(String str) {
@@ -73,10 +74,5 @@ public class Identifier extends ASTNode {
   @Override
   public Identifier cloneInto(Root root) {
     return (Identifier) super.cloneInto(root);
-  }
-
-  @Override
-  public Identifier cloneSeparate() {
-    return (Identifier) super.cloneSeparate();
   }
 }

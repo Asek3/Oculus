@@ -1,6 +1,5 @@
 package io.github.douira.glsl_transformer.ast.node.statement;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
@@ -16,11 +15,11 @@ public abstract class ManyStatement extends Statement implements ListNode<Statem
   }
 
   @Override
-  public List<Statement> getChildren() {
+  public ChildNodeList<Statement> getChildren() {
     return statements;
   }
 
-  public List<Statement> getStatements() {
+  public ChildNodeList<Statement> getStatements() {
     return statements;
   }
 
@@ -50,10 +49,5 @@ public abstract class ManyStatement extends Statement implements ListNode<Statem
   @Override
   public ManyStatement cloneInto(Root root) {
     return (ManyStatement) super.cloneInto(root);
-  }
-
-  @Override
-  public ManyStatement cloneSeparate() {
-    return (ManyStatement) super.cloneSeparate();
   }
 }

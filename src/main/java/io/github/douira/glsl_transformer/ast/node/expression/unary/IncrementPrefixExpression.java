@@ -40,9 +40,4 @@ public class IncrementPrefixExpression extends UnaryExpression {
   public IncrementPrefixExpression cloneInto(Root root) {
     return (IncrementPrefixExpression) super.cloneInto(root);
   }
-
-  @Override
-  public IncrementPrefixExpression cloneSeparate() {
-    return (IncrementPrefixExpression) super.cloneSeparate();
-  }
 }

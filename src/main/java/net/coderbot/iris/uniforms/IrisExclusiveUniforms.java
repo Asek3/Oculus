@@ -1,7 +1,9 @@
 package net.coderbot.iris.uniforms;
 
+import net.coderbot.iris.JomlConversions;
 import net.coderbot.iris.gl.uniform.UniformHolder;
 import net.coderbot.iris.gl.uniform.UniformUpdateFrequency;
+import net.coderbot.iris.gui.option.IrisVideoSettings;
 import net.coderbot.iris.mixin.DimensionTypeAccessor;
 import net.coderbot.iris.vendored.joml.Math;
 import net.coderbot.iris.vendored.joml.Vector3d;
@@ -9,7 +11,10 @@ import net.coderbot.iris.vendored.joml.Vector3f;
 import net.coderbot.iris.vendored.joml.Vector4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 
@@ -20,17 +25,30 @@ public class IrisExclusiveUniforms {
 	public static void addIrisExclusiveUniforms(UniformHolder uniforms) {
 		WorldInfoUniforms.addWorldInfoUniforms(uniforms);
 
+		uniforms.uniform1i(UniformUpdateFrequency.PER_TICK, "currentColorSpace", () -> IrisVideoSettings.colorSpace.ordinal());
+
 		//All Iris-exclusive uniforms (uniforms which do not exist in either OptiFine or ShadersMod) should be registered here.
 		uniforms.uniform1f(UniformUpdateFrequency.PER_FRAME, "thunderStrength", IrisExclusiveUniforms::getThunderStrength);
 		uniforms.uniform1f(UniformUpdateFrequency.PER_TICK, "currentPlayerHealth", IrisExclusiveUniforms::getCurrentHealth);
 		uniforms.uniform1f(UniformUpdateFrequency.PER_TICK, "maxPlayerHealth", IrisExclusiveUniforms::getMaxHealth);
 		uniforms.uniform1f(UniformUpdateFrequency.PER_TICK, "currentPlayerHunger", IrisExclusiveUniforms::getCurrentHunger);
 		uniforms.uniform1f(UniformUpdateFrequency.PER_TICK, "maxPlayerHunger", () -> 20);
+		uniforms.uniform1f(UniformUpdateFrequency.PER_TICK, "currentPlayerArmor", IrisExclusiveUniforms::getCurrentArmor);
+		uniforms.uniform1f(UniformUpdateFrequency.PER_TICK, "maxPlayerArmor", () -> 50);
 		uniforms.uniform1f(UniformUpdateFrequency.PER_TICK, "currentPlayerAir", IrisExclusiveUniforms::getCurrentAir);
 		uniforms.uniform1f(UniformUpdateFrequency.PER_TICK, "maxPlayerAir", IrisExclusiveUniforms::getMaxAir);
 		uniforms.uniform1b(UniformUpdateFrequency.PER_FRAME, "firstPersonCamera", IrisExclusiveUniforms::isFirstPersonCamera);
 		uniforms.uniform1b(UniformUpdateFrequency.PER_TICK, "isSpectator", IrisExclusiveUniforms::isSpectator);
 		uniforms.uniform3d(UniformUpdateFrequency.PER_FRAME, "eyePosition", IrisExclusiveUniforms::getEyePosition);
+		uniforms.uniform3d(UniformUpdateFrequency.PER_FRAME, "relativeEyePosition", () -> {
+			return CameraUniforms.getUnshiftedCameraPosition().sub(getEyePosition());
+		});
+		uniforms.uniform3d(UniformUpdateFrequency.PER_FRAME, "playerLookVector", () -> {
+			return JomlConversions.fromVec3(Minecraft.getInstance().getCameraEntity().getLookAngle());
+		});
+		uniforms.uniform3d(UniformUpdateFrequency.PER_FRAME, "playerBodyVector", () -> {
+			return JomlConversions.fromVec3(Minecraft.getInstance().getCameraEntity().getForward());
+		});
 		Vector4f zero = new Vector4f(0, 0, 0, 0);
 		uniforms.uniform4f(UniformUpdateFrequency.PER_TICK, "lightningBoltPosition", () -> {
 			if (Minecraft.getInstance().level != null) {
@@ -75,6 +93,14 @@ public class IrisExclusiveUniforms {
 		return (float) Minecraft.getInstance().player.getAirSupply() / (float) Minecraft.getInstance().player.getMaxAirSupply();
 	}
 
+	private static float getCurrentArmor() {
+		if (Minecraft.getInstance().player == null || !Minecraft.getInstance().gameMode.getPlayerMode().isSurvival()) {
+			return -1;
+		}
+
+		return (float) (Minecraft.getInstance().player.getArmorValue() / 50.0f);
+	}
+
 	private static float getMaxAir() {
 		if (Minecraft.getInstance().player == null || !Minecraft.getInstance().gameMode.getPlayerMode().isSurvival()) {
 			return -1;
@@ -90,6 +116,8 @@ public class IrisExclusiveUniforms {
 
 		return Minecraft.getInstance().player.getMaxHealth();
 	}
+
+
 
 	private static boolean isFirstPersonCamera() {
 		// If camera type is not explicitly third-person, assume it's first-person.
@@ -107,17 +135,39 @@ public class IrisExclusiveUniforms {
 
 	private static Vector3d getEyePosition() {
 		Objects.requireNonNull(Minecraft.getInstance().getCameraEntity());
-		return new Vector3d(Minecraft.getInstance().getCameraEntity().getX(), Minecraft.getInstance().getCameraEntity().getEyeY(), Minecraft.getInstance().getCameraEntity().getZ());
+		Vec3 pos = Minecraft.getInstance().getCameraEntity().getEyePosition(CapturedRenderingState.INSTANCE.getTickDelta());
+		return new Vector3d(pos.x, pos.y, pos.z);
 	}
 
 	public static class WorldInfoUniforms {
 		public static void addWorldInfoUniforms(UniformHolder uniforms) {
 			ClientLevel level = Minecraft.getInstance().level;
 			// TODO: Use level.dimensionType() coordinates for 1.18!
-			uniforms.uniform1i(UniformUpdateFrequency.PER_FRAME, "bedrockLevel", () -> 0);
+			uniforms.uniform1i(UniformUpdateFrequency.PER_FRAME, "bedrockLevel", () -> {
+				if (level != null) {
+					return level.dimensionType().minY();
+				} else {
+					return 0;
+				}
+			});
+			uniforms.uniform1f(UniformUpdateFrequency.PER_FRAME, "cloudHeight", () -> {
+				if (level != null) {
+					return level.effects().getCloudHeight();
+				} else {
+					return 192.0;
+				}
+			});
+
 			uniforms.uniform1i(UniformUpdateFrequency.PER_FRAME, "heightLimit", () -> {
 				if (level != null) {
-					return level.getMaxBuildHeight();
+					return level.dimensionType().height();
+				} else {
+					return 256;
+				}
+			});
+			uniforms.uniform1i(UniformUpdateFrequency.PER_FRAME, "logicalHeightLimit", () -> {
+				if (level != null) {
+					return level.dimensionType().logicalHeight();
 				} else {
 					return 256;
 				}

@@ -41,9 +41,4 @@ public class SequenceExpression extends ManyExpression {
   public SequenceExpression cloneInto(Root root) {
     return (SequenceExpression) super.cloneInto(root);
   }
-
-  @Override
-  public SequenceExpression cloneSeparate() {
-    return (SequenceExpression) super.cloneSeparate();
-  }
 }

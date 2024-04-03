@@ -1,6 +1,7 @@
 package io.github.douira.glsl_transformer.ast.traversal;
 
-import io.github.douira.glsl_transformer.ast.node.abstract_node.*;
+import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
+import io.github.douira.glsl_transformer.ast.node.abstract_node.ListNode;
 
 public abstract class ASTVoidVisitor implements ASTVisitor<Void> {
   public void visitVoid(ASTNode node) {

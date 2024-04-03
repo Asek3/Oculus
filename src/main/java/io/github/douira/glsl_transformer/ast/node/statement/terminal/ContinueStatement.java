@@ -26,9 +26,4 @@ public class ContinueStatement extends TerminalStatement {
   public ContinueStatement cloneInto(Root root) {
     return (ContinueStatement) super.cloneInto(root);
   }
-
-  @Override
-  public ContinueStatement cloneSeparate() {
-    return (ContinueStatement) super.cloneSeparate();
-  }
 }

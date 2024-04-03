@@ -1,14 +1,10 @@
 package io.github.douira.glsl_transformer.parser;
 
-import java.util.function.Function;
-
-import repack.antlr.v4.runtime.*;
-
-import io.github.douira.glsl_transformer.GLSLParser;
-import io.github.douira.glsl_transformer.GLSLParser.TranslationUnitContext;
 import io.github.douira.glsl_transformer.ast.data.TypedTreeCache;
 import io.github.douira.glsl_transformer.ast.transform.ASTBuilder;
 import io.github.douira.glsl_transformer.token_filter.TokenFilter;
+import repack.antlr.v4.runtime.BufferedTokenStream;
+import repack.antlr.v4.runtime.ParserRuleContext;
 
 /**
  * The caching parser extends the enhanced parser and returns previous parse
@@ -46,16 +42,10 @@ public class CachingParser extends EnhancedParser {
   }
 
   @Override
-  public TranslationUnitContext parse(String str) {
-    return parse(str, TranslationUnitContext.class, GLSLParser::translationUnit);
-  }
-
-  @Override
   public <C extends ParserRuleContext> C parse(
       String str,
-      Class<C> ruleType,
-      Function<GLSLParser, C> parseMethod) {
-    return parse(str, null, ruleType, parseMethod);
+      ParseShape<C, ?> parseShape) {
+    return parse(str, null, parseShape);
   }
 
   @Override
@@ -63,11 +53,10 @@ public class CachingParser extends EnhancedParser {
   public <C extends ParserRuleContext> C parse(
       String str,
       ParserRuleContext parent,
-      Class<C> ruleType,
-      Function<GLSLParser, C> parseMethod) {
-    var result = parseCache.cachedGet(str, ruleType,
+      ParseShape<C, ?> parseShape) {
+    var result = parseCache.cachedGet(str, parseShape.ruleType,
         () -> {
-          var node = parse(str, parent, parseMethod);
+          var node = parse(str, parent, parseShape.parseMethod);
           return new CacheContents(node, getTokenStream());
         });
     if (result != null) {

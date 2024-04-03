@@ -70,7 +70,7 @@ public class TranslationUnit extends ListASTNode<ExternalDeclaration> {
       ASTInjectionPoint injectionPoint,
       Stream<String> externalDeclarations) {
     injectNodes(injectionPoint,
-        externalDeclarations.map(str -> t.parseExternalDeclaration(this, str)));
+        externalDeclarations.map(str -> t.parseExternalDeclaration(getRoot(), str)));
   }
 
   /**
@@ -88,7 +88,7 @@ public class TranslationUnit extends ListASTNode<ExternalDeclaration> {
       String externalDeclaration) {
     getChildren().add(injectionPoint.getInjectionIndex(this),
         t.parseExternalDeclaration(
-            this,
+            getRoot(),
             externalDeclaration));
   }
 
@@ -105,7 +105,7 @@ public class TranslationUnit extends ListASTNode<ExternalDeclaration> {
       ASTParser t,
       ASTInjectionPoint injectionPoint,
       String... externalDeclarations) {
-    injectNodes(injectionPoint, t.parseExternalDeclarations(this, externalDeclarations));
+    injectNodes(injectionPoint, t.parseExternalDeclarations(getRoot(), externalDeclarations));
   }
 
   public Optional<CompoundStatement> getOneFunctionDefinitionBodyOptional(String functionName) {
@@ -156,19 +156,19 @@ public class TranslationUnit extends ListASTNode<ExternalDeclaration> {
   }
 
   public void prependMainFunctionBody(ASTParser t, String... statements) {
-    prependMainFunctionBody(t.parseStatements(this, statements));
+    prependMainFunctionBody(t.parseStatements(getRoot(), statements));
   }
 
   public void prependMainFunctionBody(ASTParser t, String statement) {
-    prependMainFunctionBody(t.parseStatement(this, statement));
+    prependMainFunctionBody(t.parseStatement(getRoot(), statement));
   }
 
   public void appendMainFunctionBody(ASTParser t, String... statements) {
-    appendMainFunctionBody(t.parseStatements(this, statements));
+    appendMainFunctionBody(t.parseStatements(getRoot(), statements));
   }
 
   public void appendMainFunctionBody(ASTParser t, String statement) {
-    appendMainFunctionBody(t.parseStatement(this, statement));
+    appendMainFunctionBody(t.parseStatement(getRoot(), statement));
   }
 
   public void ensureVersionStatement() {
@@ -200,10 +200,5 @@ public class TranslationUnit extends ListASTNode<ExternalDeclaration> {
   @Override
   public TranslationUnit cloneInto(Root root) {
     return (TranslationUnit) super.cloneInto(root);
-  }
-
-  @Override
-  public TranslationUnit cloneSeparate() {
-    return (TranslationUnit) super.cloneSeparate();
   }
 }

@@ -47,9 +47,4 @@ public abstract class UnaryExpression extends Expression {
   public UnaryExpression cloneInto(Root root) {
     return (UnaryExpression) super.cloneInto(root);
   }
-
-  @Override
-  public UnaryExpression cloneSeparate() {
-    return (UnaryExpression) super.cloneSeparate();
-  }
 }

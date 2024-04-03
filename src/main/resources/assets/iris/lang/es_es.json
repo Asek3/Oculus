@@ -14,9 +14,9 @@
 
   "iris.shaders.toggled.failure": "¡Error al activar shaders! Razón: %s",
   "iris.sodium.failure.title": "¡Oculus no pudo iniciarse!",
-  "iris.sodium.failure.download": "Descarga Rubidium",
-  "iris.sodium.failure.reason.notFound": "Oculus necesita Rubidium para obtener un buen rendimiento, pero no está instalado. Por favor descarga Rubidium, ponlo en tu carpeta de mods, y arranca el juego de nuevo.",
-  "iris.sodium.failure.reason.incompatible": "Oculus necesita Rubidium para obtener un buen rendimiento, pero se encontró una versión incompatible. Por favor descarga la versión correcta de Rubidium, ponla en tu carpeta de mods, quita la versión incorrecta, y arranca el juego de nuevo.",
+  "iris.sodium.failure.download": "Descarga Embeddium",
+  "iris.sodium.failure.reason.notFound": "Oculus necesita Embeddium para obtener un buen rendimiento, pero no está instalado. Por favor descarga Embeddium, ponlo en tu carpeta de mods, y arranca el juego de nuevo.",
+  "iris.sodium.failure.reason.incompatible": "Oculus necesita Embeddium para obtener un buen rendimiento, pero se encontró una versión incompatible. Por favor descarga la versión correcta de Embeddium, ponla en tu carpeta de mods, quita la versión incorrecta, y arranca el juego de nuevo.",
   "iris.unsupported.irisorpc": "Oculus o tu PC",
   "iris.unsupported.iris": "Oculus",
   "iris.unsupported.pc": "tu PC",

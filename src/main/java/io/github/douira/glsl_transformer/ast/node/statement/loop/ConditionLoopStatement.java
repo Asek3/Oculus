@@ -28,9 +28,4 @@ public abstract class ConditionLoopStatement extends LoopStatement {
   public ConditionLoopStatement cloneInto(Root root) {
     return (ConditionLoopStatement) super.cloneInto(root);
   }
-
-  @Override
-  public ConditionLoopStatement cloneSeparate() {
-    return (ConditionLoopStatement) super.cloneSeparate();
-  }
 }

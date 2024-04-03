@@ -1,15 +1,16 @@
 package io.github.douira.glsl_transformer.ast.node.expression.unary;
 
-import java.util.List;
-import java.util.stream.Stream;
-
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
 import io.github.douira.glsl_transformer.ast.node.Identifier;
 import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
-import io.github.douira.glsl_transformer.ast.node.expression.*;
+import io.github.douira.glsl_transformer.ast.node.expression.Expression;
+import io.github.douira.glsl_transformer.ast.node.expression.TerminalExpression;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.TypeSpecifier;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
+
+import java.util.stream.Stream;
 
 public class FunctionCallExpression extends TerminalExpression {
   public enum FunctionReferenceType {
@@ -97,7 +98,7 @@ public class FunctionCallExpression extends TerminalExpression {
     return referenceType == FunctionReferenceType.NAME ? functionName : functionSpecifier;
   }
 
-  public List<Expression> getParameters() {
+  public ChildNodeList<Expression> getParameters() {
     return parameters;
   }
 
@@ -131,10 +132,5 @@ public class FunctionCallExpression extends TerminalExpression {
   @Override
   public FunctionCallExpression cloneInto(Root root) {
     return (FunctionCallExpression) super.cloneInto(root);
-  }
-
-  @Override
-  public FunctionCallExpression cloneSeparate() {
-    return (FunctionCallExpression) super.cloneSeparate();
   }
 }

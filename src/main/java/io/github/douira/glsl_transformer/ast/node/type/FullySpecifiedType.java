@@ -4,7 +4,8 @@ import io.github.douira.glsl_transformer.ast.node.abstract_node.InnerASTNode;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.TypeQualifier;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.TypeSpecifier;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class FullySpecifiedType extends InnerASTNode {
   protected TypeQualifier typeQualifier; // TODO: nullable
@@ -60,10 +61,5 @@ public class FullySpecifiedType extends InnerASTNode {
   @Override
   public FullySpecifiedType cloneInto(Root root) {
     return (FullySpecifiedType) super.cloneInto(root);
-  }
-
-  @Override
-  public FullySpecifiedType cloneSeparate() {
-    return (FullySpecifiedType) super.cloneSeparate();
   }
 }

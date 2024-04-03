@@ -1,14 +1,15 @@
 package io.github.douira.glsl_transformer.ast.data;
 
+import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
+import io.github.douira.glsl_transformer.ast.node.abstract_node.InnerASTNode;
+
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import io.github.douira.glsl_transformer.ast.node.abstract_node.*;
-
 /**
  * A child list that notifies the given parent of child additions.
- * 
+ *
  * Implementation of the more complex RemovalProxyArray list isn't necessary
  * because each child notifies its previous parent of the parent change.
  */
@@ -42,6 +43,23 @@ public class ChildNodeList<Child extends ASTNode> extends ProxyArrayList<Child> 
   @Override
   protected void notifyRemoval(Child removed) {
     removed.detachParent();
+  }
+
+  /**
+   * Returns true if the list is empty or contains only null elements.
+   *
+   * @return true if the list is empty or contains only null elements
+   */
+  public boolean isNullEmpty() {
+    if (isEmpty()) {
+      return true;
+    }
+    for (var child : this) {
+      if (child != null) {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected static <Child extends ASTNode> Consumer<Child> makeChildReplacer(ChildNodeList<Child> list, Child child) {

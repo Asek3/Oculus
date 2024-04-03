@@ -40,9 +40,4 @@ public class ModuloAssignmentExpression extends BinaryExpression {
   public ModuloAssignmentExpression cloneInto(Root root) {
     return (ModuloAssignmentExpression) super.cloneInto(root);
   }
-
-  @Override
-  public ModuloAssignmentExpression cloneSeparate() {
-    return (ModuloAssignmentExpression) super.cloneSeparate();
-  }
 }

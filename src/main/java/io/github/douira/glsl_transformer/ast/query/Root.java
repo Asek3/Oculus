@@ -4,9 +4,10 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
-import io.github.douira.glsl_transformer.ast.node.Identifier;
+import io.github.douira.glsl_transformer.ast.node.*;
 import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
 import io.github.douira.glsl_transformer.ast.node.expression.*;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.ExternalDeclaration;
 import io.github.douira.glsl_transformer.ast.query.index.*;
 import io.github.douira.glsl_transformer.ast.query.match.*;
 import io.github.douira.glsl_transformer.ast.transform.ASTParser;
@@ -34,10 +35,12 @@ public class Root {
    */
   public final IdentifierIndex<?, ?> identifierIndex;
 
-  public static final Supplier<NodeIndex<?>> nodeIndexFactoryDefault = NodeIndex::withUnordered;
-  public static final Supplier<IdentifierIndex<?, ?>> identifierIndexFactoryDefault = IdentifierIndex::withOnlyExact;
-  public static Supplier<NodeIndex<?>> nodeIndexFactory = nodeIndexFactoryDefault;
-  public static Supplier<IdentifierIndex<?, ?>> identifierIndexFactory = identifierIndexFactoryDefault;
+  /**
+   * The external declaration index indexes the external declarations by their
+   * name. Each node may appear multiple times if it contains multiple members
+   * with different names.
+   */
+  public final ExternalDeclarationIndex<?, ?> externalDeclarationIndex;
 
   // internal utility state
   private static Deque<Root> activeBuildRoots = new ArrayDeque<>();
@@ -47,49 +50,118 @@ public class Root {
   /**
    * Constructs a new root with the given node and identifier indexes.
    * 
-   * @param nodeIndex       The node index
-   * @param identifierIndex The identifier index
+   * @param nodeIndex                The node index
+   * @param identifierIndex          The identifier index
+   * @param externalDeclarationIndex The external declaration index
    */
-  public Root(NodeIndex<?> nodeIndex, IdentifierIndex<?, ?> identifierIndex) {
+  public Root(NodeIndex<?> nodeIndex,
+      IdentifierIndex<?, ?> identifierIndex,
+      ExternalDeclarationIndex<?, ?> externalDeclarationIndex) {
     this.nodeIndex = nodeIndex;
     this.identifierIndex = identifierIndex;
-  }
-
-  public Root() {
-    this(nodeIndexFactory.get(), identifierIndexFactory.get());
+    this.externalDeclarationIndex = externalDeclarationIndex;
   }
 
   /**
-   * Constructs a new root with the default node and identifier indexes which have
-   * the least amount of functionality but are also the most efficient.
+   * Returns the identifier index as a prefix identifier index if it is one.
+   * Otherwise, it throws.
+   * 
+   * @return The prefix identifier index
    */
-  public static Root withExactUnordered() {
-    return new Root(NodeIndex.withUnordered(), IdentifierIndex.withOnlyExact());
+  public PrefixIdentifierIndex<?, ?> getPrefixIdentifierIndex() {
+    if (identifierIndex instanceof PrefixIdentifierIndex<?, ?> index) {
+      return index;
+    } else {
+      throw new IllegalStateException("The identifier index is not a prefix index");
+    }
   }
 
-  public static Root withExactOrdered() {
-    return new Root(NodeIndex.withOrdered(), IdentifierIndex.withOnlyExact());
+  public PrefixExternalDeclarationIndex<?, ?> getPrefixExternalDeclarationIndex() {
+    if (externalDeclarationIndex instanceof PrefixExternalDeclarationIndex<?, ?> index) {
+      return index;
+    } else {
+      throw new IllegalStateException("The external declaration index is not a prefix index");
+    }
   }
 
-  public static Root withExactOrderedBoth() {
-    return new Root(NodeIndex.withOrdered(), IdentifierIndex.withOnlyExact(LinkedHashSet::new));
+  /**
+   * Registers the given node with this root.
+   * 
+   * @param node          The node to register
+   * @param isSubtreeRoot Whether the node is the root of a subtree that is being
+   *                      added
+   */
+  public void registerNode(ASTNode node, boolean isSubtreeRoot) {
+    if (nodeIndex != null) {
+      nodeIndex.add(node);
+    }
+    if (identifierIndex != null && node instanceof Identifier identifier) {
+      identifierIndex.add(identifier);
+    }
+    if (externalDeclarationIndex != null) {
+      if (node instanceof ExternalDeclaration externalDeclaration) {
+        externalDeclarationIndex.add(externalDeclaration);
+      } else if (isSubtreeRoot && !(node instanceof TranslationUnit)) {
+        externalDeclarationIndex.notifySubtreeAdd(node);
+      }
+    }
   }
 
-  public static Root withPrefixUnordered() {
-    return new Root(NodeIndex.withUnordered(), PrefixIdentifierIndex.withPrefix());
+  /**
+   * Unregisters the given node from this root.
+   * 
+   * @param node          The node to unregister
+   * @param isSubtreeRoot Whether the node is the root of a subtree that is being
+   *                      removed
+   */
+  public void unregisterNode(ASTNode node, boolean isSubtreeRoot) {
+    if (nodeIndex != null) {
+      nodeIndex.remove(node);
+    }
+    if (identifierIndex != null && node instanceof Identifier identifier) {
+      identifierIndex.remove(identifier);
+    }
+    if (externalDeclarationIndex != null) {
+      if (node instanceof ExternalDeclaration externalDeclaration) {
+        externalDeclarationIndex.remove(externalDeclaration);
+      } else if (isSubtreeRoot && !(node instanceof TranslationUnit)) {
+        externalDeclarationIndex.notifySubtreeRemove(node);
+      }
+    }
   }
 
-  public static Root withPrefixOrdered() {
-    return new Root(NodeIndex.withOrdered(), PrefixIdentifierIndex.withPrefix());
+  public void unregisterIdentifierRename(Identifier identifier) {
+    if (identifierIndex != null) {
+      identifierIndex.remove(identifier);
+    }
+    unregisterFastRename(identifier);
   }
 
-  public static Root withPrefixOrderedBoth() {
-    return new Root(NodeIndex.withOrdered(), PrefixIdentifierIndex.withPrefix(LinkedHashSet::new));
+  public void unregisterFastRename(ASTNode identifier) {
+    if (externalDeclarationIndex != null) {
+      externalDeclarationIndex.notifySubtreeRemove(identifier);
+    }
   }
 
-  public static void resetRootFactories() {
-    nodeIndexFactory = nodeIndexFactoryDefault;
-    identifierIndexFactory = identifierIndexFactoryDefault;
+  public void registerIdentifierRename(Identifier identifier) {
+    if (identifierIndex != null) {
+      identifierIndex.add(identifier);
+    }
+    registerFastRename(identifier);
+  }
+
+  public void registerFastRename(ASTNode identifier) {
+    if (externalDeclarationIndex != null) {
+      externalDeclarationIndex.notifySubtreeAdd(identifier);
+    }
+  }
+
+  private void ensureEmptyNodeList() {
+    if (nodeList == null) {
+      nodeList = new ArrayList<>();
+    } else {
+      nodeList.clear();
+    }
   }
 
   /**
@@ -108,16 +180,14 @@ public class Root {
    * Runs the given consumer with the given root as the active build root.
    * 
    * @param <R>          The return type of the consumer
-   * @param instance     The root to run the consumer with
    * @param rootConsumer The consumer to run
    * @return The return value of the consumer
    */
-  protected static final synchronized <R> R withActiveBuildRoot(
-      Root instance,
+  protected final <R> R withActiveBuildRoot(
       Function<Root, R> rootConsumer) {
-    activeBuildRoots.push(instance);
+    activeBuildRoots.push(this);
     try {
-      return rootConsumer.apply(instance);
+      return rootConsumer.apply(this);
     } finally {
       activeBuildRoots.pop();
     }
@@ -131,43 +201,15 @@ public class Root {
    * another node with the root.
    * 
    * @param <N>      The type of the node to build
-   * @param instance The root to run the builder with
    * @param builder  The builder to run
    * @return The built and registered node
    */
-  public static synchronized <N extends ASTNode> N indexNodes(
-      Root instance, Supplier<N> builder) {
-    return withActiveBuildRoot(instance, root -> {
+  public <N extends ASTNode> N indexNodes(Supplier<N> builder) {
+    return withActiveBuildRoot(root -> {
       var result = builder.get();
-      root.registerNode(result);
+      root.registerNode(result, true);
       return result;
     });
-  }
-
-  /**
-   * Runs the given builder supplier with a new root as the active build root.
-   * 
-   * @param <N>     The type of the node to build
-   * @param builder The builder to run
-   * @return The built and registered node
-   */
-  public static <N extends ASTNode> N indexNodes(
-      Supplier<N> builder) {
-    return indexNodes(new Root(), builder);
-  }
-
-  /**
-   * Runs the given builder supplier with the same root as a given tree node as
-   * the active build root.
-   * 
-   * @param <N>              The type of the node to build
-   * @param parentTreeMember The tree member to get the root from
-   * @param builder          The builder to run
-   * @return The built and registered node
-   */
-  public static <N extends ASTNode> N indexNodes(
-      ASTNode parentTreeMember, Supplier<N> builder) {
-    return indexNodes(parentTreeMember.getRoot(), builder);
   }
 
   /**
@@ -175,34 +217,20 @@ public class Root {
    * used for constructing nodes with children without registering the constructed
    * root node with the root or for registering it manually.
    * 
-   * @param instance The root to use as the active build root
    * @param session  The runnable to run
    */
-  public static synchronized void indexBuildSession(Root instance, Runnable session) {
-    withActiveBuildRoot(instance, root -> {
+  public void indexBuildSession(Runnable session) {
+    withActiveBuildRoot(root -> {
       session.run();
       return null;
     });
   }
 
-  /**
-   * Runs the given runnable with a new root as the active build root.
-   * 
-   * @param session The runnable to run
-   */
-  public static void indexBuildSession(Runnable session) {
-    indexBuildSession(new Root(), session);
-  }
-
-  /**
-   * Runs the given runnable with the same root as a given tree node as the active
-   * build root.
-   * 
-   * @param treeMember The tree member to get the root from
-   * @param session    The runnable to run
-   */
-  public static void indexBuildSession(ASTNode treeMember, Runnable session) {
-    indexBuildSession(treeMember.getRoot(), session);
+  public void indexBuildSession(Consumer<Root> session) {
+    withActiveBuildRoot(root -> {
+      session.accept(root);
+      return null;
+    });
   }
 
   /**
@@ -212,94 +240,16 @@ public class Root {
    * is helpful for constructing trees manually and registering them inline.
    * 
    * @param <N>                The type of the nodes to register
-   * @param instance           the root to register the nodes with
    * @param registererConsumer The consumer to run
    */
-  public static synchronized <N extends ASTNode> void indexSeparateTrees(
-      Root instance, Consumer<Passthrough<N>> registererConsumer) {
-    withActiveBuildRoot(instance, root -> {
-      registererConsumer.accept(Passthrough.of(root::registerNode));
+  public <N extends ASTNode> void indexSeparateTrees(Consumer<Passthrough<N>> registererConsumer) {
+    withActiveBuildRoot(root -> {
+      registererConsumer.accept(node -> {
+        root.registerNode(node, true);
+        return node;
+      });
       return null;
     });
-  }
-
-  /**
-   * Runs the given consumer of a registration pass-through function with a new
-   * root as the active build root.
-   * 
-   * @param <N>        The type of the nodes to register
-   * @param registerer The consumer to run
-   */
-  public static <N extends ASTNode> void indexSeparateTrees(
-      Consumer<Passthrough<N>> registerer) {
-    indexSeparateTrees(new Root(), registerer);
-  }
-
-  /**
-   * Runs the given consumer of a registration pass-through function with the same
-   * root as a given tree node as the active build root.
-   * 
-   * @param <N>        The type of the nodes to register
-   * @param treeMember The tree member to get the root from
-   * @param registerer The consumer to run
-   */
-  public static <N extends ASTNode> void indexSeparateTrees(
-      ASTNode treeMember, Consumer<Passthrough<N>> registerer) {
-    indexSeparateTrees(treeMember.getRoot(), registerer);
-  }
-
-  /**
-   * Returns the identifier index as a prefix identifier index if it is one.
-   * Otherwise, it throws.
-   * 
-   * @return The prefix identifier index
-   */
-  public PrefixIdentifierIndex<?, ?> getPrefixIdentifierIndex() {
-    if (identifierIndex instanceof PrefixIdentifierIndex<?, ?> index) {
-      return index;
-    } else {
-      throw new IllegalStateException("The identifier index is not a prefix index");
-    }
-  }
-
-  /**
-   * Registers the given node with this root.
-   * 
-   * @param node The node to register
-   */
-  public void registerNode(ASTNode node) {
-    nodeIndex.add(node);
-    if (node instanceof Identifier identifier) {
-      identifierIndex.add(identifier);
-    }
-  }
-
-  /**
-   * Unregisters the given node from this root.
-   * 
-   * @param node The node to unregister
-   */
-  public void unregisterNode(ASTNode node) {
-    nodeIndex.remove(node);
-    if (node instanceof Identifier identifier) {
-      identifierIndex.remove(identifier);
-    }
-  }
-
-  public void unregisterIdentifierRename(Identifier identifier) {
-    identifierIndex.remove(identifier);
-  }
-
-  public void registerIdentifierRename(Identifier identifier) {
-    identifierIndex.add(identifier);
-  }
-
-  private void ensureEmptyNodeList() {
-    if (nodeList == null) {
-      nodeList = new ArrayList<>();
-    } else {
-      nodeList.clear();
-    }
   }
 
   /**
@@ -411,7 +361,7 @@ public class Root {
         return;
       }
       parent.replaceByAndDelete(
-          t.parseExpression(identifier, expression));
+          t.parseExpression(identifier.getRoot(), expression));
     });
   }
 
@@ -435,7 +385,7 @@ public class Root {
         return;
       }
       parent.replaceByAndDelete(
-          t.parseExpression(identifier, expression));
+          t.parseExpression(identifier.getRoot(), expression));
       activity = true;
     });
     return activity;
@@ -456,7 +406,7 @@ public class Root {
       String expression) {
     return process(targets, node -> {
       node.replaceByAndDelete(
-          t.parseExpression(node, expression));
+          t.parseExpression(node.getRoot(), expression));
     });
   }
 
@@ -476,7 +426,7 @@ public class Root {
       String expression) {
     for (var node : targets) {
       node.replaceByAndDelete(
-          t.parseExpression(node, expression));
+          t.parseExpression(node.getRoot(), expression));
     }
     return !targets.isEmpty();
   }

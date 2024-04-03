@@ -81,9 +81,4 @@ public class StructSpecifier extends TypeSpecifier {
   public StructSpecifier cloneInto(Root root) {
     return (StructSpecifier) super.cloneInto(root);
   }
-
-  @Override
-  public StructSpecifier cloneSeparate() {
-    return (StructSpecifier) super.cloneSeparate();
-  }
 }

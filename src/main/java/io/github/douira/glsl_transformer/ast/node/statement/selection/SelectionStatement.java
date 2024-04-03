@@ -84,9 +84,4 @@ public class SelectionStatement extends SemiTerminalStatement {
   public SelectionStatement cloneInto(Root root) {
     return (SelectionStatement) super.cloneInto(root);
   }
-
-  @Override
-  public SelectionStatement cloneSeparate() {
-    return (SelectionStatement) super.cloneSeparate();
-  }
 }

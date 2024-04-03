@@ -5,7 +5,8 @@ import io.github.douira.glsl_transformer.ast.node.abstract_node.InnerASTNode;
 import io.github.douira.glsl_transformer.ast.node.type.initializer.Initializer;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.ArraySpecifier;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class DeclarationMember extends InnerASTNode {
   protected Identifier name;
@@ -82,10 +83,5 @@ public class DeclarationMember extends InnerASTNode {
   @Override
   public DeclarationMember cloneInto(Root root) {
     return (DeclarationMember) super.cloneInto(root);
-  }
-
-  @Override
-  public DeclarationMember cloneSeparate() {
-    return (DeclarationMember) super.cloneSeparate();
   }
 }

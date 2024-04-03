@@ -1,9 +1,10 @@
 package io.github.douira.glsl_transformer.ast.transform;
 
-import java.util.EnumMap;
-import java.util.function.*;
-
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
+
+import java.util.EnumMap;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class EnumASTTransformer<J extends JobParameters, E extends Enum<E>>
     extends GroupedASTTransformer<J, E, EnumMap<E, String>, EnumMap<E, TranslationUnit>> {

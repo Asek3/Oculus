@@ -8,7 +8,7 @@ import net.coderbot.iris.gl.blending.AlphaTest;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
 import net.coderbot.iris.gl.blending.BufferBlendOverride;
 import net.coderbot.iris.gl.framebuffer.GlFramebuffer;
-import net.coderbot.iris.pipeline.PatchedShaderPrinter;
+import net.coderbot.iris.pipeline.ShaderPrinter;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.pipeline.newshader.fallback.FallbackShader;
 import net.coderbot.iris.pipeline.newshader.fallback.ShaderSynthesizer;
@@ -42,17 +42,21 @@ public class NewShaderTests {
 										GlFramebuffer writingToAfterTranslucent, GlFramebuffer baseline, AlphaTest fallbackAlpha,
 										VertexFormat vertexFormat, ShaderAttributeInputs inputs, FrameUpdateNotifier updateNotifier,
 										NewWorldRenderingPipeline parent, Supplier<ImmutableSet<Integer>> flipped, FogMode fogMode, boolean isIntensity,
-										boolean isFullbright, boolean isShadowPass, CustomUniforms customUniforms) throws IOException {
+										boolean isFullbright, boolean isShadowPass, boolean isLines, CustomUniforms customUniforms) throws IOException {
 		AlphaTest alpha = source.getDirectives().getAlphaTestOverride().orElse(fallbackAlpha);
 		BlendModeOverride blendModeOverride = source.getDirectives().getBlendModeOverride().orElse(programId.getBlendModeOverride());
 
 		Map<PatchShaderType, String> transformed = TransformPatcher.patchVanilla(
 			source.getVertexSource().orElseThrow(RuntimeException::new),
 			source.getGeometrySource().orElse(null),
+			source.getTessControlSource().orElse(null),
+			source.getTessEvalSource().orElse(null),
 			source.getFragmentSource().orElseThrow(RuntimeException::new),
-			alpha, true, inputs, pipeline.getTextureMap());
+			alpha, isLines, true, inputs, pipeline.getTextureMap());
 		String vertex = transformed.get(PatchShaderType.VERTEX);
 		String geometry = transformed.get(PatchShaderType.GEOMETRY);
+		String tessControl = transformed.get(PatchShaderType.TESS_CONTROL);
+		String tessEval = transformed.get(PatchShaderType.TESS_EVAL);
 		String fragment = transformed.get(PatchShaderType.FRAGMENT);
 
 		StringBuilder shaderJson = new StringBuilder("{\n" +
@@ -88,9 +92,9 @@ public class NewShaderTests {
 
 		String shaderJsonString = shaderJson.toString();
 
-		PatchedShaderPrinter.debugPatchedShaders(source.getName(), vertex, geometry, fragment, shaderJsonString);
+		ShaderPrinter.printProgram(name).addSources(transformed).addJson(shaderJsonString).print();
 
-		ResourceProvider shaderResourceFactory = new IrisProgramResourceFactory(shaderJsonString, vertex, geometry, fragment);
+		ResourceProvider shaderResourceFactory = new IrisProgramResourceFactory(shaderJsonString, vertex, geometry, tessControl, tessEval, fragment);
 
 		List<BufferBlendOverride> overrides = new ArrayList<>();
 		source.getDirectives().getBufferBlendOverrides().forEach(information -> {
@@ -100,7 +104,7 @@ public class NewShaderTests {
 			}
 		});
 
-		return new ExtendedShader(shaderResourceFactory, name, vertexFormat, writingToBeforeTranslucent, writingToAfterTranslucent, baseline, blendModeOverride, alpha, uniforms -> {
+		return new ExtendedShader(shaderResourceFactory, name, vertexFormat, tessControl != null || tessEval != null, writingToBeforeTranslucent, writingToAfterTranslucent, baseline, blendModeOverride, alpha, uniforms -> {
 			CommonUniforms.addDynamicUniforms(uniforms, FogMode.PER_VERTEX);
 			customUniforms.assignTo(uniforms);
 			//SamplerUniforms.addWorldSamplerUniforms(uniforms);
@@ -116,8 +120,8 @@ public class NewShaderTests {
 												GlFramebuffer writingToAfterTranslucent, AlphaTest alpha,
 												VertexFormat vertexFormat, BlendModeOverride blendModeOverride,
 												NewWorldRenderingPipeline parent, FogMode fogMode, boolean entityLighting,
-												boolean intensityTex, boolean isFullbright) throws IOException {
-		ShaderAttributeInputs inputs = new ShaderAttributeInputs(vertexFormat, isFullbright);
+												boolean isGlint, boolean isText, boolean intensityTex, boolean isFullbright) throws IOException {
+		ShaderAttributeInputs inputs = new ShaderAttributeInputs(vertexFormat, isFullbright, false, isGlint, isText);
 
 		// TODO: Is this check sound in newer versions?
 		boolean isLeash = vertexFormat == DefaultVertexFormat.POSITION_COLOR_LIGHTMAP;
@@ -160,9 +164,13 @@ public class NewShaderTests {
 			"    ]\n" +
 			"}";
 
-		PatchedShaderPrinter.debugPatchedShaders(name, vertex, null, fragment, shaderJsonString);
+		ShaderPrinter.printProgram(name)
+			.addSource(PatchShaderType.VERTEX, vertex)
+			.addSource(PatchShaderType.FRAGMENT, fragment)
+			.addJson(shaderJsonString)
+			.print();
 
-		ResourceProvider shaderResourceFactory = new IrisProgramResourceFactory(shaderJsonString, vertex, null, fragment);
+		ResourceProvider shaderResourceFactory = new IrisProgramResourceFactory(shaderJsonString, vertex, null, null, null, fragment);
 
 		return new FallbackShader(shaderResourceFactory, name, vertexFormat, writingToBeforeTranslucent,
 			writingToAfterTranslucent, blendModeOverride, alpha.getReference(), parent);
@@ -172,12 +180,16 @@ public class NewShaderTests {
 		private final String json;
 		private final String vertex;
 		private final String geometry;
+		private final String tessControl;
+		private final String tessEval;
 		private final String fragment;
 
-		public IrisProgramResourceFactory(String json, String vertex, String geometry, String fragment) {
+		public IrisProgramResourceFactory(String json, String vertex, String geometry, String tessControl, String tessEval, String fragment) {
 			this.json = json;
 			this.vertex = vertex;
 			this.geometry = geometry;
+			this.tessControl = tessControl;
+			this.tessEval = tessEval;
 			this.fragment = fragment;
 		}
 
@@ -194,6 +206,16 @@ public class NewShaderTests {
 					return null;
 				}
 				return new StringResource(id, geometry);
+			} else if (path.endsWith("tcs")) {
+				if (tessControl == null) {
+					return null;
+				}
+				return new StringResource(id, tessControl);
+			} else if (path.endsWith("tes")) {
+				if (tessEval == null) {
+					return null;
+				}
+				return new StringResource(id, tessEval);
 			} else if (path.endsWith("fsh")) {
 				return new StringResource(id, fragment);
 			}

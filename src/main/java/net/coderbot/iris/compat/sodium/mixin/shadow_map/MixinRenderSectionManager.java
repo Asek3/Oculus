@@ -10,17 +10,13 @@ import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSectionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
 import me.jellysquid.mods.sodium.client.util.frustum.Frustum;
+import net.coderbot.iris.compat.sodium.impl.shadow_map.SwappableRenderSectionManager;
 import net.coderbot.iris.pipeline.ShadowRenderer;
 import net.coderbot.iris.shadows.ShadowRenderingState;
-import net.coderbot.iris.compat.sodium.impl.shadow_map.SwappableRenderSectionManager;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -34,7 +30,7 @@ import java.util.Iterator;
  * Modifies {@link RenderSectionManager} to support maintaining a separate visibility list for the shadow camera, as well
  * as disabling chunk rebuilds when computing visibility for the shadow camera.
  */
-@Mixin(RenderSectionManager.class)
+@Mixin(value = RenderSectionManager.class, remap = false)
 public class MixinRenderSectionManager implements SwappableRenderSectionManager {
     @Shadow(remap = false)
     @Final
@@ -97,7 +93,7 @@ public class MixinRenderSectionManager implements SwappableRenderSectionManager 
         needsUpdateSwap = needsUpdateTmp;
     }
 
-    @Inject(method = "update", at = @At("RETURN"), remap = false)
+    @Inject(method = "update", at = @At("RETURN"))
 	private void iris$captureVisibleBlockEntities(Camera camera, Frustum frustum, int frame, boolean spectator, CallbackInfo ci) {
 		if (ShadowRenderingState.areShadowsCurrentlyBeingRendered()) {
 			ShadowRenderer.visibleBlockEntities = visibleBlockEntities;

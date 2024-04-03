@@ -2,11 +2,9 @@ package io.github.douira.glsl_transformer.ast.transform;
 
 import java.util.function.*;
 
-import repack.antlr.v4.runtime.RecognitionException;
-
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
 import io.github.douira.glsl_transformer.ast.print.ASTPrinter;
-import io.github.douira.glsl_transformer.ast.query.Root;
+import io.github.douira.glsl_transformer.ast.query.*;
 import io.github.douira.glsl_transformer.util.TriConsumer;
 
 /**
@@ -66,8 +64,8 @@ public class SingleASTTransformer<J extends JobParameters> extends ASTTransforme
   }
 
   @Override
-  public String transform(String str) throws RecognitionException {
-    var translationUnit = parseTranslationUnit(str);
+  public String transform(RootSupplier rootSupplier, String str) {
+    var translationUnit = parseTranslationUnit(rootSupplier, str);
     transformation.accept(translationUnit);
     return ASTPrinter.print(getPrintType(), translationUnit);
   }

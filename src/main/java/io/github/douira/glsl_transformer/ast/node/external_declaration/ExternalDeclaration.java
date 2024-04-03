@@ -3,7 +3,8 @@ package io.github.douira.glsl_transformer.ast.node.external_declaration;
 import io.github.douira.glsl_transformer.ast.node.abstract_node.InnerASTNode;
 import io.github.douira.glsl_transformer.ast.query.Root;
 import io.github.douira.glsl_transformer.ast.transform.ASTBuilder;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public abstract class ExternalDeclaration extends InnerASTNode {
   public ExternalDeclaration() {
@@ -13,10 +14,10 @@ public abstract class ExternalDeclaration extends InnerASTNode {
   public enum ExternalDeclarationType {
     FUNCTION_DEFINITION,
     DECLARATION,
-    PRAGMA_STATEMENT,
-    EXTENSION_STATEMENT,
-    CUSTOM_DIRECTIVE_STATEMENT,
-    INCLUDE_STATEMENT,
+    PRAGMA_DIRECTIVE,
+    EXTENSION_DIRECTIVE,
+    CUSTOM_DIRECTIVE,
+    INCLUDE_DIRECTIVE,
     LAYOUT_DEFAULTS,
     EMPTY_DECLARATION
   }
@@ -48,10 +49,5 @@ public abstract class ExternalDeclaration extends InnerASTNode {
   @Override
   public ExternalDeclaration cloneInto(Root root) {
     return (ExternalDeclaration) super.cloneInto(root);
-  }
-
-  @Override
-  public ExternalDeclaration cloneSeparate() {
-    return (ExternalDeclaration) super.cloneSeparate();
   }
 }

@@ -6,6 +6,7 @@ import io.github.douira.glsl_transformer.ast.transform.ASTInjectionPoint;
 import io.github.douira.glsl_transformer.ast.transform.ASTParser;
 import net.coderbot.iris.gl.shader.ShaderType;
 import net.coderbot.iris.pipeline.newshader.AlphaTests;
+import net.coderbot.iris.pipeline.transform.PatchShaderType;
 import net.coderbot.iris.pipeline.transform.parameter.VanillaParameters;
 
 public class VanillaTransformer {
@@ -17,10 +18,13 @@ public class VanillaTransformer {
 		// this happens before common to make sure the renaming of attributes is done on
 		// attribute inserted by this
 		if (parameters.inputs.hasOverlay()) {
-			AttributeTransformer.patchOverlayColor(t, tree, root, parameters);
+			if (!parameters.inputs.isText()) {
+				AttributeTransformer.patchOverlayColor(t, tree, root, parameters);
+			}
+			AttributeTransformer.patchEntityId(t, tree, root, parameters);
 		}
 
-		CommonTransformer.transform(t, tree, root, parameters);
+		CommonTransformer.transform(t, tree, root, parameters, false);
 
 		if (parameters.type.glShaderType == ShaderType.VERTEX) {
 			// Alias of gl_MultiTexCoord1 on 1.15+ for OptiFine
@@ -58,7 +62,7 @@ public class VanillaTransformer {
 		tree.parseAndInjectNode(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
 				"uniform vec4 iris_ColorModulator;");
 
-		if (parameters.inputs.hasColor()) {
+		if (parameters.inputs.hasColor() && parameters.type == PatchShaderType.VERTEX) {
 			// TODO: Handle the fragment / geometry shader here
 			if (parameters.alpha == AlphaTests.VERTEX_ALPHA) {
 				root.replaceReferenceExpressions(t, "gl_Color",

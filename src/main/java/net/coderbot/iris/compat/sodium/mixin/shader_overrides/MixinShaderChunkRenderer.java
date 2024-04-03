@@ -2,16 +2,12 @@ package net.coderbot.iris.compat.sodium.mixin.shader_overrides;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
-import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
-import me.jellysquid.mods.sodium.client.gl.shader.GlShader;
-import me.jellysquid.mods.sodium.client.gl.shader.ShaderConstants;
-import me.jellysquid.mods.sodium.client.gl.shader.ShaderLoader;
-import me.jellysquid.mods.sodium.client.gl.shader.ShaderParser;
-import me.jellysquid.mods.sodium.client.gl.shader.ShaderType;
+import me.jellysquid.mods.sodium.client.gl.shader.*;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.ShaderChunkRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderInterface;
+import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkProgramOverrides;
 import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkShaderInterface;
 import net.coderbot.iris.compat.sodium.impl.shader_overrides.ShaderChunkRendererExt;
 import net.coderbot.iris.compat.sodium.impl.vertex_format.IrisModelVertexFormats;
@@ -20,7 +16,6 @@ import net.coderbot.iris.gl.program.ProgramUniforms;
 import net.coderbot.iris.shaderpack.transform.StringTransformations;
 import net.coderbot.iris.shaderpack.transform.Transformations;
 import net.coderbot.iris.shadows.ShadowRenderingState;
-import net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkProgramOverrides;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,12 +26,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
-
 /**
  * Overrides shaders in {@link ShaderChunkRenderer} with our own as needed.
  */
-@Mixin(ShaderChunkRenderer.class)
+@Mixin(value = ShaderChunkRenderer.class, remap = false)
 public class MixinShaderChunkRenderer implements ShaderChunkRendererExt {
     @Unique
     private IrisChunkProgramOverrides irisChunkProgramOverrides;
@@ -56,17 +49,20 @@ public class MixinShaderChunkRenderer implements ShaderChunkRendererExt {
         irisChunkProgramOverrides = new IrisChunkProgramOverrides();
     }
 
-	@Redirect(method = "createShader", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/gl/shader/ShaderLoader;loadShader(Lme/jellysquid/mods/sodium/client/gl/shader/ShaderType;Lnet/minecraft/resources/ResourceLocation;Lme/jellysquid/mods/sodium/client/gl/shader/ShaderConstants;)Lme/jellysquid/mods/sodium/client/gl/shader/GlShader;", ordinal = 0), remap = false)
+	@Redirect(method = "createShader", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/gl/shader/ShaderLoader;loadShader(Lme/jellysquid/mods/sodium/client/gl/shader/ShaderType;Lnet/minecraft/resources/ResourceLocation;Lme/jellysquid/mods/sodium/client/gl/shader/ShaderConstants;)Lme/jellysquid/mods/sodium/client/gl/shader/GlShader;", ordinal = 0))
 	private GlShader iris$redirectOriginalShader(ShaderType type, ResourceLocation name, ShaderConstants constants) {
 		if (this.vertexType == IrisModelVertexFormats.MODEL_VERTEX_XHFP) {
-			String shader = ShaderLoader.getShaderSource(name);
+			String shader = ShaderParser.parseShader(ShaderLoader.getShaderSource(name), constants);
+			shader = shader.replace("in vec2 a_LightCoord", "in ivec2 a_LightCoord");
+			shader = shader.replace("vec2 _vert_tex_light_coord", "ivec2 _vert_tex_light_coord");
 			shader = shader.replace("v_LightCoord = _vert_tex_light_coord", "v_LightCoord = (iris_LightmapTextureMatrix * vec4(_vert_tex_light_coord, 0, 1)).xy");
 
 			StringTransformations transformations = new StringTransformations(shader);
 
 			transformations.injectLine(Transformations.InjectionPoint.BEFORE_CODE, "mat4 iris_LightmapTextureMatrix = mat4(vec4(0.00390625, 0.0, 0.0, 0.0), vec4(0.0, 0.00390625, 0.0, 0.0), vec4(0.0, 0.0, 0.00390625, 0.0), vec4(0.03125, 0.03125, 0.03125, 1.0));");
 
-			return new GlShader(type, name, ShaderParser.parseShader(transformations.toString(), constants));
+			// Iris.logger.warn(transformations.toString());
+			return new GlShader(type, name, transformations.toString());
 		} else {
 			return ShaderLoader.loadShader(type, name, constants);
 		}

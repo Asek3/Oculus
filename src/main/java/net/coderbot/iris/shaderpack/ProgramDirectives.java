@@ -11,6 +11,7 @@ import net.coderbot.iris.gl.blending.AlphaTest;
 import net.coderbot.iris.gl.blending.BlendMode;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
 import net.coderbot.iris.gl.blending.BufferBlendInformation;
+import net.coderbot.iris.gl.framebuffer.ViewportData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -24,7 +25,7 @@ public class ProgramDirectives {
 	private static final ImmutableList<String> LEGACY_RENDER_TARGETS = PackRenderTargetDirectives.LEGACY_RENDER_TARGETS;
 
 	private final int[] drawBuffers;
-	private final float viewportScale;
+	private final ViewportData viewportScale;
 	@Nullable
 	private final AlphaTest alphaTestOverride;
 
@@ -32,8 +33,9 @@ public class ProgramDirectives {
 	private final List<BufferBlendInformation> bufferBlendInformations;
 	private final ImmutableSet<Integer> mipmappedBuffers;
 	private final ImmutableMap<Integer, Boolean> explicitFlips;
+	private boolean unknownDrawBuffers;
 
-	private ProgramDirectives(int[] drawBuffers, float viewportScale, @Nullable AlphaTest alphaTestOverride,
+	private ProgramDirectives(int[] drawBuffers, ViewportData viewportScale, @Nullable AlphaTest alphaTestOverride,
 							  Optional<BlendModeOverride> blendModeOverride, List<BufferBlendInformation> bufferBlendInformations, ImmutableSet<Integer> mipmappedBuffers,
 							  ImmutableMap<Integer, Boolean> explicitFlips) {
 		this.drawBuffers = drawBuffers;
@@ -43,6 +45,7 @@ public class ProgramDirectives {
 		this.bufferBlendInformations = bufferBlendInformations;
 		this.mipmappedBuffers = mipmappedBuffers;
 		this.explicitFlips = explicitFlips;
+		this.unknownDrawBuffers = false;
 	}
 
 	ProgramDirectives(ProgramSource source, ShaderProperties properties, Set<Integer> supportedRenderTargets,
@@ -66,10 +69,13 @@ public class ProgramDirectives {
 			} else {
 				throw new IllegalStateException("Unhandled comment directive type!");
 			}
-		}).orElse(new int[] { 0 });
+		}).orElseGet(() -> {
+			unknownDrawBuffers = true;
+			return new int[] { 0 };
+		});
 
 		if (properties != null) {
-			viewportScale = properties.getViewportScaleOverrides().getOrDefault(source.getName(), 1.0f);
+			viewportScale = properties.getViewportScaleOverrides().getOrDefault(source.getName(), ViewportData.defaultValue());
 			alphaTestOverride = properties.getAlphaTestOverrides().get(source.getName());
 
 			BlendModeOverride blendModeOverride = properties.getBlendModeOverrides().get(source.getName());
@@ -79,7 +85,7 @@ public class ProgramDirectives {
 
 			explicitFlips = source.getParent().getPackDirectives().getExplicitFlips(source.getName());
 		} else {
-			viewportScale = 1.0f;
+			viewportScale = ViewportData.defaultValue();
 			alphaTestOverride = null;
 			blendModeOverride = Optional.ofNullable(defaultBlendOverride);
 			bufferBlendInformations = Collections.emptyList();
@@ -140,8 +146,8 @@ public class ProgramDirectives {
 
 	private static int[] parseDigitList(String digitListString) {
 		return Arrays.stream(digitListString.split(","))
-				.mapToInt(Integer::parseInt)
-				.toArray();
+					 .mapToInt(Integer::parseInt)
+					 .toArray();
 	}
 
 	private static Optional<CommentDirective> getAppliedDirective(Optional<CommentDirective> optionalDrawbuffersDirective, Optional<CommentDirective> optionalRendertargetsDirective) {
@@ -164,7 +170,11 @@ public class ProgramDirectives {
 		return drawBuffers;
 	}
 
-	public float getViewportScale() {
+	public boolean hasUnknownDrawBuffers() {
+		return unknownDrawBuffers;
+	}
+
+	public ViewportData getViewportScale() {
 		return viewportScale;
 	}
 

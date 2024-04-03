@@ -70,9 +70,4 @@ public class SwitchStatement extends Statement {
   public SwitchStatement cloneInto(Root root) {
     return (SwitchStatement) super.cloneInto(root);
   }
-
-  @Override
-  public SwitchStatement cloneSeparate() {
-    return (SwitchStatement) super.cloneSeparate();
-  }
 }

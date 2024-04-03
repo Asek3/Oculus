@@ -42,9 +42,4 @@ public class VersionStatement extends ASTNode {
   public VersionStatement cloneInto(Root root) {
     return (VersionStatement) super.cloneInto(root);
   }
-
-  @Override
-  public VersionStatement cloneSeparate() {
-    return (VersionStatement) super.cloneSeparate();
-  }
 }

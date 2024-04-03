@@ -40,9 +40,4 @@ public class RightShiftExpression extends BinaryExpression {
   public RightShiftExpression cloneInto(Root root) {
     return (RightShiftExpression) super.cloneInto(root);
   }
-
-  @Override
-  public RightShiftExpression cloneSeparate() {
-    return (RightShiftExpression) super.cloneSeparate();
-  }
 }

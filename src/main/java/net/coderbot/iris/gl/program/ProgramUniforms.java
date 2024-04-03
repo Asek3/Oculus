@@ -4,12 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.gl.IrisRenderSystem;
-import net.coderbot.iris.gl.uniform.DynamicLocationalUniformHolder;
-import net.coderbot.iris.gl.uniform.Uniform;
-import net.coderbot.iris.gl.uniform.UniformHolder;
-import net.coderbot.iris.gl.uniform.UniformType;
-import net.coderbot.iris.gl.uniform.UniformUpdateFrequency;
 import net.coderbot.iris.gl.state.ValueUpdateNotifier;
+import net.coderbot.iris.gl.uniform.*;
 import net.coderbot.iris.uniforms.SystemTimeUniforms;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.BufferUtils;
@@ -18,12 +14,7 @@ import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
 
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.OptionalInt;
+import java.util.*;
 
 public class ProgramUniforms {
 	private static ProgramUniforms active;
@@ -52,7 +43,11 @@ public class ProgramUniforms {
 	}
 
 	private static long getCurrentTick() {
-		return Objects.requireNonNull(Minecraft.getInstance().level).getGameTime();
+		if (Minecraft.getInstance().level == null) {
+			return 0L;
+		} else {
+			return Minecraft.getInstance().level.getGameTime();
+		}
 	}
 
 	public void update() {
@@ -198,53 +193,6 @@ public class ProgramUniforms {
 				UniformType provided = uniformNames.get(name);
 				UniformType expected = getExpectedType(type);
 
-				if (provided == null && !name.startsWith("gl_")) {
-					String typeName = getTypeName(type);
-
-					if (isSampler(type) || isImage(type)) {
-						// don't print a warning, samplers and images are managed elsewhere.
-						// TODO: Detect unsupported samplers/images?
-						continue;
-					}
-
-					UniformType externalProvided = externalUniformNames.get(name);
-
-					if (externalProvided != null) {
-						if (externalProvided != expected) {
-							String expectedName;
-
-							if (expected != null) {
-								expectedName = expected.toString();
-							} else {
-								expectedName = "(unsupported type: " + getTypeName(type) + ")";
-							}
-
-							Iris.logger.error("[" + this.name + "] Wrong uniform type for externally-managed uniform " + name + ": " + externalProvided + " is provided but the program expects " + expectedName + ".");
-						}
-
-						continue;
-					}
-
-					if (name.startsWith("Chunks[")) {
-						// explicitly filter out Chunks[] UBO stuff
-						continue;
-					}
-
-					if (size == 1) {
-						Iris.logger.warn("[" + this.name + "] Unsupported uniform: " + typeName + " " + name);
-					} else {
-						Iris.logger.warn("[" + this.name + "] Unsupported uniform: " + name + " of size " + size + " and type " + typeName);
-					}
-
-					continue;
-				}
-
-				// TODO: This is an absolutely horrific hack, but is needed until custom uniforms work.
-				if ("framemod8".equals(name) && expected == UniformType.FLOAT && provided == UniformType.INT) {
-					SystemTimeUniforms.addFloatFrameMod8Uniform(this);
-					provided = UniformType.FLOAT;
-				}
-
 				if (provided != null && provided != expected) {
 					String expectedName;
 
@@ -264,7 +212,7 @@ public class ProgramUniforms {
 			}
 
 			return new ProgramUniforms(ImmutableList.copyOf(once.values()), ImmutableList.copyOf(perTick.values()), ImmutableList.copyOf(perFrame.values()),
-					ImmutableList.copyOf(dynamic.values()), ImmutableList.copyOf(notifiersToReset));
+				ImmutableList.copyOf(dynamic.values()), ImmutableList.copyOf(notifiersToReset));
 		}
 
 		@Override
@@ -323,10 +271,24 @@ public class ProgramUniforms {
 			typeName = "sampler2DShadow";
 		} else if (type == GL20C.GL_SAMPLER_1D_SHADOW) {
 			typeName = "sampler1DShadow";
+		} else if (type == ARBShaderImageLoadStore.GL_IMAGE_1D) {
+			typeName = "image1D";
 		} else if (type == ARBShaderImageLoadStore.GL_IMAGE_2D) {
 			typeName = "image2D";
 		} else if (type == ARBShaderImageLoadStore.GL_IMAGE_3D) {
 			typeName = "image3D";
+		} else if (type == ARBShaderImageLoadStore.GL_INT_IMAGE_1D) {
+			typeName = "iimage1D";
+		} else if (type == ARBShaderImageLoadStore.GL_INT_IMAGE_2D) {
+			typeName = "iimage2D";
+		} else if (type == ARBShaderImageLoadStore.GL_INT_IMAGE_3D) {
+			typeName = "iimage3D";
+		} else if (type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_1D) {
+			typeName = "uimage1D";
+		} else if (type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_2D) {
+			typeName = "uimage2D";
+		} else if (type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_3D) {
+			typeName = "uimage3D";
 		} else {
 			typeName = "(unknown:" + type + ")";
 		}
@@ -352,7 +314,7 @@ public class ProgramUniforms {
 		} else if (type == GL20C.GL_FLOAT_VEC3) {
 			return UniformType.VEC3;
 		} else if (type == GL20C.GL_INT_VEC3) {
-			return null;
+			return UniformType.VEC3I;
 		} else if (type == GL20C.GL_FLOAT_MAT2) {
 			return null;
 		} else if (type == GL20C.GL_FLOAT_VEC2) {
@@ -380,20 +342,25 @@ public class ProgramUniforms {
 
 	private static boolean isSampler(int type) {
 		return type == GL20C.GL_SAMPLER_1D
-				|| type == GL20C.GL_SAMPLER_2D
-				|| type == GL30C.GL_UNSIGNED_INT_SAMPLER_2D
-				|| type == GL30C.GL_UNSIGNED_INT_SAMPLER_3D
-				|| type == GL20C.GL_SAMPLER_3D
-				|| type == GL20C.GL_SAMPLER_1D_SHADOW
-				|| type == GL20C.GL_SAMPLER_2D_SHADOW;
+			   || type == GL20C.GL_SAMPLER_2D
+			   || type == GL30C.GL_UNSIGNED_INT_SAMPLER_2D
+			   || type == GL30C.GL_UNSIGNED_INT_SAMPLER_3D
+			   || type == GL20C.GL_SAMPLER_3D
+			   || type == GL20C.GL_SAMPLER_1D_SHADOW
+			   || type == GL20C.GL_SAMPLER_2D_SHADOW;
 	}
 
 	private static boolean isImage(int type) {
 		return type == ARBShaderImageLoadStore.GL_IMAGE_1D
-			|| type == ARBShaderImageLoadStore.GL_IMAGE_2D
-			|| type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_2D
-			|| type == ARBShaderImageLoadStore.GL_IMAGE_3D
-			|| type == ARBShaderImageLoadStore.GL_IMAGE_1D_ARRAY
-			|| type == ARBShaderImageLoadStore.GL_IMAGE_2D_ARRAY;
+			   || type == ARBShaderImageLoadStore.GL_IMAGE_2D
+			   || type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_1D
+			   || type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_2D
+			   || type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_3D
+			   || type == ARBShaderImageLoadStore.GL_INT_IMAGE_1D
+			   || type == ARBShaderImageLoadStore.GL_INT_IMAGE_2D
+			   || type == ARBShaderImageLoadStore.GL_INT_IMAGE_3D
+			   || type == ARBShaderImageLoadStore.GL_IMAGE_3D
+			   || type == ARBShaderImageLoadStore.GL_IMAGE_1D_ARRAY
+			   || type == ARBShaderImageLoadStore.GL_IMAGE_2D_ARRAY;
 	}
 }

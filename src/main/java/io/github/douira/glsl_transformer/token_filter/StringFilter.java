@@ -5,7 +5,6 @@ import java.util.Set;
 import repack.antlr.v4.runtime.Token;
 
 import io.github.douira.glsl_transformer.ast.transform.JobParameters;
-import io.github.douira.glsl_transformer.util.CompatUtil;
 
 /**
  * The string token filter disallows tokens that are matched against a set of
@@ -29,7 +28,7 @@ public class StringFilter<J extends JobParameters> extends TokenFilter<J> {
    * @param disallowed The string to match
    */
   public StringFilter(String disallowed) {
-    this.disallowed = CompatUtil.setOf(disallowed);
+    this.disallowed = Set.of(disallowed);
   }
 
   /**
@@ -38,7 +37,7 @@ public class StringFilter<J extends JobParameters> extends TokenFilter<J> {
    * @param disallowed The strings to match
    */
   public StringFilter(String... disallowed) {
-    this.disallowed = CompatUtil.setOf(disallowed);
+    this.disallowed = Set.of(disallowed);
   }
 
   @Override

@@ -1,36 +1,33 @@
 package net.coderbot.iris.mixin;
 
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
-
 import net.coderbot.iris.Iris;
+import net.coderbot.iris.gl.IrisRenderSystem;
 import net.coderbot.iris.layer.IsOutlineRenderStateShard;
 import net.coderbot.iris.layer.OuterWrappedRenderType;
 import net.coderbot.iris.pipeline.HandRenderer;
 import net.coderbot.iris.pipeline.WorldRenderingPhase;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
+import net.coderbot.iris.shadows.frustum.fallback.NonCullingFrustum;
 import net.coderbot.iris.uniforms.CapturedRenderingState;
+import net.coderbot.iris.uniforms.IrisTimeUniforms;
 import net.coderbot.iris.uniforms.SystemTimeUniforms;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.culling.Frustum;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL43C;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LevelRenderer.class)
 public class MixinLevelRenderer {
@@ -50,6 +47,34 @@ public class MixinLevelRenderer {
 	@Shadow
 	private RenderBuffers renderBuffers;
 
+	@Shadow
+	private Frustum cullingFrustum;
+
+	@Shadow
+	private @Nullable ClientLevel level;
+
+	@Inject(method = "renderLevel", at = @At("HEAD"))
+	private void iris$setupPipeline(PoseStack poseStack, float tickDelta, long startTime, boolean renderBlockOutline,
+									Camera camera, GameRenderer gameRenderer, LightTexture lightTexture,
+									Matrix4f projection, CallbackInfo callback) {
+		IrisTimeUniforms.updateTime();
+		CapturedRenderingState.INSTANCE.setGbufferModelView(poseStack.last().pose());
+		CapturedRenderingState.INSTANCE.setGbufferProjection(projection);
+		CapturedRenderingState.INSTANCE.setTickDelta(tickDelta);
+		SystemTimeUniforms.COUNTER.beginFrame();
+		SystemTimeUniforms.TIMER.beginFrame(startTime);
+
+		pipeline = Iris.getPipelineManager().preparePipeline(Iris.getCurrentDimension());
+
+		if (pipeline.shouldDisableFrustumCulling()) {
+			this.cullingFrustum = new NonCullingFrustum();
+		}
+
+		if (Iris.shouldActivateWireframe() && this.minecraft.isLocalServer()) {
+			IrisRenderSystem.setPolygonMode(GL43C.GL_LINE);
+		}
+	}
+
 	// Begin shader rendering after buffers have been cleared.
 	// At this point we've ensured that Minecraft's main framebuffer is cleared.
 	// This is important or else very odd issues will happen with shaders that have a final pass that doesn't write to
@@ -58,16 +83,10 @@ public class MixinLevelRenderer {
 	private void iris$beginLevelRender(PoseStack poseStack, float tickDelta, long startTime, boolean renderBlockOutline,
 									   Camera camera, GameRenderer gameRenderer, LightTexture lightTexture,
 									   Matrix4f projection, CallbackInfo callback) {
-		CapturedRenderingState.INSTANCE.setGbufferModelView(poseStack.last().pose());
-		CapturedRenderingState.INSTANCE.setGbufferProjection(projection);
-		CapturedRenderingState.INSTANCE.setTickDelta(tickDelta);
-		SystemTimeUniforms.COUNTER.beginFrame();
-		SystemTimeUniforms.TIMER.beginFrame(startTime);
-
-		pipeline = Iris.getPipelineManager().preparePipeline(Iris.getCurrentDimension());
 		pipeline.beginLevelRendering();
 		pipeline.setPhase(WorldRenderingPhase.NONE);
 	}
+
 
 	// Inject a bit early so that we can end our rendering before mods like VoxelMap (which inject at RETURN)
 	// render their waypoint beams.
@@ -77,6 +96,10 @@ public class MixinLevelRenderer {
 		Minecraft.getInstance().getProfiler().popPush("iris_final");
 		pipeline.finalizeLevelRendering();
 		pipeline = null;
+
+		if (Iris.shouldActivateWireframe() && this.minecraft.isLocalServer()) {
+			IrisRenderSystem.setPolygonMode(GL43C.GL_FILL);
+		}
 	}
 
 	// Setup shadow terrain & render shadows before the main terrain setup. We need to do things in this order to

@@ -17,7 +17,9 @@ import net.coderbot.iris.pipeline.SodiumTerrainPipeline;
 import net.coderbot.iris.samplers.IrisSamplers;
 import net.coderbot.iris.uniforms.CapturedRenderingState;
 import net.coderbot.iris.uniforms.custom.CustomUniforms;
+import net.coderbot.iris.vertices.ImmediateState;
 import org.jetbrains.annotations.Nullable;
+import repack.joml.Matrix3f;
 import repack.joml.Matrix4f;
 import org.lwjgl.opengl.GL32C;
 
@@ -35,7 +37,7 @@ public class IrisChunkShaderInterface {
 	@Nullable
 	private final GlUniformFloat3v uniformRegionOffset;
 	@Nullable
-	private final GlUniformMatrix4f uniformNormalMatrix;
+	private final GlUniformMatrix3f uniformNormalMatrix;
 	@Nullable
 	private final GlUniformBlock uniformBlockDrawParameters;
 
@@ -47,18 +49,20 @@ public class IrisChunkShaderInterface {
 	private final ProgramImages irisProgramImages;
 	private final List<BufferBlendOverride> bufferBlendOverrides;
 	private final boolean hasOverrides;
+	private final boolean isTess;
 	private CustomUniforms customUniforms;
 
 	public IrisChunkShaderInterface(int handle, ShaderBindingContextExt contextExt, SodiumTerrainPipeline pipeline,
-									boolean isShadowPass, BlendModeOverride blendModeOverride, List<BufferBlendOverride> bufferOverrides, float alpha, CustomUniforms customUniforms) {
+									boolean isTess, boolean isShadowPass, BlendModeOverride blendModeOverride, List<BufferBlendOverride> bufferOverrides, float alpha, CustomUniforms customUniforms) {
 		this.uniformModelViewMatrix = contextExt.bindUniformIfPresent("iris_ModelViewMatrix", GlUniformMatrix4f::new);
 		this.uniformModelViewMatrixInverse = contextExt.bindUniformIfPresent("iris_ModelViewMatrixInverse", GlUniformMatrix4f::new);
 		this.uniformProjectionMatrix = contextExt.bindUniformIfPresent("iris_ProjectionMatrix", GlUniformMatrix4f::new);
 		this.uniformProjectionMatrixInverse = contextExt.bindUniformIfPresent("iris_ProjectionMatrixInverse", GlUniformMatrix4f::new);
 		this.uniformRegionOffset = contextExt.bindUniformIfPresent("u_RegionOffset", GlUniformFloat3v::new);
-		this.uniformNormalMatrix = contextExt.bindUniformIfPresent("iris_NormalMatrix", GlUniformMatrix4f::new);
+		this.uniformNormalMatrix = contextExt.bindUniformIfPresent("iris_NormalMatrix", GlUniformMatrix3f::new);
 		this.uniformBlockDrawParameters = contextExt.bindUniformBlockIfPresent("ubo_DrawParameters", 0);
 		this.customUniforms = customUniforms;
+		this.isTess = isTess;
 
 		this.alpha = alpha;
 
@@ -86,6 +90,8 @@ public class IrisChunkShaderInterface {
 			blendModeOverride.apply();
 		}
 
+		ImmediateState.usingTessellation = isTess;
+
 		if (hasOverrides) {
 			bufferBlendOverrides.forEach(BufferBlendOverride::apply);
 		}
@@ -101,6 +107,8 @@ public class IrisChunkShaderInterface {
 	}
 
 	public void restore() {
+		ImmediateState.usingTessellation = false;
+
 		if (blendModeOverride != null || hasOverrides) {
 			BlendModeOverride.restore();
 		}
@@ -129,10 +137,10 @@ public class IrisChunkShaderInterface {
 			this.uniformModelViewMatrixInverse.set(invertedMatrix);
 			if (this.uniformNormalMatrix != null) {
 				invertedMatrix.transpose();
-				this.uniformNormalMatrix.set(invertedMatrix);
+				this.uniformNormalMatrix.set(new Matrix3f(invertedMatrix));
 			}
 		} else if (this.uniformNormalMatrix != null) {
-			Matrix4f normalMatrix = new Matrix4f(modelView);
+			Matrix3f normalMatrix = new Matrix3f(modelView);
 			normalMatrix.invert();
 			normalMatrix.transpose();
 			this.uniformNormalMatrix.set(normalMatrix);

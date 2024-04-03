@@ -5,7 +5,8 @@ import io.github.douira.glsl_transformer.ast.node.abstract_node.InnerASTNode;
 import io.github.douira.glsl_transformer.ast.node.type.FullySpecifiedType;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.ArraySpecifier;
 import io.github.douira.glsl_transformer.ast.query.Root;
-import io.github.douira.glsl_transformer.ast.traversal.*;
+import io.github.douira.glsl_transformer.ast.traversal.ASTListener;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 
 public class FunctionParameter extends InnerASTNode {
   protected FullySpecifiedType type;
@@ -80,10 +81,5 @@ public class FunctionParameter extends InnerASTNode {
   @Override
   public FunctionParameter cloneInto(Root root) {
     return (FunctionParameter) super.cloneInto(root);
-  }
-
-  @Override
-  public FunctionParameter cloneSeparate() {
-    return (FunctionParameter) super.cloneSeparate();
   }
 }

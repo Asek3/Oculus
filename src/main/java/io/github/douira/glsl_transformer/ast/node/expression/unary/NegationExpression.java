@@ -40,9 +40,4 @@ public class NegationExpression extends UnaryExpression {
   public NegationExpression cloneInto(Root root) {
     return (NegationExpression) super.cloneInto(root);
   }
-
-  @Override
-  public NegationExpression cloneSeparate() {
-    return (NegationExpression) super.cloneSeparate();
-  }
 }

@@ -1,10 +1,11 @@
 package io.github.douira.glsl_transformer.ast.query.index;
 
-import java.util.*;
+import repack.apache.commons.collections4.trie.PatriciaTrie;
+
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
-import repack.apache.commons.collections4.trie.PatriciaTrie;
 
 /**
  * Base class for trie variants that insert more than one entry per key.
