@@ -1,6 +1,7 @@
 package net.coderbot.iris.mixin.fantastic;
 
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import net.coderbot.iris.Iris;
@@ -67,7 +68,7 @@ public class MixinLevelRenderer {
 		}
 	}*/
 
-	@WrapWithCondition(
+	@WrapOperation(
 		method = "renderLevel",
 		at = @At(
 			value = "INVOKE",
@@ -77,24 +78,24 @@ public class MixinLevelRenderer {
 					 "FLnet/minecraft/client/renderer/culling/Frustum;)V"
 		)
 	)
-	private boolean oculus$renderTranslucentAfterDeferred(
-		ParticleEngine instance,
-		PoseStack poseStack,
-		MultiBufferSource.BufferSource bufferSource,
-		LightTexture lightTexture,
-		Camera camera,
-		float f,
-		Frustum frustum
+	private void oculus$renderTranslucentAfterDeferred(
+		final ParticleEngine instance,
+		final PoseStack poseStack,
+		final MultiBufferSource.BufferSource bufferSource,
+		final LightTexture lightTexture,
+		final Camera camera,
+		final float f,
+		final Frustum frustum,
+		final Operation<Void> original
 	) {
 		ParticleRenderingSettings settings = getRenderingSettings();
 
 		if (settings == ParticleRenderingSettings.AFTER) {
-			minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f, frustum);
+			original.call(instance, poseStack, bufferSource, lightTexture, camera, f, frustum);
 		} else if (settings == ParticleRenderingSettings.MIXED) {
-			((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
-			minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f, frustum);
+			((PhasedParticleEngine) instance).setParticleRenderingPhase(ParticleRenderingPhase.TRANSLUCENT);
+			original.call(instance, poseStack, bufferSource, lightTexture, camera, f, frustum);
 		}
-		return true;
 	}
 
 	private ParticleRenderingSettings getRenderingSettings() {

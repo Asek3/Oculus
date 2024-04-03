@@ -53,10 +53,6 @@ public class MixinParticleEngine implements PhasedParticleEngine {
     @Final
     private static List<ParticleRenderType> RENDER_ORDER;
 
-    @Shadow
-    @Final
-    private Map<ParticleRenderType, Queue<Particle>> particles;
-
     private static final List<ParticleRenderType> OPAQUE_PARTICLE_RENDER_TYPES;
 
     static {
@@ -70,20 +66,25 @@ public class MixinParticleEngine implements PhasedParticleEngine {
 
     @ModifyExpressionValue(
         method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;" +
-				 "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;" +
-				 "Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;" +
-				 "FLnet/minecraft/client/renderer/culling/Frustum;)V",
+                 "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;" +
+                 "Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;" +
+                 "FLnet/minecraft/client/renderer/culling/Frustum;)V",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/client/particle/ParticleEngine;particles:Ljava/util/Map;"
         )
     )
-    private Map<ParticleRenderType, Queue<Particle>> iris$selectParticlesToRender(Map original) {
-        Map<ParticleRenderType, Queue<Particle>> toRender = Maps.newTreeMap(ForgeHooksClient.makeParticleRenderTypeComparator(RENDER_ORDER));
+    private Map<ParticleRenderType, Queue<Particle>> iris$selectParticlesToRender(
+        Map<ParticleRenderType, Queue<Particle>> particles
+    ) {
+        Map<ParticleRenderType, Queue<Particle>> toRender =
+            Maps.newTreeMap(ForgeHooksClient.makeParticleRenderTypeComparator(RENDER_ORDER));
         for (Map.Entry<ParticleRenderType, Queue<Particle>> type : particles.entrySet()) {
-            if (!((phase == ParticleRenderingPhase.TRANSLUCENT && OPAQUE_PARTICLE_RENDER_TYPES.contains(type.getKey())) || (phase == ParticleRenderingPhase.OPAQUE && type.getKey() == ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT))) {
-                toRender.put(type.getKey(), type.getValue());
-            }
+            if (phase == ParticleRenderingPhase.OPAQUE &&
+                type.getKey() == ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT) continue;
+            if (phase == ParticleRenderingPhase.TRANSLUCENT && OPAQUE_PARTICLE_RENDER_TYPES.contains(type.getKey()))
+                continue;
+            toRender.put(type.getKey(), type.getValue());
         }
         return toRender;
     }
