@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
 
 @Mixin(TextureManager.class)
 public class MixinTextureManager {
-	@Inject(method = "m_118482_", at = @At("TAIL"), remap = false)
+	@Inject(method = {"m_118482_", "method_18167"}, at = @At("TAIL"), remap = false)
 	private void iris$onTailReloadLambda(ResourceManager resourceManager, Executor applyExecutor, Void void1, CallbackInfo ci) {
 		TextureFormatLoader.reload(resourceManager);
 		PBRTextureManager.INSTANCE.clear();
