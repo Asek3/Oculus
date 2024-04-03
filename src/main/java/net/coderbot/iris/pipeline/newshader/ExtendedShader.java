@@ -32,6 +32,7 @@ import net.coderbot.iris.samplers.IrisSamplers;
 import net.coderbot.iris.uniforms.CapturedRenderingState;
 import net.coderbot.iris.uniforms.custom.CustomUniforms;
 import net.coderbot.iris.vendored.joml.Vector3f;
+import net.coderbot.iris.vertices.ImmediateState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
@@ -57,13 +58,14 @@ public class ExtendedShader extends ShaderInstance implements ShaderInstanceInte
 	GlFramebuffer baseline;
 	BlendModeOverride blendModeOverride;
 	float alphaTest;
-	private Program geometry;
+	boolean usesTessellation;
+	private Program geometry, tessControl, tessEval;
 	private final ShaderAttributeInputs inputs;
 
 	private static ExtendedShader lastApplied;
 	private final Vector3f chunkOffset = new Vector3f();
 
-	public ExtendedShader(ResourceProvider resourceFactory, String string, VertexFormat vertexFormat,
+	public ExtendedShader(ResourceProvider resourceFactory, String string, VertexFormat vertexFormat, boolean usesTessellation,
 						  GlFramebuffer writingToBeforeTranslucent, GlFramebuffer writingToAfterTranslucent,
 						  GlFramebuffer baseline, BlendModeOverride blendModeOverride, AlphaTest alphaTest,
 						  Consumer<DynamicLocationalUniformHolder> uniformCreator, BiConsumer<SamplerHolder, ImageHolder> samplerCreator, boolean isIntensity,
@@ -78,6 +80,7 @@ public class ExtendedShader extends ShaderInstance implements ShaderInstanceInte
 		ProgramImages.Builder builder = ProgramImages.builder(programId);
 		samplerCreator.accept(samplerBuilder, builder);
 		customUniforms.mapholderToPass(uniformBuilder, this);
+		this.usesTessellation = usesTessellation;
 
 		uniforms = uniformBuilder.buildUniforms();
 		this.customUniforms = customUniforms;
@@ -146,6 +149,8 @@ public class ExtendedShader extends ShaderInstance implements ShaderInstanceInte
 		IrisRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), IrisSamplers.ALBEDO_TEXTURE_UNIT, RenderSystem.getShaderTexture(0));
 		IrisRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), IrisSamplers.OVERLAY_TEXTURE_UNIT, RenderSystem.getShaderTexture(1));
 		IrisRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), IrisSamplers.LIGHTMAP_TEXTURE_UNIT, RenderSystem.getShaderTexture(2));
+
+		ImmediateState.usingTessellation = usesTessellation;
 
 		if (PROJECTION_MATRIX != null) {
 			if (projectionInverse != null) {
@@ -231,13 +236,41 @@ public class ExtendedShader extends ShaderInstance implements ShaderInstanceInte
 		if (this.geometry != null) {
 			this.geometry.attachToShader(this);
 		}
+		if (this.tessControl != null) {
+			this.tessControl.attachToShader(this);
+		}
+		if (this.tessEval != null) {
+			this.tessEval.attachToShader(this);
+		}
 	}
 
 	@Override
-	public void iris$createGeometryShader(ResourceProvider factory, ResourceLocation name) throws IOException {
-		Resource geometry = factory.getResource(new ResourceLocation(name.getNamespace(), name.getPath() + "_geometry.gsh"));
+	public void iris$createExtraShaders(ResourceProvider factory, String name) throws IOException {
+		Resource geometry = factory.getResource(new ResourceLocation("minecraft", name + "_geometry.gsh"));
 		if (geometry != null) {
 			this.geometry = Program.compileShader(IrisProgramTypes.GEOMETRY, name.getPath(), geometry.getInputStream(), geometry.getSourceName(), new GlslPreprocessor() {
+				@Nullable
+				@Override
+				public String applyImport(boolean bl, String string) {
+					return null;
+				}
+			});
+		}
+
+		Resource tessControl = factory.getResource(new ResourceLocation("minecraft", name + "_tessControl.tcs"));
+		if (tessControl != null) {
+			this.tessControl = Program.compileShader(IrisProgramTypes.TESS_CONTROL, name, tessControl.getInputStream(), tessControl.getSourceName(), new GlslPreprocessor() {
+				@Nullable
+				@Override
+				public String applyImport(boolean bl, String string) {
+					return null;
+				}
+			});
+		}
+
+		Resource tessEval = factory.getResource(new ResourceLocation("minecraft", name + "_tessEval.tes"));
+		if (tessEval != null) {
+			this.tessEval = Program.compileShader(IrisProgramTypes.TESS_EVAL, name, tessEval.getInputStream(), tessEval.getSourceName(), new GlslPreprocessor() {
 				@Nullable
 				@Override
 				public String applyImport(boolean bl, String string) {
@@ -249,6 +282,14 @@ public class ExtendedShader extends ShaderInstance implements ShaderInstanceInte
 
 	public Program getGeometry() {
 		return this.geometry;
+	}
+
+	public Program getTessControl() {
+		return this.tessControl;
+	}
+
+	public Program getTessEval() {
+		return this.tessEval;
 	}
 
 	public boolean hasActiveImages() {

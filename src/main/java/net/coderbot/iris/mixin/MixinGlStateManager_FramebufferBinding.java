@@ -16,8 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinGlStateManager_FramebufferBinding {
 	private static int iris$drawFramebuffer = 0;
 	private static int iris$readFramebuffer = 0;
+	private static int iris$program = 0;
 
-	@Inject(method = "_glBindFramebuffer(II)V", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "_glBindFramebuffer(II)V", at = @At("HEAD"), cancellable = true, remap = false)
 	private static void iris$avoidRedundantBind(int target, int framebuffer, CallbackInfo ci) {
 		if (target == GlConst.GL_FRAMEBUFFER) {
 			if (iris$drawFramebuffer == target && iris$readFramebuffer == target) {
@@ -43,7 +44,16 @@ public class MixinGlStateManager_FramebufferBinding {
 		}
 	}
 
-	@Inject(method = "_glDeleteFramebuffers(I)V", at = @At("HEAD"))
+	@Inject(method = "_glUseProgram", at = @At("HEAD"), cancellable = true, remap = false)
+	private static void iris$avoidRedundantBind2(int pInt0, CallbackInfo ci) {
+		if (iris$program == pInt0) {
+			ci.cancel();
+		} else {
+			iris$program = pInt0;
+		}
+	}
+
+	@Inject(method = "_glDeleteFramebuffers(I)V", at = @At("HEAD"), remap = false)
 	private static void iris$trackFramebufferDelete(int framebuffer, CallbackInfo ci) {
 		if (iris$drawFramebuffer == framebuffer) {
 			iris$drawFramebuffer = 0;

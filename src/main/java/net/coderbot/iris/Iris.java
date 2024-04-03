@@ -24,6 +24,8 @@ import org.lwjgl.glfw.GLFW;
 import com.google.common.base.Throwables;
 import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.sun.jna.platform.unix.LibC;
+import net.coderbot.iris.compat.sodium.SodiumVersionCheck;
 
 import net.coderbot.iris.config.IrisConfig;
 import net.coderbot.iris.gl.GLDebug;
@@ -46,9 +48,11 @@ import net.coderbot.iris.shaderpack.option.values.MutableOptionValues;
 import net.coderbot.iris.shaderpack.option.values.OptionValues;
 import net.coderbot.iris.texture.pbr.PBRTextureManager;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.client.ClientRegistry;
@@ -62,6 +66,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkConstants;
+import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.Configuration;
 
 @Mod(Iris.MODID)
 public class Iris {
@@ -90,6 +97,7 @@ public class Iris {
 	private static KeyMapping reloadKeybind;
 	private static KeyMapping toggleShadersKeybind;
 	private static KeyMapping shaderpackScreenKeybind;
+	private static KeyMapping wireframeKeybind;
 
 	private static final Map<String, String> shaderPackOptionQueue = new HashMap<>();
 	// Flag variable used when reloading
@@ -139,6 +147,7 @@ public class Iris {
 		reloadKeybind = new KeyMapping("iris.keybind.reload", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "iris.keybinds");
 		toggleShadersKeybind = new KeyMapping("iris.keybind.toggleShaders", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "iris.keybinds");
 		shaderpackScreenKeybind = new KeyMapping("iris.keybind.shaderPackSelection", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, "iris.keybinds");
+		wireframeKeybind = new KeyMapping("iris.keybind.wireframe", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), "iris.keybinds");
 
 		setupCommands(Minecraft.getInstance());
 
@@ -149,7 +158,8 @@ public class Iris {
 		IRIS_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
 		ClientRegistry.registerKeyBinding(reloadKeybind);
 		ClientRegistry.registerKeyBinding(toggleShadersKeybind);
-		ClientRegistry.registerKeyBinding(shaderpackScreenKeybind);
+        ClientRegistry.registerKeyBinding(shaderpackScreenKeybind);
+        ClientRegistry.registerKeyBinding(wireframeKeybind);
 
 		ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.set(false);
 	}
@@ -255,7 +265,15 @@ public class Iris {
 			}
 		} else if (shaderpackScreenKeybind.consumeClick()) {
 			minecraft.setScreen(new ShaderPackScreen(null));
+		} else if (wireframeKeybind.consumeClick()) {
+			if (irisConfig.areDebugOptionsEnabled() && minecraft.player != null && !Minecraft.getInstance().isLocalServer()) {
+				minecraft.player.displayClientMessage(new TextComponent("No cheating; wireframe only in singleplayer!"), false);
+			}
 		}
+	}
+
+	public static boolean shouldActivateWireframe() {
+		return irisConfig.areDebugOptionsEnabled() && wireframeKeybind.isDown();
 	}
 
 	public static void toggleShaders(Minecraft minecraft, boolean enabled) throws IOException {

@@ -24,6 +24,7 @@ import org.lwjgl.opengl.GL40C;
 import org.lwjgl.opengl.GL42C;
 import org.lwjgl.opengl.GL43C;
 import org.lwjgl.opengl.GL45C;
+import org.lwjgl.opengl.GL46C;
 import org.lwjgl.opengl.NVXGPUMemoryInfo;
 import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.MemoryUtil;
@@ -41,6 +42,9 @@ public class IrisRenderSystem {
 	private static DSAAccess dsaState;
 	private static boolean hasMultibind;
 	private static boolean supportsCompute;
+	private static boolean supportsTesselation;
+	private static int polygonMode = GL43C.GL_FILL;
+	private static int backupPolygonMode = GL43C.GL_FILL;
 	private static int[] samplers;
 
 	public static void initRenderer() {
@@ -58,6 +62,7 @@ public class IrisRenderSystem {
 		hasMultibind = GL.getCapabilities().OpenGL45 || GL.getCapabilities().GL_ARB_multi_bind;
 
 		supportsCompute = GL.getCapabilities().glDispatchCompute != MemoryUtil.NULL;
+		supportsTesselation = GL.getCapabilities().GL_ARB_tessellation_shader || GL.getCapabilities().OpenGL40;
 
 		samplers = new int[SamplerLimits.get().getMaxTextureUnits()];
 	}
@@ -364,6 +369,10 @@ public class IrisRenderSystem {
 		return supportsCompute;
 	}
 
+	public static boolean supportsTesselation() {
+		return supportsTesselation;
+	}
+
     public static int genSampler() {
 		return GL33C.glGenSamplers();
     }
@@ -424,7 +433,32 @@ public class IrisRenderSystem {
 		GL43C.glDeleteBuffers(glId);
     }
 
-    public interface DSAAccess {
+    public static void setPolygonMode(int mode) {
+		if (mode != polygonMode) {
+			polygonMode = mode;
+			GL43C.glPolygonMode(GL43C.GL_FRONT_AND_BACK, mode);
+		}
+    }
+
+	public static void overridePolygonMode() {
+		backupPolygonMode = polygonMode;
+		setPolygonMode(GL43C.GL_FILL);
+	}
+
+	public static void restorePolygonMode() {
+		setPolygonMode(backupPolygonMode);
+		backupPolygonMode = GL43C.GL_FILL;
+	}
+
+    public static void dispatchComputeIndirect(long offset) {
+		GL43C.glDispatchComputeIndirect(offset);
+    }
+
+	public static void bindBuffer(int target, int buffer) {
+		GL46C.glBindBuffer(target, buffer);
+	}
+
+	public interface DSAAccess {
 		void generateMipmaps(int texture, int target);
 
 		void texParameteri(int texture, int target, int pname, int param);

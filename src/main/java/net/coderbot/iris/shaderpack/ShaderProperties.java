@@ -17,6 +17,7 @@ import net.coderbot.iris.gl.blending.BlendMode;
 import net.coderbot.iris.gl.blending.BlendModeFunction;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
 import net.coderbot.iris.gl.buffer.ShaderStorageInfo;
+import net.coderbot.iris.gl.framebuffer.ViewportData;
 import net.coderbot.iris.gl.texture.InternalTextureFormat;
 import net.coderbot.iris.gl.texture.PixelFormat;
 import net.coderbot.iris.gl.texture.PixelType;
@@ -92,9 +93,10 @@ public class ShaderProperties {
 	// TODO: private Map<String, String> optifineVersionRequirements;
 	// TODO: Parse custom uniforms / variables
 	private final Object2ObjectMap<String, AlphaTest> alphaTestOverrides = new Object2ObjectOpenHashMap<>();
-	private final Object2FloatMap<String> viewportScaleOverrides = new Object2FloatOpenHashMap<>();
+	private final Object2ObjectMap<String, ViewportData> viewportScaleOverrides = new Object2ObjectOpenHashMap<>();
 	private final Object2ObjectMap<String, TextureScaleOverride> textureScaleOverrides = new Object2ObjectOpenHashMap<>();
 	private final Object2ObjectMap<String, BlendModeOverride> blendModeOverrides = new Object2ObjectOpenHashMap<>();
+	private final Object2ObjectMap<String, IndirectPointer> indirectPointers = new Object2ObjectOpenHashMap<>();
 	private final Object2ObjectMap<String, ArrayList<BufferBlendInformation>> bufferBlendOverrides = new Object2ObjectOpenHashMap<>();
 	private final EnumMap<TextureStage, Object2ObjectMap<String, TextureDefinition>> customTextures = new EnumMap<>(TextureStage.class);
 	private final Object2ObjectMap<Tri<String, TextureType, TextureStage>, String> customTexturePatching = new Object2ObjectOpenHashMap<>();
@@ -212,16 +214,22 @@ public class ShaderProperties {
 			// TODO: Custom uniforms
 
 			handlePassDirective("scale.", key, value, pass -> {
-				float scale;
+				float scale, offsetX = 0.0f, offsetY = 0.0f;
+				String[] parts = value.split(" ");
 
 				try {
-					scale = Float.parseFloat(value);
-				} catch (NumberFormatException e) {
+					scale = Float.parseFloat(parts[0]);
+
+					if (parts.length > 1) {
+						offsetX = Float.parseFloat(parts[1]);
+						offsetY = Float.parseFloat(parts[2]);
+					}
+				} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
 					Iris.logger.error("Unable to parse scale directive for " + pass + ": " + value, e);
 					return;
 				}
 
-				viewportScaleOverrides.put(pass, scale);
+				viewportScaleOverrides.put(pass, new ViewportData(scale, offsetX, offsetY));
 			});
 
 			handlePassDirective("size.buffer.", key, value, pass -> {
@@ -327,6 +335,16 @@ public class ShaderProperties {
 				}
 
 				blendModeOverrides.put(pass, new BlendModeOverride(new BlendMode(modes[0], modes[1], modes[2], modes[3])));
+			});
+
+			handlePassDirective("indirect.", key, value, pass -> {
+				try {
+					String[] locations = value.split(" ");
+
+					indirectPointers.put(pass, new IndirectPointer(Integer.parseInt(locations[0]), Long.parseLong(locations[1])));
+				} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+					Iris.logger.fatal("Failed to parse indirect command for " + pass + "! " + value);
+				}
 			});
 
 			handleProgramEnabledDirective("program.", key, value, program -> {
@@ -793,7 +811,7 @@ public class ShaderProperties {
 		return prepareBeforeShadow;
 	}
 
-	public Object2FloatMap<String> getViewportScaleOverrides() {
+	public Object2ObjectMap<String, ViewportData> getViewportScaleOverrides() {
 		return viewportScaleOverrides;
 	}
 
@@ -803,6 +821,10 @@ public class ShaderProperties {
 
 	public Object2ObjectMap<String, BlendModeOverride> getBlendModeOverrides() {
 		return blendModeOverrides;
+	}
+
+	public Object2ObjectMap<String, IndirectPointer> getIndirectPointers() {
+		return indirectPointers;
 	}
 
 	public Object2ObjectMap<String, ArrayList<BufferBlendInformation>> getBufferBlendOverrides() {

@@ -8,11 +8,14 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import net.coderbot.iris.features.FeatureFlags;
 import net.coderbot.iris.gl.IrisRenderSystem;
+import net.coderbot.iris.gl.buffer.ShaderStorageBufferHolder;
 import net.coderbot.iris.gl.framebuffer.GlFramebuffer;
 import net.coderbot.iris.gl.image.GlImage;
 import net.coderbot.iris.gl.program.*;
 import net.coderbot.iris.gl.sampler.SamplerLimits;
 import net.coderbot.iris.gl.texture.TextureAccess;
+import net.coderbot.iris.mixin.GlStateManagerAccessor;
+import net.coderbot.iris.pipeline.DeferredWorldRenderingPipeline;
 import net.coderbot.iris.pipeline.ShaderPrinter;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.pipeline.newshader.FogMode;
@@ -23,6 +26,12 @@ import net.coderbot.iris.rendertarget.RenderTarget;
 import net.coderbot.iris.rendertarget.RenderTargets;
 import net.coderbot.iris.samplers.IrisImages;
 import net.coderbot.iris.samplers.IrisSamplers;
+import net.coderbot.iris.shaderpack.ComputeSource;
+import net.coderbot.iris.shaderpack.FilledIndirectPointer;
+import net.coderbot.iris.shaderpack.PackRenderTargetDirectives;
+import net.coderbot.iris.shaderpack.ProgramDirectives;
+import net.coderbot.iris.shaderpack.ProgramSet;
+import net.coderbot.iris.shaderpack.ProgramSource;
 import net.coderbot.iris.shaderpack.*;
 import net.coderbot.iris.shaderpack.texture.TextureStage;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
@@ -58,13 +67,13 @@ public class FinalPassRenderer {
 	private final CustomUniforms customUniforms;
 
 	// TODO: The length of this argument list is getting a bit ridiculous
-	public FinalPassRenderer(WorldRenderingPipeline pipeline, ProgramSet pack, RenderTargets renderTargets, TextureAccess noiseTexture,
+	public FinalPassRenderer(WorldRenderingPipeline pipeline, ProgramSet pack, RenderTargets renderTargets, TextureAccess noiseTexture, ShaderStorageBufferHolder holder,
 							 FrameUpdateNotifier updateNotifier, ImmutableSet<Integer> flippedBuffers,
 							 CenterDepthSampler centerDepthSampler,
 							 Supplier<ShadowRenderTargets> shadowTargetsSupplier,
 							 Object2ObjectMap<String, TextureAccess> customTextureIds,
 							 Object2ObjectMap<String, TextureAccess> irisCustomTextures, Set<GlImage> customImages, ImmutableSet<Integer> flippedAtLeastOnce
-		, CustomUniforms customUniforms) {
+							, CustomUniforms customUniforms) {
 		this.pipeline = pipeline;
 		this.updateNotifier = updateNotifier;
 		this.centerDepthSampler = centerDepthSampler;
@@ -74,7 +83,7 @@ public class FinalPassRenderer {
 
 		final PackRenderTargetDirectives renderTargetDirectives = pack.getPackDirectives().getRenderTargetDirectives();
 		final Map<Integer, PackRenderTargetDirectives.RenderTargetSettings> renderTargetSettings =
-			renderTargetDirectives.getRenderTargetSettings();
+				renderTargetDirectives.getRenderTargetSettings();
 
 		this.noiseTexture = noiseTexture;
 		this.renderTargets = renderTargets;
@@ -84,7 +93,7 @@ public class FinalPassRenderer {
 			ProgramDirectives directives = source.getDirectives();
 
 			pass.program = createProgram(source, flippedBuffers, flippedAtLeastOnce, shadowTargetsSupplier);
-			pass.computes = createComputes(pack.getFinalCompute(), flippedBuffers, flippedAtLeastOnce, shadowTargetsSupplier);
+			pass.computes = createComputes(pack.getFinalCompute(), flippedBuffers, flippedAtLeastOnce, shadowTargetsSupplier, holder);
 			pass.stageReadsFromAlt = flippedBuffers;
 			pass.mipmappedBuffers = directives.getMipmappedBuffers();
 
@@ -261,8 +270,10 @@ public class FinalPassRenderer {
 		for (int i = 0; i < SamplerLimits.get().getMaxTextureUnits(); i++) {
 			// Unbind all textures that we may have used.
 			// NB: This is necessary for shader pack reloading to work properly
-			RenderSystem.activeTexture(GL15C.GL_TEXTURE0 + i);
-			RenderSystem.bindTexture(0);
+			if (GlStateManagerAccessor.getTEXTURES()[i].binding != 0) {
+				RenderSystem.activeTexture(GL15C.GL_TEXTURE0 + i);
+				RenderSystem.bindTexture(0);
+			}
 		}
 
 		RenderSystem.activeTexture(GL15C.GL_TEXTURE0);
@@ -377,7 +388,7 @@ public class FinalPassRenderer {
 		return build;
 	}
 
-	private ComputeProgram[] createComputes(ComputeSource[] compute, ImmutableSet<Integer> flipped, ImmutableSet<Integer> flippedAtLeastOnceSnapshot, Supplier<ShadowRenderTargets> shadowTargetsSupplier) {
+	private ComputeProgram[] createComputes(ComputeSource[] compute, ImmutableSet<Integer> flipped, ImmutableSet<Integer> flippedAtLeastOnceSnapshot, Supplier<ShadowRenderTargets> shadowTargetsSupplier, ShaderStorageBufferHolder holder) {
 		ComputeProgram[] programs = new ComputeProgram[compute.length];
 		for (int i = 0; i < programs.length; i++) {
 			ComputeSource source = compute[i];
@@ -426,7 +437,7 @@ public class FinalPassRenderer {
 
 				this.customUniforms.mapholderToPass(builder, programs[i]);
 
-				programs[i].setWorkGroupInfo(source.getWorkGroupRelative(), source.getWorkGroups());
+				programs[i].setWorkGroupInfo(source.getWorkGroupRelative(), source.getWorkGroups(), FilledIndirectPointer.basedOff(holder, source.getIndirectPointer()));
 			}
 		}
 

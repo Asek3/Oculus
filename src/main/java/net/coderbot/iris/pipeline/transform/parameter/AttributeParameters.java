@@ -12,10 +12,10 @@ public class AttributeParameters extends GeometryInfoParameters {
 	// WARNING: adding new fields requires updating hashCode and equals methods!
 
 	public AttributeParameters(Patch patch,
-							   Object2ObjectMap<Tri<String, TextureType, TextureStage>, String> textureMap,
-							   boolean hasGeometry,
-							   InputAvailability inputs) {
-		super(patch, textureMap, hasGeometry);
+			Object2ObjectMap<Tri<String, TextureType, TextureStage>, String> textureMap,
+			boolean hasGeometry,
+			InputAvailability inputs) {
+		super(patch, textureMap, hasGeometry, false);
 		this.inputs = inputs;
 	}
 

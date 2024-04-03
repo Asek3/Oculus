@@ -9,11 +9,17 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import net.coderbot.iris.features.FeatureFlags;
 import net.coderbot.iris.gl.IrisRenderSystem;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
+import net.coderbot.iris.gl.buffer.ShaderStorageBufferHolder;
 import net.coderbot.iris.gl.framebuffer.GlFramebuffer;
+import net.coderbot.iris.gl.framebuffer.ViewportData;
 import net.coderbot.iris.gl.image.GlImage;
 import net.coderbot.iris.gl.program.*;
 import net.coderbot.iris.gl.sampler.SamplerLimits;
 import net.coderbot.iris.gl.texture.TextureAccess;
+import net.coderbot.iris.mixin.GlStateManagerAccessor;
+import net.coderbot.iris.pipeline.DeferredWorldRenderingPipeline;
+import net.coderbot.iris.pipeline.WorldRenderingPipeline;
+import net.coderbot.iris.rendertarget.RenderTarget;
 import net.coderbot.iris.pipeline.ShaderPrinter;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.pipeline.newshader.FogMode;
@@ -23,6 +29,12 @@ import net.coderbot.iris.rendertarget.RenderTarget;
 import net.coderbot.iris.rendertarget.RenderTargets;
 import net.coderbot.iris.samplers.IrisImages;
 import net.coderbot.iris.samplers.IrisSamplers;
+import net.coderbot.iris.shaderpack.ComputeSource;
+import net.coderbot.iris.shaderpack.FilledIndirectPointer;
+import net.coderbot.iris.shaderpack.PackDirectives;
+import net.coderbot.iris.shaderpack.PackRenderTargetDirectives;
+import net.coderbot.iris.shaderpack.ProgramDirectives;
+import net.coderbot.iris.shaderpack.ProgramSource;
 import net.coderbot.iris.shaderpack.*;
 import net.coderbot.iris.shaderpack.texture.TextureStage;
 import net.coderbot.iris.shadows.ShadowRenderTargets;
@@ -56,7 +68,7 @@ public class CompositeRenderer {
 	private TextureStage textureStage;
 	private WorldRenderingPipeline pipeline;
 
-	public CompositeRenderer(WorldRenderingPipeline pipeline, PackDirectives packDirectives, ProgramSource[] sources, ComputeSource[][] computes, RenderTargets renderTargets,
+	public CompositeRenderer(WorldRenderingPipeline pipeline, PackDirectives packDirectives, ProgramSource[] sources, ComputeSource[][] computes, RenderTargets renderTargets, ShaderStorageBufferHolder holder,
 							 TextureAccess noiseTexture, FrameUpdateNotifier updateNotifier,
 							 CenterDepthSampler centerDepthSampler, BufferFlipper bufferFlipper,
 							 Supplier<ShadowRenderTargets> shadowTargetsSupplier, TextureStage textureStage,
@@ -96,7 +108,7 @@ public class CompositeRenderer {
 			if (source == null || !source.isValid()) {
 				if (computes[i] != null) {
 					ComputeOnlyPass pass = new ComputeOnlyPass();
-					pass.computes = createComputes(computes[i], flipped, flippedAtLeastOnceSnapshot, shadowTargetsSupplier);
+					pass.computes = createComputes(computes[i], flipped, flippedAtLeastOnceSnapshot, shadowTargetsSupplier, holder);
 					passes.add(pass);
 				}
 				continue;
@@ -107,7 +119,7 @@ public class CompositeRenderer {
 
 			pass.program = createProgram(source, flipped, flippedAtLeastOnceSnapshot, shadowTargetsSupplier);
 			pass.blendModeOverride = source.getDirectives().getBlendModeOverride().orElse(null);
-			pass.computes = createComputes(computes[i], flipped, flippedAtLeastOnceSnapshot, shadowTargetsSupplier);
+			pass.computes = createComputes(computes[i], flipped, flippedAtLeastOnceSnapshot, shadowTargetsSupplier, holder);
 			int[] drawBuffers = directives.getDrawBuffers();
 
 
@@ -196,7 +208,7 @@ public class CompositeRenderer {
 		ImmutableSet<Integer> flippedAtLeastOnce;
 		ImmutableSet<Integer> stageReadsFromAlt;
 		ImmutableSet<Integer> mipmappedBuffers;
-		float viewportScale;
+		ViewportData viewportScale;
 
 		protected void destroy() {
 			this.program.destroy();
@@ -254,9 +266,11 @@ public class CompositeRenderer {
 				}
 			}
 
-			float scaledWidth = renderPass.viewWidth * renderPass.viewportScale;
-			float scaledHeight = renderPass.viewHeight * renderPass.viewportScale;
-			RenderSystem.viewport(0, 0, (int) scaledWidth, (int) scaledHeight);
+			float scaledWidth = renderPass.viewWidth * renderPass.viewportScale.scale();
+			float scaledHeight = renderPass.viewHeight * renderPass.viewportScale.scale();
+			int beginWidth = (int) (renderPass.viewWidth * renderPass.viewportScale.viewportX());
+			int beginHeight = (int) (renderPass.viewHeight * renderPass.viewportScale.viewportY());
+			RenderSystem.viewport(beginWidth, beginHeight, (int) scaledWidth, (int) scaledHeight);
 
 			renderPass.framebuffer.bind();
 			renderPass.program.use();
@@ -287,8 +301,10 @@ public class CompositeRenderer {
 		for (int i = 0; i < SamplerLimits.get().getMaxTextureUnits(); i++) {
 			// Unbind all textures that we may have used.
 			// NB: This is necessary for shader pack reloading to work propely
-			RenderSystem.activeTexture(GL15C.GL_TEXTURE0 + i);
-			RenderSystem.bindTexture(0);
+			if (GlStateManagerAccessor.getTEXTURES()[i].binding != 0) {
+				RenderSystem.activeTexture(GL15C.GL_TEXTURE0 + i);
+				RenderSystem.bindTexture(0);
+			}
 		}
 
 		RenderSystem.activeTexture(GL15C.GL_TEXTURE0);
@@ -378,7 +394,7 @@ public class CompositeRenderer {
 		return build;
 	}
 
-	private ComputeProgram[] createComputes(ComputeSource[] compute, ImmutableSet<Integer> flipped, ImmutableSet<Integer> flippedAtLeastOnceSnapshot, Supplier<ShadowRenderTargets> shadowTargetsSupplier) {
+	private ComputeProgram[] createComputes(ComputeSource[] compute, ImmutableSet<Integer> flipped, ImmutableSet<Integer> flippedAtLeastOnceSnapshot, Supplier<ShadowRenderTargets> shadowTargetsSupplier, ShaderStorageBufferHolder holder) {
 		ComputeProgram[] programs = new ComputeProgram[compute.length];
 		for (int i = 0; i < programs.length; i++) {
 			ComputeSource source = compute[i];
@@ -428,7 +444,7 @@ public class CompositeRenderer {
 
 				customUniforms.mapholderToPass(builder, programs[i]);
 
-				programs[i].setWorkGroupInfo(source.getWorkGroupRelative(), source.getWorkGroups());
+				programs[i].setWorkGroupInfo(source.getWorkGroupRelative(), source.getWorkGroups(), FilledIndirectPointer.basedOff(holder, source.getIndirectPointer()));
 			}
 		}
 
