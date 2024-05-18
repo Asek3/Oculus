@@ -33,3 +33,10 @@ mandatory = false
 versionRange = "[0.3.1,)"
 ordering = "NONE"
 side = "CLIENT"
+
+[[dependencies.oculus]]
+modId = "rubidium"
+mandatory = false
+versionRange = "[0.0.0-USE-EMBEDDIUM-INSTEAD]"
+ordering = "NONE"
+side = "CLIENT"
