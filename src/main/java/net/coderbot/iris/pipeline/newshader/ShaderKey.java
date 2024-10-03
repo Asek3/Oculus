@@ -58,22 +58,25 @@ public enum ShaderKey {
 	BEACON                 (ProgramId.BeaconBeam,  AlphaTests.OFF,             DefaultVertexFormat.BLOCK,                       FogMode.PER_FRAGMENT, LightingModel.FULLBRIGHT),
 	GLINT                  (ProgramId.ArmorGlint,  AlphaTests.NON_ZERO_ALPHA,  DefaultVertexFormat.POSITION_TEX,                FogMode.PER_VERTEX,   LightingModel.LIGHTMAP  ),
 	LINES                  (ProgramId.Line,        AlphaTests.OFF,             DefaultVertexFormat.POSITION_COLOR_NORMAL,       FogMode.PER_VERTEX,   LightingModel.LIGHTMAP  ),
+	MEKANISM_FLAME		   (ProgramId.SpiderEyes,  AlphaTests.ONE_TENTH_ALPHA, DefaultVertexFormat.POSITION_TEX_COLOR, 			FogMode.PER_VERTEX,   LightingModel.LIGHTMAP),
 
 	// Note: These must be at the very end (NewWorldRenderingPipeline implementation details)
-	SHADOW_TERRAIN_CUTOUT  (ProgramId.Shadow,      AlphaTests.ONE_TENTH_ALPHA, IrisVertexFormats.TERRAIN,                       FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_ENTITIES_CUTOUT (ProgramId.Shadow,      AlphaTests.ONE_TENTH_ALPHA, IrisVertexFormats.ENTITY,                        FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_BEACON_BEAM     (ProgramId.Shadow,      AlphaTests.OFF,             DefaultVertexFormat.BLOCK,                       FogMode.OFF,          LightingModel.FULLBRIGHT),
-	SHADOW_BASIC           (ProgramId.Shadow,      AlphaTests.OFF,             DefaultVertexFormat.POSITION,      				FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_BASIC_COLOR     (ProgramId.Shadow,      AlphaTests.NON_ZERO_ALPHA,  DefaultVertexFormat.POSITION_COLOR,       		FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_TEX             (ProgramId.Shadow,      AlphaTests.NON_ZERO_ALPHA,  DefaultVertexFormat.POSITION_TEX,       			FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_TEX_COLOR       (ProgramId.Shadow,      AlphaTests.ONE_TENTH_ALPHA, DefaultVertexFormat.POSITION_TEX_COLOR,       	FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_CLOUDS          (ProgramId.Shadow,      AlphaTests.ONE_TENTH_ALPHA, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL,   FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_LINES           (ProgramId.Shadow,      AlphaTests.OFF,             DefaultVertexFormat.POSITION_COLOR_NORMAL,       FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_LEASH           (ProgramId.Shadow,      AlphaTests.OFF,             DefaultVertexFormat.POSITION_COLOR_LIGHTMAP,     FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_LIGHTNING       (ProgramId.Shadow,      AlphaTests.OFF,             DefaultVertexFormat.POSITION_COLOR,     			FogMode.OFF,          LightingModel.FULLBRIGHT),
-	SHADOW_PARTICLES       (ProgramId.Shadow,      AlphaTests.ONE_TENTH_ALPHA, DefaultVertexFormat.PARTICLE,	     			FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_TEXT           (ProgramId.Shadow,       AlphaTests.NON_ZERO_ALPHA,  IrisVertexFormats.ENTITY                       , FogMode.OFF,          LightingModel.LIGHTMAP  ),
-	SHADOW_TEXT_INTENSITY (ProgramId.Shadow,       AlphaTests.NON_ZERO_ALPHA,  IrisVertexFormats.ENTITY                       , FogMode.OFF,          LightingModel.LIGHTMAP  );
+	SHADOW_TERRAIN_CUTOUT  (ProgramId.Shadow,      		AlphaTests.ONE_TENTH_ALPHA, IrisVertexFormats.TERRAIN,                      FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_ENTITIES_CUTOUT (ProgramId.Shadow,      		AlphaTests.ONE_TENTH_ALPHA, IrisVertexFormats.ENTITY,                       FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_BEACON_BEAM     (ProgramId.Shadow,      		AlphaTests.OFF,             DefaultVertexFormat.BLOCK,                      FogMode.OFF,          LightingModel.FULLBRIGHT),
+	SHADOW_BASIC           (ProgramId.Shadow,      		AlphaTests.OFF,             DefaultVertexFormat.POSITION,      				FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_BASIC_COLOR     (ProgramId.Shadow,      		AlphaTests.NON_ZERO_ALPHA,  DefaultVertexFormat.POSITION_COLOR,       		FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_TEX             (ProgramId.Shadow,      		AlphaTests.NON_ZERO_ALPHA,  DefaultVertexFormat.POSITION_TEX,       		FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_TEX_COLOR       (ProgramId.Shadow,      		AlphaTests.ONE_TENTH_ALPHA, DefaultVertexFormat.POSITION_TEX_COLOR,       	FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_CLOUDS          (ProgramId.Shadow,      		AlphaTests.ONE_TENTH_ALPHA, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL,  FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_LINES           (ProgramId.Shadow,      		AlphaTests.OFF,             DefaultVertexFormat.POSITION_COLOR_NORMAL,      FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_LEASH           (ProgramId.Shadow,      		AlphaTests.OFF,             DefaultVertexFormat.POSITION_COLOR_LIGHTMAP,    FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_LIGHTNING       (ProgramId.Shadow,      		AlphaTests.OFF,             DefaultVertexFormat.POSITION_COLOR,     		FogMode.OFF,          LightingModel.FULLBRIGHT),
+	SHADOW_PARTICLES       (ProgramId.Shadow,      		AlphaTests.ONE_TENTH_ALPHA, DefaultVertexFormat.PARTICLE,	     			FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_TEXT           (ProgramId.Shadow,       		AlphaTests.NON_ZERO_ALPHA,  IrisVertexFormats.ENTITY                       ,FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	SHADOW_TEXT_INTENSITY (ProgramId.Shadow,       		AlphaTests.NON_ZERO_ALPHA,  IrisVertexFormats.ENTITY                       ,FogMode.OFF,          LightingModel.LIGHTMAP  ),
+	MEKANISM_FLAME_SHADOW (ProgramId.ShadowEntities,	AlphaTests.ONE_TENTH_ALPHA,	DefaultVertexFormat.POSITION_TEX_COLOR, 		FogMode.OFF, 		  LightingModel.LIGHTMAP  );
+
 
 	private final ProgramId program;
 	private final AlphaTest alphaTest;

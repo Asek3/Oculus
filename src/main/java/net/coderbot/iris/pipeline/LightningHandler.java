@@ -4,8 +4,13 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.coderbot.iris.layer.InnerWrappedRenderType;
 import net.coderbot.iris.layer.LightningRenderStateShard;
-import net.coderbot.iris.layer.OuterWrappedRenderType;
+import net.minecraft.Util;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.function.Function;
+
 
 public class LightningHandler extends RenderType {
     public static final RenderType IRIS_LIGHTNING = new InnerWrappedRenderType("iris_lightning2", RenderType.create(
@@ -22,6 +27,24 @@ public class LightningHandler extends RenderType {
                     .setOutputState(WEATHER_TARGET)
                     .createCompositeState(false)
     ), new LightningRenderStateShard());
+
+    public static final Function<ResourceLocation, RenderType> MEKANISM_FLAME = Util.memoize(resourceLocation -> {
+        RenderType.CompositeState state = RenderType.CompositeState.builder()
+                .setShaderState(new ShaderStateShard(ShaderAccess::getMekanismFlameShader))
+                .setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .createCompositeState(true);
+        return create("mek_flame", DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS, 256, true, false, state);
+    });
+
+    public static final RenderType MEKASUIT = create("mekasuit", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 131_072, true, false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(new ShaderStateShard(ShaderAccess::getMekasuitShader))
+                    .setTextureState(BLOCK_SHEET)
+                    .setLightmapState(LIGHTMAP)
+                    .setOverlayState(OVERLAY)
+                    .createCompositeState(true)
+    );
 
     public LightningHandler(String pRenderType0, VertexFormat pVertexFormat1, VertexFormat.Mode pVertexFormat$Mode2, int pInt3, boolean pBoolean4, boolean pBoolean5, Runnable pRunnable6, Runnable pRunnable7) {
         super(pRenderType0, pVertexFormat1, pVertexFormat$Mode2, pInt3, pBoolean4, pBoolean5, pRunnable6, pRunnable7);

@@ -104,6 +104,10 @@ public class Iris {
 		}
 	}
 
+	public static boolean isPackInUseQuick() {
+		return getPipelineManager().getPipelineNullable() instanceof NewWorldRenderingPipeline;
+	}
+
 	/**
 	 * Called very early on in Minecraft initialization. At this point we *cannot* safely access OpenGL, but we can do
 	 * some very basic setup, config loading, and environment checks.
