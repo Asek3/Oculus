@@ -11,6 +11,7 @@ public enum ProgramId {
 	Shadow(ProgramGroup.Shadow, ""),
 	ShadowSolid(ProgramGroup.Shadow, "solid", Shadow),
 	ShadowCutout(ProgramGroup.Shadow, "cutout", Shadow),
+	ShadowEntities(ProgramGroup.Shadow, "entities", Shadow, BlendModeOverride.OFF),
 
 	Basic(ProgramGroup.Gbuffers, "basic"),
 	Line(ProgramGroup.Gbuffers, "line", Basic),
