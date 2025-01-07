@@ -44,7 +44,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.LoadingModList;
@@ -110,7 +110,7 @@ public class Iris {
 	private static boolean renderSystemInit = false;
 
 	@SubscribeEvent
-	public static void onInitializeClient(FMLClientSetupEvent event) {
+	public static void onInitializeClient(FMLConstructModEvent event) {
 		IRIS_VERSION = ModList.get().getModContainerById(Oculus.MODID).get().getModInfo().getVersion().toString();
 		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, screen) -> new ShaderPackScreen(screen)));
 		MinecraftForge.EVENT_BUS.addListener(Iris::onKeyInput);
