@@ -49,6 +49,7 @@ public class StandardMacros {
 		define(standardDefines, getVendor());
 		define(standardDefines, getRenderer());
 		define(standardDefines, "IS_IRIS");
+		define(standardDefines, "IS_OCULUS");
 
 
 		if (LoadingModList.get().getModFileById("distanthorizons") != null && DHCompat.hasRenderingEnabled()) {
