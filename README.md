@@ -5,6 +5,8 @@
 # Oculus
 [![](http://cf.way2muchnoise.eu/short_oculus_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/oculus)
 [![](http://cf.way2muchnoise.eu/versions/Available%20for_oculus_full.svg)](https://www.curseforge.com/minecraft/mc-mods/oculus/files)
+[![](http://modrinth.roughness.technology/short_oculus_downloads.svg)](https://modrinth.com/mod/oculus)
+[![](http://modrinth.roughness.technology/versions/oculus.svg)](https://modrinth.com/mod/oculus/versions)
 
 Oculus is an Unofficial Fork of ["Iris"](https://www.curseforge.com/minecraft/mc-mods/irisshaders), made to work with Forge Mod Loader.
 
