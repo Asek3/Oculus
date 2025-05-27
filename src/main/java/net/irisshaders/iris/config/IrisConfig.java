@@ -1,14 +1,21 @@
 package net.irisshaders.iris.config;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gui.option.IrisVideoSettings;
 import net.irisshaders.iris.pathways.colorspace.ColorSpace;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -19,6 +26,7 @@ public class IrisConfig {
 	private static final String COMMENT =
 		"This file stores configuration options for Iris, such as the currently active shaderpack";
 	private final Path propertiesPath;
+	private final Path excludedPath;
 	/**
 	 * The path to the current shaderpack. Null if the internal shaderpack is being used.
 	 */
@@ -28,20 +36,31 @@ public class IrisConfig {
 	 */
 	private boolean enableShaders;
 	/**
+	 * Whether or not to allow core shaders to draw to the main color texture.
+	 */
+	private boolean allowUnknownShaders;
+	/**
 	 * If debug features should be enabled. Gives much more detailed OpenGL error outputs at the cost of performance.
 	 */
 	private boolean enableDebugOptions;
+	/**
+	 * What shaders should be nuked.
+	 */
+	private List<ResourceLocation> shadersToSkip = new ArrayList<>();
 	/**
 	 * If the update notification should be disabled or not.
 	 */
 	private boolean disableUpdateMessage;
 
-	public IrisConfig(Path propertiesPath) {
+	public IrisConfig(Path propertiesPath, Path excluded) {
 		shaderPackName = null;
 		enableShaders = true;
 		enableDebugOptions = false;
 		disableUpdateMessage = false;
 		this.propertiesPath = propertiesPath;
+		allowUnknownShaders = false;
+		this.excludedPath = excluded;
+
 	}
 
 	/**
@@ -113,6 +132,14 @@ public class IrisConfig {
 		this.enableShaders = enabled;
 	}
 
+	public void setUnknown(boolean b) throws IOException {
+		this.allowUnknownShaders = b;
+		save();
+	}
+
+	private static Gson GSON = new Gson();
+
+
 	/**
 	 * loads the config file and then populates the string, int, and boolean entries with the parsed entries
 	 *
@@ -124,6 +151,24 @@ public class IrisConfig {
 			return;
 		}
 
+		if (Files.exists(excludedPath)) {
+			JsonArray json = JsonParser.parseString(Files.readString(excludedPath)).getAsJsonObject().getAsJsonArray("excluded");
+			for (int i = 0; i < json.size(); i++) {
+				ResourceLocation resource = ResourceLocation.tryParse(json.get(i).getAsString());
+				if (resource == null) {
+					Iris.logger.warn("Unknown shader " + json.get(i).getAsString());
+				}
+
+				shadersToSkip.add(resource);
+			}
+		} else {
+			JsonObject defaultV = new JsonObject();
+			JsonArray array = new JsonArray();
+			array.add("put:valuesHere");
+			defaultV.add("excluded", array);
+			Files.writeString(excludedPath, GSON.toJson(defaultV));
+		}
+
 		Properties properties = new Properties();
 		// NB: This uses ISO-8859-1 with unicode escapes as the encoding
 		try (InputStream is = Files.newInputStream(propertiesPath)) {
@@ -133,6 +178,8 @@ public class IrisConfig {
 		enableShaders = !"false".equals(properties.getProperty("enableShaders"));
 		enableDebugOptions = "true".equals(properties.getProperty("enableDebugOptions"));
 		disableUpdateMessage = "true".equals(properties.getProperty("disableUpdateMessage"));
+		allowUnknownShaders = "true".equals(properties.getProperty("allowUnknownShaders"));
+
 		try {
 			IrisVideoSettings.shadowDistance = Integer.parseInt(properties.getProperty("maxShadowRenderDistance", "32"));
 			IrisVideoSettings.colorSpace = ColorSpace.valueOf(properties.getProperty("colorSpace", "SRGB"));
@@ -163,9 +210,18 @@ public class IrisConfig {
 		properties.setProperty("disableUpdateMessage", disableUpdateMessage ? "true" : "false");
 		properties.setProperty("maxShadowRenderDistance", String.valueOf(IrisVideoSettings.shadowDistance));
 		properties.setProperty("colorSpace", IrisVideoSettings.colorSpace.name());
+		properties.setProperty("allowUnknownShaders", allowUnknownShaders ? "true" : "false");
 		// NB: This uses ISO-8859-1 with unicode escapes as the encoding
 		try (OutputStream os = Files.newOutputStream(propertiesPath)) {
 			properties.store(os, COMMENT);
 		}
+	}
+
+	public boolean shouldAllowUnknownShaders() {
+		return allowUnknownShaders;
+	}
+
+	public boolean shouldSkip(ResourceLocation value) {
+		return shadersToSkip.contains(value); // TODO
 	}
 }

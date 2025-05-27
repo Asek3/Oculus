@@ -107,6 +107,20 @@ public class ShaderPackScreen extends Screen implements HudHideable {
 				Component.literal("No")));
 		}
 
+		if (Screen.hasControlDown() && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_G)) {
+			Minecraft.getInstance().setScreen(new ConfirmScreen((option) -> {
+				try {
+					Iris.getIrisConfig().setUnknown(option);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				Minecraft.getInstance().setScreen(this);
+			}, Component.literal("Unknown shader toggle"),
+					Component.literal("This allows unknown shaders to load in."),
+					Component.literal("Enable"),
+					Component.literal("Disable")));
+		}
+
 		if (!this.guiHidden) {
 			if (optionMenuOpen && this.shaderOptionList != null) {
 				this.shaderOptionList.render(guiGraphics, mouseX, mouseY, delta);

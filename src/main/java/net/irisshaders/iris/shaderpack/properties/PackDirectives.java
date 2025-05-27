@@ -22,6 +22,7 @@ public class PackDirectives {
 	private final PackRenderTargetDirectives renderTargetDirectives;
 	private final PackShadowDirectives shadowDirectives;
 	private final float drynessHalfLife;
+	private int fallbackTex;
 	private boolean supportsColorCorrection;
 	private int noiseTextureResolution;
 	private float sunPathRotation;
@@ -89,6 +90,9 @@ public class PackDirectives {
 		particleRenderingSettings = properties.getParticleRenderingSettings();
 		textureMap = properties.getCustomTexturePatching();
 		bufferObjects = properties.getBufferObjects();
+		fallbackTex = properties.getFallbackTex();
+
+
 	}
 
 	PackDirectives(Set<Integer> supportedRenderTargets, PackDirectives directives) {
@@ -106,6 +110,7 @@ public class PackDirectives {
 		particleRenderingSettings = directives.particleRenderingSettings;
 		textureMap = directives.textureMap;
 		bufferObjects = directives.bufferObjects;
+		fallbackTex = directives.fallbackTex;
 	}
 
 	private static float clamp(float val, float lo, float hi) {
@@ -311,5 +316,9 @@ public class PackDirectives {
 		}
 
 		return scale;
+	}
+
+	public int getFallbackTex() {
+		return fallbackTex;
 	}
 }

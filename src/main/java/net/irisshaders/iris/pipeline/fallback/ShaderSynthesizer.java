@@ -29,34 +29,34 @@ public class ShaderSynthesizer {
 
 		if (inputs.isNewLines()) {
 			shader.append("const float VIEW_SHRINK = 1.0 - (1.0 / 256.0);\n" +
-				"const mat4 VIEW_SCALE = mat4(\n" +
-				"    VIEW_SHRINK, 0.0, 0.0, 0.0,\n" +
-				"    0.0, VIEW_SHRINK, 0.0, 0.0,\n" +
-				"    0.0, 0.0, VIEW_SHRINK, 0.0,\n" +
-				"    0.0, 0.0, 0.0, 1.0\n" +
-				");\n");
+					"const mat4 VIEW_SCALE = mat4(\n" +
+					"    VIEW_SHRINK, 0.0, 0.0, 0.0,\n" +
+					"    0.0, VIEW_SHRINK, 0.0, 0.0,\n" +
+					"    0.0, 0.0, VIEW_SHRINK, 0.0,\n" +
+					"    0.0, 0.0, 0.0, 1.0\n" +
+					");\n");
 
 			shader.append("uniform float LineWidth;\n" +
-				"uniform vec2 ScreenSize;\n");
+					"uniform vec2 ScreenSize;\n");
 
 			main.append("vec4 linePosStart = ProjMat * VIEW_SCALE * ModelViewMat * vec4(" + position + ", 1.0);\n" +
-				"    vec4 linePosEnd = ProjMat * VIEW_SCALE * ModelViewMat * vec4(" + position + " + Normal, 1.0);\n" +
-				"\n" +
-				"    vec3 ndc1 = linePosStart.xyz / linePosStart.w;\n" +
-				"    vec3 ndc2 = linePosEnd.xyz / linePosEnd.w;\n" +
-				"\n" +
-				"    vec2 lineScreenDirection = normalize((ndc2.xy - ndc1.xy) * ScreenSize);\n" +
-				"    vec2 lineOffset = vec2(-lineScreenDirection.y, lineScreenDirection.x) * LineWidth / ScreenSize;\n" +
-				"\n" +
-				"    if (lineOffset.x < 0.0) {\n" +
-				"        lineOffset *= -1.0;\n" +
-				"    }\n" +
-				"\n" +
-				"    if (gl_VertexID % 2 == 0) {\n" +
-				"        gl_Position = vec4((ndc1 + vec3(lineOffset, 0.0)) * linePosStart.w, linePosStart.w);\n" +
-				"    } else {\n" +
-				"        gl_Position = vec4((ndc1 - vec3(lineOffset, 0.0)) * linePosStart.w, linePosStart.w);\n" +
-				"    }\n");
+					"    vec4 linePosEnd = ProjMat * VIEW_SCALE * ModelViewMat * vec4(" + position + " + Normal, 1.0);\n" +
+					"\n" +
+					"    vec3 ndc1 = linePosStart.xyz / linePosStart.w;\n" +
+					"    vec3 ndc2 = linePosEnd.xyz / linePosEnd.w;\n" +
+					"\n" +
+					"    vec2 lineScreenDirection = normalize((ndc2.xy - ndc1.xy) * ScreenSize);\n" +
+					"    vec2 lineOffset = vec2(-lineScreenDirection.y, lineScreenDirection.x) * LineWidth / ScreenSize;\n" +
+					"\n" +
+					"    if (lineOffset.x < 0.0) {\n" +
+					"        lineOffset *= -1.0;\n" +
+					"    }\n" +
+					"\n" +
+					"    if (gl_VertexID % 2 == 0) {\n" +
+					"        gl_Position = vec4((ndc1 + vec3(lineOffset, 0.0)) * linePosStart.w, linePosStart.w);\n" +
+					"    } else {\n" +
+					"        gl_Position = vec4((ndc1 - vec3(lineOffset, 0.0)) * linePosStart.w, linePosStart.w);\n" +
+					"    }\n");
 		} else {
 			main.append("    gl_Position = ProjMat * ModelViewMat * vec4(");
 			main.append(position);
@@ -82,13 +82,13 @@ public class ShaderSynthesizer {
 
 				// Copied from Mojang code.
 				shader.append("vec4 minecraft_mix_light(vec3 lightDir0, vec3 lightDir1, vec3 normal, vec4 color) {\n" +
-					"    lightDir0 = normalize(lightDir0);\n" +
-					"    lightDir1 = normalize(lightDir1);\n" +
-					"    float light0 = max(0.0, dot(lightDir0, normal));\n" +
-					"    float light1 = max(0.0, dot(lightDir1, normal));\n" +
-					"    float lightAccum = min(1.0, (light0 + light1) * 0.6 + 0.4);\n" +
-					"    return vec4(color.rgb * lightAccum, color.a);\n" +
-					"}\n");
+						//			"    lightDir0 = normalize(lightDir0);\n" +
+						//			"    lightDir1 = normalize(lightDir1);\n" +
+						"    float light0 = max(0.0, dot(lightDir0, normal));\n" +
+						"    float light1 = max(0.0, dot(lightDir1, normal));\n" +
+						"    float lightAccum = min(1.0, (light0 + light1) * 0.6 + 0.4);\n" +
+						"    return vec4(color.rgb * lightAccum, color.a);\n" +
+						"}\n");
 
 				shader.append("in vec3 Normal;\n");
 
@@ -122,7 +122,8 @@ public class ShaderSynthesizer {
 			shader.append("in vec2 UV0;\n");
 			shader.append("out vec2 texCoord;\n");
 
-			main.append("    texCoord = UV0;\n");
+			shader.append("uniform mat4 TextureMat;\n");
+			main.append("    texCoord = (TextureMat * vec4(UV0, 0.0, 1.0)).xy;\n");
 		}
 
 		// Fog

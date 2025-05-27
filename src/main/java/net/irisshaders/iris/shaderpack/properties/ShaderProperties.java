@@ -115,6 +115,9 @@ public class ShaderProperties {
 	private List<String> requiredFeatureFlags = new ArrayList<>();
 	private List<String> optionalFeatureFlags = new ArrayList<>();
 
+	private int fallbackTex = 0;
+
+
 	private ShaderProperties() {
 		// empty
 	}
@@ -222,6 +225,8 @@ public class ShaderProperties {
 			});
 			handleBooleanDirective(key, value, "prepareBeforeShadow", bool -> prepareBeforeShadow = bool);
 			handleBooleanDirective(key, value, "supportsColorCorrection", bool -> supportsColorCorrection = bool);
+			handleIntDirective(key, value, "fallbackTex", bool -> fallbackTex = bool);
+
 
 			if (key.startsWith("particles.ordering")) {
 				Optional<ParticleRenderingSettings> settings = ParticleRenderingSettings.fromString(value.trim().toUpperCase(Locale.US));
@@ -951,4 +956,8 @@ public class ShaderProperties {
     public CloudSetting getDHCloudSetting() {
         return dhCloudSetting;
     }
+
+	public int getFallbackTex() {
+		return fallbackTex;
+	}
 }

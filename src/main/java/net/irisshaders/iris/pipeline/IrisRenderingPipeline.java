@@ -183,6 +183,11 @@ public class IrisRenderingPipeline implements WorldRenderingPipeline, ShaderRend
 	private ColorSpace currentColorSpace;
 	private CloudSetting dhCloudSetting;
 
+
+	private GlFramebuffer defaultFB;
+	private GlFramebuffer defaultFBAlt;
+	private GlFramebuffer defaultFBShadow;
+
 	public IrisRenderingPipeline(ProgramSet programSet) {
 		ShaderPrinter.resetPrintState();
 
@@ -472,6 +477,8 @@ public class IrisRenderingPipeline implements WorldRenderingPipeline, ShaderRend
 				shadowRenderer = null;
 			}
 
+			defaultFBShadow = shadowRenderTargets.createFramebufferWritingToMain(new int[] {0});
+
 		} else {
 			this.shadowClearPasses = ImmutableList.of();
 			this.shadowClearPassesFull = ImmutableList.of();
@@ -541,6 +548,10 @@ public class IrisRenderingPipeline implements WorldRenderingPipeline, ShaderRend
 		}
 
 		currentColorSpace = IrisVideoSettings.colorSpace;
+		int defaultTex = packDirectives.getFallbackTex();
+
+		defaultFB = flippedAfterPrepare.contains(defaultTex) ? renderTargets.createFramebufferWritingToAlt(new int[] { defaultTex }) : renderTargets.createFramebufferWritingToMain(new int[] { defaultTex });
+		defaultFBAlt = flippedAfterTranslucent.contains(defaultTex) ? renderTargets.createFramebufferWritingToAlt(new int[] { defaultTex }) : renderTargets.createFramebufferWritingToMain(new int[] { defaultTex });
 	}
 
 	private ComputeProgram[] createShadowComputes(ComputeSource[] compute, ProgramSet programSet) {
@@ -1214,6 +1225,9 @@ public class IrisRenderingPipeline implements WorldRenderingPipeline, ShaderRend
 
 		customImages.forEach(GlImage::destroy);
 
+		if (shadowRenderTargets != null) {
+			shadowRenderTargets.destroy();
+		}
 		if (shadowRenderer != null) {
 			shadowRenderer.destroy();
 		}
@@ -1305,5 +1319,17 @@ public class IrisRenderingPipeline implements WorldRenderingPipeline, ShaderRend
 
 	public boolean hasShadowRenderTargets() {
 		return shadowRenderTargets != null;
+	}
+
+	public void bindDefault() {
+		if (isBeforeTranslucent) {
+			defaultFB.bind();
+		} else {
+			defaultFBAlt.bind();
+		}
+	}
+
+	public void bindDefaultShadow() {
+		defaultFBShadow.bind();
 	}
 }
