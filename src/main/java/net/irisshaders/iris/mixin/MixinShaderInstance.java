@@ -7,6 +7,7 @@ import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.irisshaders.iris.Iris;
+import net.irisshaders.iris.compat.SkipList;
 import net.irisshaders.iris.gl.GLDebug;
 import net.irisshaders.iris.gl.IrisRenderSystem;
 import net.irisshaders.iris.gl.blending.DepthColorStorage;
@@ -17,6 +18,7 @@ import net.irisshaders.iris.pipeline.programs.ExtendedShader;
 import net.irisshaders.iris.pipeline.programs.FallbackShader;
 import net.irisshaders.iris.pipeline.programs.ShaderInstanceInterface;
 import net.irisshaders.iris.shadows.ShadowRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
@@ -76,6 +78,11 @@ public abstract class MixinShaderInstance implements ShaderInstanceInterface {
         shouldSkipList.put(FallbackShader.class, NONE);
     }
 
+    @Override
+    public void setShouldSkip(MethodHandle s) {
+        shouldSkip = s;
+    }
+
     @Inject(method = "<init>(Lnet/minecraft/server/packs/resources/ResourceProvider;Lnet/minecraft/resources/ResourceLocation;Lcom/mojang/blaze3d/vertex/VertexFormat;)V", at = @At("TAIL"), require = 0)
     private void iriss$storeSkip(ResourceProvider resourceProvider, ResourceLocation string, VertexFormat vertexFormat, CallbackInfo ci) {
         shouldSkip = shouldSkipList.computeIfAbsent(getClass(), x -> {
@@ -113,6 +120,7 @@ public abstract class MixinShaderInstance implements ShaderInstanceInterface {
         }
     }
 
+    @Unique
     private static boolean shouldOverrideShaders() {
         WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
 
@@ -152,22 +160,30 @@ public abstract class MixinShaderInstance implements ShaderInstanceInterface {
         GLDebug.nameObject(KHRDebug.GL_SHADER, this.fragmentProgram.getId(), string);
     }
 
-    @Inject(method = "apply", at = @At("TAIL"))
+    @Inject(method = "apply", at = @At("HEAD"))
     private void iris$lockDepthColorState(CallbackInfo ci) {
-        if (((Object) this) instanceof ExtendedShader || ((Object) this) instanceof FallbackShader || !shouldOverrideShaders()) {
-            return;
+        if (lastAppliedShader != null) {
+            lastAppliedShader.clear();
+            lastAppliedShader = null;
         }
-
-        DepthColorStorage.disableDepthColor();
     }
 
     @Inject(method = "clear", at = @At("HEAD"))
     private void iris$unlockDepthColorState(CallbackInfo ci) {
-        if (((Object) this) instanceof ExtendedShader || ((Object) this) instanceof FallbackShader || !shouldOverrideShaders()) {
+        if (!iris$shouldSkipThis()) {
+            if (!isKnownShader() && shouldOverrideShaders()) {
+                WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
+
+                if (pipeline instanceof IrisRenderingPipeline) {
+                    Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
+                }
+            }
+
             return;
         }
 
         DepthColorStorage.unlockDepthColor();
+
     }
 
     @Inject(method = "apply", at = @At("TAIL"))
@@ -199,6 +215,26 @@ public abstract class MixinShaderInstance implements ShaderInstanceInterface {
     public JsonObject iris$setupGeometryShader(Reader reader, ResourceProvider resourceProvider, ResourceLocation name, VertexFormat vertexFormat) {
         this.iris$createExtraShaders(resourceProvider, name);
         return GsonHelper.parse(reader);
+    }
+
+    @Inject(method = "<init>(Lnet/minecraft/server/packs/resources/ResourceProvider;Lnet/minecraft/resources/ResourceLocation;Lcom/mojang/blaze3d/vertex/VertexFormat;)V", at = @At("TAIL"), require = 0)
+    private void iriss$storeSkipNeo(ResourceProvider resourceProvider, ResourceLocation string, VertexFormat vertexFormat, CallbackInfo ci) {
+        MethodHandle shouldSkip = shouldSkipList.computeIfAbsent(getClass(), x -> {
+            try {
+                MethodHandle iris$skipDraw = MethodHandles.lookup().findVirtual(x, "iris$skipDraw", MethodType.methodType(boolean.class));
+                Iris.logger.warn("Class " + x.getName() + " has opted out of being rendered with shaders.");
+                return iris$skipDraw;
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                return SkipList.NONE;
+            }
+        });
+
+
+        if (Iris.getIrisConfig().shouldSkip(string)) {
+            shouldSkip = ALWAYS;
+        }
+
+        ((ShaderInstanceInterface) this).setShouldSkip(shouldSkip);
     }
 
 

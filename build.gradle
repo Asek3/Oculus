@@ -17,7 +17,7 @@ loom {
 				"mixins.oculus.bettermipmaps.json",
 				"mixins.oculus.fixes.maxfpscrash.json",
 				"oculus-batched-entity-rendering.mixins.json",
-				//"mixins.oculus.compat.sodium.json",
+				"mixins.oculus.compat.sodium.json",
 				"mixins.oculus.compat.indigo.json",
 				"mixins.oculus.compat.indium.json",
 				"mixins.oculus.compat.dh.json",
