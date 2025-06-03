@@ -107,6 +107,7 @@ repositories {
 dependencies {
 	minecraft "com.mojang:minecraft:${minecraft_version}"
 	mappings loom.officialMojangMappings()
+	//forge "net.neoforged:forge:${minecraft_version}-${neoforge_version}"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
 	modImplementation "org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}"
