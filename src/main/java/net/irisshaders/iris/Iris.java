@@ -771,7 +771,7 @@ public class Iris {
 			logger.warn("", e);
 		}
 
-		irisConfig = new IrisConfig(FMLPaths.CONFIGDIR.get().resolve(MODID + ".properties"));
+		irisConfig = new IrisConfig(FMLPaths.CONFIGDIR.get().resolve(MODID + ".properties"), FMLPaths.CONFIGDIR.get().resolve("iris-excluded.json"));
 
 		try {
 			irisConfig.initialize();
