@@ -1,13 +1,12 @@
 package net.irisshaders.iris.shaderpack;
 
+import com.google.common.cache.*;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.*;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.features.FeatureFlags;
 import net.irisshaders.iris.gl.buffer.BuiltShaderStorageInfo;
@@ -17,26 +16,16 @@ import net.irisshaders.iris.gui.FeatureMissingErrorScreen;
 import net.irisshaders.iris.gui.screen.ShaderPackScreen;
 import net.irisshaders.iris.helpers.StringPair;
 import net.irisshaders.iris.pathways.colorspace.ColorSpace;
-import net.irisshaders.iris.shaderpack.include.AbsolutePackPath;
-import net.irisshaders.iris.shaderpack.include.IncludeGraph;
-import net.irisshaders.iris.shaderpack.include.IncludeProcessor;
-import net.irisshaders.iris.shaderpack.include.ShaderPackSourceNames;
+import net.irisshaders.iris.shaderpack.include.*;
 import net.irisshaders.iris.shaderpack.materialmap.NamespacedId;
-import net.irisshaders.iris.shaderpack.option.OrderBackedProperties;
-import net.irisshaders.iris.shaderpack.option.ProfileSet;
-import net.irisshaders.iris.shaderpack.option.ShaderPackOptions;
+import net.irisshaders.iris.shaderpack.option.*;
 import net.irisshaders.iris.shaderpack.option.menu.OptionMenuContainer;
-import net.irisshaders.iris.shaderpack.option.values.MutableOptionValues;
-import net.irisshaders.iris.shaderpack.option.values.OptionValues;
+import net.irisshaders.iris.shaderpack.option.values.*;
 import net.irisshaders.iris.shaderpack.parsing.BooleanParser;
-import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
-import net.irisshaders.iris.shaderpack.preprocessor.PropertiesPreprocessor;
-import net.irisshaders.iris.shaderpack.programs.ProgramSet;
-import net.irisshaders.iris.shaderpack.programs.ProgramSetInterface;
+import net.irisshaders.iris.shaderpack.preprocessor.*;
+import net.irisshaders.iris.shaderpack.programs.*;
 import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
-import net.irisshaders.iris.shaderpack.texture.CustomTextureData;
-import net.irisshaders.iris.shaderpack.texture.TextureFilteringData;
-import net.irisshaders.iris.shaderpack.texture.TextureStage;
+import net.irisshaders.iris.shaderpack.texture.*;
 import net.irisshaders.iris.uniforms.custom.CustomUniforms;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -50,16 +39,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -71,6 +53,14 @@ public class ShaderPack {
 	private static final ForkJoinPool TEXTURE_LOAD_EXECUTOR = new ForkJoinPool(PARALLELISM, ForkJoinPool.defaultForkJoinWorkerThreadFactory, (t, e) -> LOGGER.error("Texture loader thread failed", e), true);
 	private static final int MAX_CONCURRENT_LOADS = Math.min(Integer.MAX_VALUE, CORES * 4);
 	private static final int LOAD_TIMEOUT = 2;
+
+	private static final LoadingCache<PreprocessKey, String> PREPROCESS_CACHE = CacheBuilder.newBuilder()
+			.maximumSize(1000)
+			.build(new CacheLoader<PreprocessKey, String>() {
+				public @NotNull String load(@NotNull PreprocessKey key) {
+					return PropertiesPreprocessor.preprocessSource(key.content, key.defines);
+				}
+			});
 
 	static {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -112,13 +102,6 @@ public class ShaderPack {
 		ArrayList<StringPair> envDefines1 = new ArrayList<>(environmentDefines);
 		envDefines1.addAll(IrisDefines.createIrisReplacements());
 		environmentDefines = ImmutableList.copyOf(envDefines1);
-
-		List<StringPair> enhancedDefines = new ArrayList<>(environmentDefines);
-		enhancedDefines.add(new StringPair("PT_VOXEL_RESOLUTION_X", "16"));
-		enhancedDefines.add(new StringPair("PT_VOXEL_RESOLUTION_Y", "16"));
-		enhancedDefines.add(new StringPair("PT_VOXEL_RESOLUTION_Z", "16"));
-		environmentDefines = ImmutableList.copyOf(enhancedDefines);
-
 		ImmutableList.Builder<AbsolutePackPath> starts = ImmutableList.builder();
 		ImmutableList<String> potentialFileNames = ShaderPackSourceNames.POTENTIAL_STARTS;
 
@@ -173,9 +156,7 @@ public class ShaderPack {
 			if (flag.isUsable()) finalEnvironmentDefines.add(new StringPair("IRIS_FEATURE_" + flag.name(), ""));
 		}
 
-		// 不使用缓存，直接预处理属性文件
-		Optional<String> shaderPropertiesSource = loadPropertiesAsString(root, "shaders.properties", environmentDefines);
-		this.shaderProperties = shaderPropertiesSource
+		this.shaderProperties = loadPropertiesAsString(root, "shaders.properties", environmentDefines)
 				.map(source -> new ShaderProperties(source, shaderPackOptions, finalEnvironmentDefines))
 				.orElseGet(ShaderProperties::empty);
 
@@ -294,43 +275,66 @@ public class ShaderPack {
 		this.overrides = new ConcurrentHashMap<>();
 		this.idMap = new IdMap(root, shaderPackOptions, environmentDefines);
 
-		// 简化纹理加载，避免异步问题
-		this.customNoiseTexture = shaderProperties.getNoiseTexturePath()
-				.map(path -> {
-					try {
-						return loadTextureSync(root, new TextureDefinition.PNGDefinition(path));
-					} catch (IOException e) {
-						LOGGER.error("Failed to load noise texture", e);
-						return createFallbackTexture(new TextureDefinition.PNGDefinition("noise.png"));
-					}
-				})
-				.orElse(null);
+		CompletableFuture<CustomTextureData> noiseFuture = shaderProperties.getNoiseTexturePath()
+				.map(path -> readTextureAsync(root, new TextureDefinition.PNGDefinition(path)))
+				.orElseGet(() -> CompletableFuture.completedFuture(null));
 
-		// 同步加载自定义纹理
+		this.customNoiseTexture = noiseFuture.exceptionally(ex -> {
+			LOGGER.error("Failed to load noise texture", ex);
+			return createFallbackTexture(new TextureDefinition.PNGDefinition("noise.png"));
+		}).join();
+
 		shaderProperties.getCustomTextures().forEach((stage, textures) -> {
-			Object2ObjectMap<String, CustomTextureData> result = new Object2ObjectOpenHashMap<>();
+			Object2ObjectMap<String, CompletableFuture<CustomTextureData>> futures = new Object2ObjectOpenHashMap<>();
 			textures.forEach((name, def) -> {
-				try {
-					result.put(name, loadTextureSync(root, def));
-				} catch (IOException e) {
-					LOGGER.error("Failed to load texture {}: {}", name, def.getName(), e);
-					result.put(name, createFallbackTexture(def));
-				}
+				CompletableFuture<CustomTextureData> future = readTextureAsync(root, def)
+						.exceptionally(ex -> {
+							LOGGER.error("Failed to load texture {}: {}", name, def.getName(), ex);
+							return createFallbackTexture(def);
+						})
+						.completeOnTimeout(createFallbackTexture(def), LOAD_TIMEOUT, TimeUnit.SECONDS);
+				futures.put(name, future);
 			});
-			customTextureDataMap.put(stage, result);
+
+			CompletableFuture.allOf(futures.values().toArray(new CompletableFuture[0])).thenRun(() -> {
+				Object2ObjectMap<String, CustomTextureData> result = new Object2ObjectOpenHashMap<>();
+				futures.forEach((key, value) -> result.put(key, value.join()));
+				customTextureDataMap.put(stage, result);
+			});
 		});
 
 		shaderProperties.getIrisCustomTextures().forEach((name, def) -> {
-			try {
-				irisCustomTextureDataMap.put(name, loadTextureSync(root, def));
-			} catch (IOException e) {
-				LOGGER.error("Failed to load Iris texture {}: {}", name, def.getName(), e);
-				irisCustomTextureDataMap.put(name, createFallbackTexture(def));
-			}
+			CompletableFuture<CustomTextureData> future = readTextureAsync(root, def)
+					.exceptionally(ex -> {
+						LOGGER.error("Failed to load Iris texture {}: {}", name, def.getName(), ex);
+						return createFallbackTexture(def);
+					})
+					.completeOnTimeout(createFallbackTexture(def), LOAD_TIMEOUT, TimeUnit.SECONDS);
+			irisCustomTextureDataMap.put(name, future.join());
 		});
 
 		this.irisCustomImages = shaderProperties.getIrisCustomImages();
 		this.customUniforms = shaderProperties.getCustomUniforms();
+	}
+
+	private CompletableFuture<CustomTextureData> readTextureAsync(Path root, TextureDefinition definition) {
+		return textureCache.computeIfAbsent(definition, def ->
+				CompletableFuture.supplyAsync(() -> {
+							try {
+								textureLoadSemaphore.acquire();
+								return loadTextureSync(root, def);
+							} catch (IOException | InterruptedException e) {
+								throw new CompletionException(e);
+							} finally {
+								textureLoadSemaphore.release();
+							}
+						}, TEXTURE_LOAD_EXECUTOR)
+						.exceptionally(ex -> {
+							LOGGER.error("Failed to load texture: {}", def.getName(), ex);
+							return createFallbackTexture(def);
+						})
+						.completeOnTimeout(createFallbackTexture(def), LOAD_TIMEOUT, TimeUnit.SECONDS)
+		);
 	}
 
 	private CustomTextureData loadTextureSync(Path root, TextureDefinition definition) throws IOException {
@@ -423,16 +427,8 @@ public class ShaderPack {
 
 	private static Optional<String> loadPropertiesAsString(Path shaderPath, String name, Iterable<StringPair> environmentDefines) {
 		try {
-			Path filePath = shaderPath.resolve(name);
-			if (!Files.exists(filePath)) {
-				return Optional.empty();
-			}
-
-			String fileContents = Files.readString(filePath, StandardCharsets.ISO_8859_1);
-			// 直接预处理，不使用缓存
-			String processed = PropertiesPreprocessor.preprocessSource(fileContents, environmentDefines);
-
-			return Optional.of(processed);
+			String fileContents = Files.readString(shaderPath.resolve(name), StandardCharsets.ISO_8859_1);
+			return Optional.of(PREPROCESS_CACHE.getUnchecked(new PreprocessKey(fileContents, ImmutableList.copyOf(environmentDefines))));
 		} catch (NoSuchFileException e) {
 			return Optional.empty();
 		} catch (IOException e) {
@@ -499,5 +495,27 @@ public class ShaderPack {
 				.filter(key -> key.startsWith(keyPrefix))
 				.map(key -> key.substring(keyPrefix.length()))
 				.collect(Collectors.toList());
+	}
+
+	private record PreprocessKey(@NotNull String content, @NotNull ImmutableList<StringPair> defines) {
+		private static final Map<String, String> CONTENT_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
+
+		public PreprocessKey {
+			content = CONTENT_CACHE.computeIfAbsent(content, k -> k);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (!(o instanceof PreprocessKey that)) return false;
+			return content.equals(that.content) && defines.equals(that.defines);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = content.hashCode();
+			result = 31 * result + defines.hashCode();
+			return result;
+		}
 	}
 }
