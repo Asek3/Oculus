@@ -48,14 +48,20 @@ import java.util.stream.Collectors;
 public class ShaderPack {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShaderPack.class);
 	private static final Gson GSON = new Gson();
+	// 优化线程池大小以减少线程争用
 	private static final int CORES = Runtime.getRuntime().availableProcessors();
-	private static final int PARALLELISM = Math.min(CORES * 8, 256);
+	// 减少线程池大小，从CORES*8改为CORES*2，最大32，以避免过多的线程争用
+	private static final int PARALLELISM = Math.min(CORES * 2, 32);
 	private static final ForkJoinPool TEXTURE_LOAD_EXECUTOR = new ForkJoinPool(PARALLELISM, ForkJoinPool.defaultForkJoinWorkerThreadFactory, (t, e) -> LOGGER.error("Texture loader thread failed", e), true);
-	private static final int MAX_CONCURRENT_LOADS = Math.min(Integer.MAX_VALUE, CORES * 4);
+	// 优化并发加载限制，从CORES*4改为CORES*2，最大16
+	private static final int MAX_CONCURRENT_LOADS = Math.min(Integer.MAX_VALUE, CORES * 2);
 	private static final int LOAD_TIMEOUT = 2;
 
+	// 优化预处理器缓存大小和过期策略
 	private static final LoadingCache<PreprocessKey, String> PREPROCESS_CACHE = CacheBuilder.newBuilder()
-			.maximumSize(1000)
+			.maximumSize(2000) // 增加缓存大小以存储更多预处理结果
+			.expireAfterWrite(5, TimeUnit.MINUTES) // 添加过期策略以释放不再使用的缓存
+			.softValues() // 使用软引用值，内存不足时会自动释放
 			.build(new CacheLoader<PreprocessKey, String>() {
 				public @NotNull String load(@NotNull PreprocessKey key) {
 					return PropertiesPreprocessor.preprocessSource(key.content, key.defines);

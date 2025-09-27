@@ -40,6 +40,9 @@ public class IrisRenderSystem {
 	private static int polygonMode = GL43C.GL_FILL;
 	private static int backupPolygonMode = GL43C.GL_FILL;
 	private static int[] samplers;
+	// 添加纹理参数缓存，减少OpenGL查询调用
+	private static final Map<Integer, Map<Integer, Integer>> TEXTURE_PARAM_CACHE = new ConcurrentHashMap<>();
+	private static final int PARAM_CACHE_SIZE = 100;
 
 	public static void initRenderer() {
 		if (GL.getCapabilities().OpenGL45) {
@@ -288,11 +291,15 @@ public class IrisRenderSystem {
 		GL45C.glDispatchCompute(workGroups.x, workGroups.y, workGroups.z);
 	}
 
+	// 存储上次内存屏障的类型，避免不必要的重复调用
+	private static int lastMemoryBarrier = -1;
+	
 	public static void memoryBarrier(int barriers) {
 		RenderSystem.assertOnRenderThreadOrInit();
 
-		if (supportsCompute) {
+		if (supportsCompute && barriers != lastMemoryBarrier) {
 			GL45C.glMemoryBarrier(barriers);
+			lastMemoryBarrier = barriers;
 		}
 	}
 
@@ -353,6 +360,36 @@ public class IrisRenderSystem {
 
 	public static int createTexture(int target) {
 		return dsaState.createTexture(target);
+	}
+	
+	/**
+	 * 从缓存获取纹理参数值
+	 */	
+	private static Integer getCachedTexParameter(int texture, int pname) {
+		Map<Integer, Integer> paramMap = TEXTURE_PARAM_CACHE.get(texture);
+		if (paramMap != null) {
+			return paramMap.get(pname);
+		}
+		return null;
+	}
+	
+	/**
+	 * 缓存纹理参数值
+	 */	
+	private static void cacheTexParameter(int texture, int pname, int value) {
+		// 确保缓存不会无限增长
+		if (TEXTURE_PARAM_CACHE.size() > PARAM_CACHE_SIZE * 2) {
+			// 清理超出大小限制的缓存条目
+			Iterator<Integer> iterator = TEXTURE_PARAM_CACHE.keySet().iterator();
+			int removeCount = TEXTURE_PARAM_CACHE.size() - PARAM_CACHE_SIZE;
+			while (iterator.hasNext() && removeCount > 0) {
+				iterator.next();
+				iterator.remove();
+				removeCount--;
+			}
+		}
+		
+		TEXTURE_PARAM_CACHE.computeIfAbsent(texture, k -> new HashMap<>()).put(pname, value);
 	}
 
 	public static void bindTextureForSetup(int glType, int glId) {
@@ -499,7 +536,16 @@ public class IrisRenderSystem {
 
 		@Override
 		public void texParameteri(int texture, int target, int pname, int param) {
+			// 在设置参数前，检查当前值是否与要设置的值相同
+			Integer currentValue = getCachedTexParameter(texture, pname);
+			if (currentValue != null && currentValue == param) {
+				// 值相同，不需要重复设置
+				return;
+			}
+			
 			ARBDirectStateAccess.glTextureParameteri(texture, pname, param);
+			// 更新缓存
+			cacheTexParameter(texture, pname, param);
 		}
 
 		@Override
@@ -586,8 +632,17 @@ public class IrisRenderSystem {
 
 		@Override
 		public void texParameteri(int texture, int target, int pname, int param) {
+			// 在设置参数前，检查当前值是否与要设置的值相同
+			Integer currentValue = getCachedTexParameter(texture, pname);
+			if (currentValue != null && currentValue == param) {
+				// 值相同，不需要重复设置
+				return;
+			}
+			
 			bindTextureForSetup(target, texture);
 			GL32C.glTexParameteri(target, pname, param);
+			// 更新缓存
+			cacheTexParameter(texture, pname, param);
 		}
 
 		@Override
@@ -616,8 +671,18 @@ public class IrisRenderSystem {
 
 		@Override
 		public int getTexParameteri(int texture, int target, int pname) {
+			// 尝试从缓存获取参数值
+			Integer cachedValue = getCachedTexParameter(texture, pname);
+			if (cachedValue != null) {
+				return cachedValue;
+			}
+			
 			bindTextureForSetup(target, texture);
-			return GL32C.glGetTexParameteri(target, pname);
+			int value = GL32C.glGetTexParameteri(target, pname);
+			
+			// 缓存结果
+			cacheTexParameter(texture, pname, value);
+			return value;
 		}
 
 		@Override
@@ -630,9 +695,17 @@ public class IrisRenderSystem {
 
 		@Override
 		public void bindTextureToUnit(int target, int unit, int texture) {
+			// 添加绑定检查以避免不必要的OpenGL调用
+			if (GlStateManagerAccessor.getTEXTURES()[unit].binding == texture) {
+				return;
+			}
+			
 			int activeTexture = GlStateManager._getActiveTexture();
 			GlStateManager._activeTexture(GL30C.GL_TEXTURE0 + unit);
 			bindTextureForSetup(target, texture);
+			// 更新状态管理器中的绑定记录
+			GlStateManagerAccessor.getTEXTURES()[unit].binding = texture;
+			GlStateManagerAccessor.setTextureId(texture);
 			GlStateManager._activeTexture(activeTexture);
 		}
 
