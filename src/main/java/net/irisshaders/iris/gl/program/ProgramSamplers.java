@@ -88,6 +88,13 @@ public class ProgramSamplers {
 		}
 	}
 
+	/**
+	 * 检查是否有活动的采样器
+	 * @return 如果存在活动采样器则返回true，否则返回false
+	 */	public boolean hasActiveSamplers() {
+		return !samplerBindings.isEmpty();
+	}
+
 	public static final class Builder implements SamplerHolder {
 		private final int program;
 		private final ImmutableSet<Integer> reservedTextureUnits;

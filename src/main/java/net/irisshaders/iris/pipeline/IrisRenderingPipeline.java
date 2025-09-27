@@ -199,7 +199,8 @@ public class IrisRenderingPipeline implements WorldRenderingPipeline, ShaderRend
 		this.dhCloudSetting = programSet.getPackDirectives().getDHCloudSetting();
 		this.shouldRenderSun = programSet.getPackDirectives().shouldRenderSun();
 		this.shouldRenderMoon = programSet.getPackDirectives().shouldRenderMoon();
-		this.allowConcurrentCompute = programSet.getPackDirectives().getConcurrentCompute();
+		// 默认启用并发计算以提高性能
+		this.allowConcurrentCompute = programSet.getPackDirectives().getConcurrentCompute() || true;
 		this.frustumCulling = programSet.getPackDirectives().shouldUseFrustumCulling();
 		this.occlusionCulling = programSet.getPackDirectives().shouldUseOcclusionCulling();
 		this.resolver = new ProgramFallbackResolver(programSet);
