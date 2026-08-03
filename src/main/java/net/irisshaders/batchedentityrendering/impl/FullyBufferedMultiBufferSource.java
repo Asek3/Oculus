@@ -59,7 +59,7 @@ public class FullyBufferedMultiBufferSource extends MultiBufferSource.BufferSour
 
 	@Override
 	public VertexConsumer getBuffer(RenderType renderType) {
-		removeReady();
+		if (isReady) endBatch();
 
 		if (wrappingFunction != null) {
 			renderType = wrappingFunction.apply(renderType);
