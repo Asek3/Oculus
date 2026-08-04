@@ -5,6 +5,7 @@ import net.irisshaders.batchedentityrendering.impl.FullyBufferedMultiBufferSourc
 import net.irisshaders.batchedentityrendering.impl.MemoryTrackingBuffer;
 import net.irisshaders.batchedentityrendering.impl.MemoryTrackingRenderBuffers;
 import net.irisshaders.batchedentityrendering.impl.RenderBuffersExt;
+import net.irisshaders.iris.pathways.HandRenderer;
 import net.minecraft.client.renderer.ChunkBufferBuilderPack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.OutlineBufferSource;
@@ -41,6 +42,11 @@ public class MixinRenderBuffers implements RenderBuffersExt, MemoryTrackingRende
 
 	@Inject(method = "bufferSource", at = @At("HEAD"), cancellable = true)
 	private void batchedentityrendering$replaceBufferSource(CallbackInfoReturnable<MultiBufferSource.BufferSource> cir) {
+		if (HandRenderer.INSTANCE.isActive()) {
+			cir.setReturnValue(HandRenderer.INSTANCE.getBufferSource());
+			return;
+		}
+
 		if (begins == 0) {
 			return;
 		}
