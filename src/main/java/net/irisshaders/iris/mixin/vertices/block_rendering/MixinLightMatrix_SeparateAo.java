@@ -1,14 +1,40 @@
 package net.irisshaders.iris.mixin.vertices.block_rendering;
 
 import net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Pseudo
 @Mixin(targets = "codechicken.lib.render.lighting.LightMatrix", remap = false)
 public abstract class MixinLightMatrix_SeparateAo {
+	@Shadow(remap = false)
+	@Final
+	private static float[] sideao;
+
+	@Unique
+	private static final float[] iris$NO_DIRECTIONAL_SHADE = {
+		1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
+	};
+
+	@Redirect(
+		method = "interp",
+		at = @At(
+			value = "FIELD",
+			target = "Lcodechicken/lib/render/lighting/LightMatrix;sideao:[F",
+			remap = false
+		),
+		require = 0,
+		remap = false
+	)
+	private float[] iris$selectAoShadeFactors() {
+		return WorldRenderingSettings.INSTANCE.shouldDisableDirectionalShading() ? iris$NO_DIRECTIONAL_SHADE : sideao;
+	}
+
 	@Redirect(
 		method = "operate",
 		at = @At(

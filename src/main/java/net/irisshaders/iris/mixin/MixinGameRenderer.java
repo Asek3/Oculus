@@ -458,6 +458,19 @@ public class MixinGameRenderer {
 		itemInHandRenderer.renderHandsWithItems(tickDelta, poseStack, bufferSource, localPlayer, light);
 	}
 
+	@Inject(
+		method = "renderLevel",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraftforge/client/ForgeHooksClient;dispatchRenderStage(Lnet/minecraftforge/client/event/RenderLevelStageEvent$Stage;Lnet/minecraft/client/renderer/LevelRenderer;Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;ILnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;)V",
+			shift = At.Shift.AFTER,
+			remap = false
+		)
+	)
+	private void iris$finalizeLevelAfterForge(float tickDelta, long limitTime, PoseStack poseStack, CallbackInfo ci) {
+		Iris.getPipelineManager().getPipeline().ifPresent(WorldRenderingPipeline::finalizeLevelRendering);
+	}
+
 	@Inject(method = "renderLevel", at = @At("TAIL"))
 	private void iris$runColorSpace(float pGameRenderer0, long pLong1, PoseStack pPoseStack2, CallbackInfo ci) {
 		Iris.getPipelineManager().getPipeline().ifPresent(WorldRenderingPipeline::finalizeGameRendering);
