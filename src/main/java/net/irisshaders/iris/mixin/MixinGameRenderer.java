@@ -8,10 +8,12 @@ import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.irisshaders.iris.gl.program.IrisProgramTypes;
 import net.irisshaders.iris.pathways.HandRenderer;
+import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
 import net.irisshaders.iris.pipeline.ShaderRenderingPipeline;
 import net.irisshaders.iris.pipeline.WorldRenderingPhase;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
 import net.irisshaders.iris.pipeline.programs.ShaderKey;
+import net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings;
 import net.irisshaders.iris.shadows.ShadowRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -109,6 +111,8 @@ public class MixinGameRenderer {
 		if (ShadowRenderer.ACTIVE) {
 			// TODO: Wrong program
 			override(ShaderKey.SHADOW_TERRAIN_CUTOUT, cir);
+		} else if (isLateTerrainDraw()) {
+			override(ShaderKey.TERRAIN_TRANSLUCENT, cir);
 		} else if (isBlockEntities() || isEntities()) {
 			override(ShaderKey.MOVING_BLOCK, cir);
 		} else if (shouldOverrideShaders()) {
@@ -123,6 +127,8 @@ public class MixinGameRenderer {
 	private static void iris$overrideCutoutShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_TERRAIN_CUTOUT, cir);
+		} else if (isLateTerrainDraw()) {
+			override(ShaderKey.TERRAIN_TRANSLUCENT_CUTOUT, cir);
 		} else if (isBlockEntities() || isEntities()) {
 			override(ShaderKey.MOVING_BLOCK, cir);
 		} else if (shouldOverrideShaders()) {
@@ -139,6 +145,8 @@ public class MixinGameRenderer {
 	private static void iris$overrideTranslucentShader(CallbackInfoReturnable<ShaderInstance> cir) {
 		if (ShadowRenderer.ACTIVE) {
 			override(ShaderKey.SHADOW_TERRAIN_CUTOUT, cir);
+		} else if (isBlockEntities() && WorldRenderingSettings.INSTANCE.shouldSeparateEntityDraws()) {
+			override(ShaderKey.MOVING_BLOCK_TRANSLUCENT, cir);
 		} else if (isBlockEntities() || isEntities()) {
 			override(ShaderKey.MOVING_BLOCK, cir);
 		} else if (shouldOverrideShaders()) {
@@ -393,6 +401,14 @@ public class MixinGameRenderer {
 		return pipeline != null && pipeline.getPhase() == WorldRenderingPhase.ENTITIES;
 	}
 
+	private static boolean isLateTerrainDraw() {
+		WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
+
+		return pipeline instanceof IrisRenderingPipeline iris && iris.shouldOverrideShaders()
+			&& WorldRenderingSettings.INSTANCE.shouldSeparateEntityDraws() && !iris.isBeforeTranslucent
+			&& iris.getPhase() == WorldRenderingPhase.NONE;
+	}
+
 	private static boolean isSky() {
 		WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
 
@@ -456,6 +472,19 @@ public class MixinGameRenderer {
 		}
 
 		itemInHandRenderer.renderHandsWithItems(tickDelta, poseStack, bufferSource, localPlayer, light);
+	}
+
+	@Inject(
+		method = "renderLevel",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraftforge/client/ForgeHooksClient;dispatchRenderStage(Lnet/minecraftforge/client/event/RenderLevelStageEvent$Stage;Lnet/minecraft/client/renderer/LevelRenderer;Lcom/mojang/blaze3d/vertex/PoseStack;Lorg/joml/Matrix4f;ILnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;)V",
+			shift = At.Shift.AFTER,
+			remap = false
+		)
+	)
+	private void iris$finalizeLevelAfterForge(float tickDelta, long limitTime, PoseStack poseStack, CallbackInfo ci) {
+		Iris.getPipelineManager().getPipeline().ifPresent(WorldRenderingPipeline::finalizeLevelRendering);
 	}
 
 	@Inject(method = "renderLevel", at = @At("TAIL"))

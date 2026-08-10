@@ -34,19 +34,24 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.Configuration;
@@ -65,6 +70,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import java.util.zip.ZipError;
 import java.util.zip.ZipException;
@@ -81,6 +88,7 @@ public class Iris {
 	public static final String MODNAME = "Oculus";
 	public static final IrisLogging logger = new IrisLogging(MODNAME);
 	private static final Map<String, String> shaderPackOptionQueue = new HashMap<>();
+	private static final Set<ResourceLocation> translucentHandItems = ConcurrentHashMap.newKeySet();
 	// Change this for snapshots!
 	private static final String backupVersionNumber = "1.20.3";
 	public static NamespacedId lastDimension = null;
@@ -112,6 +120,7 @@ public class Iris {
 	public Iris() {
 		try {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onKeyRegister);
+			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInterModProcess);
 			MinecraftForge.EVENT_BUS.addListener(this::onKeyInput);
 
 			IRIS_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
@@ -120,6 +129,18 @@ public class Iris {
 			ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 		}catch (Exception ignored) {
 		}
+	}
+
+	private void onInterModProcess(InterModProcessEvent event) {
+		InterModComms.getMessages(MODID, "register_translucent_hand_item"::equals)
+			.map(message -> message.messageSupplier().get())
+			.filter(ResourceLocation.class::isInstance)
+			.map(ResourceLocation.class::cast)
+			.forEach(translucentHandItems::add);
+	}
+
+	public static boolean isTranslucentHandItem(Item item) {
+		return translucentHandItems.contains(ForgeRegistries.ITEMS.getKey(item));
 	}
 
 	public static void loadShaderpackWhenPossible() {

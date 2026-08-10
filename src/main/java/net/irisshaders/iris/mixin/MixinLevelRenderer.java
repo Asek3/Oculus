@@ -104,13 +104,12 @@ public class MixinLevelRenderer {
 	}
 
 
-	// Inject a bit early so that we can end our rendering before mods like VoxelMap (which inject at RETURN)
-	// render their waypoint beams.
+	// Render the translucent hand here, but keep the pipeline active for Forge's AFTER_LEVEL render stage.
+	// Forge dispatches that stage from GameRenderer after this method returns.
 	@Inject(method = RENDER, at = @At(value = "RETURN", shift = At.Shift.BEFORE))
 	private void iris$endLevelRender(PoseStack poseStack, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo callback) {
 		HandRenderer.INSTANCE.renderTranslucent(poseStack, tickDelta, camera, gameRenderer, pipeline);
 		Minecraft.getInstance().getProfiler().popPush("iris_final");
-		pipeline.finalizeLevelRendering();
 		pipeline = null;
 
 		if (Iris.shouldActivateWireframe() && this.minecraft.isLocalServer()) {

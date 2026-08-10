@@ -2,6 +2,7 @@ package net.irisshaders.iris.pipeline;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.irisshaders.iris.Iris;
+import net.irisshaders.iris.gl.blending.DepthColorStorage;
 import net.irisshaders.iris.shaderpack.materialmap.NamespacedId;
 import net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings;
 import net.irisshaders.iris.uniforms.SystemTimeUniforms;
@@ -81,6 +82,9 @@ public class PipelineManager {
 	 * @see <a href="https://github.com/IrisShaders/Iris/issues/1330">this GitHub issue</a>
 	 */
 	public void destroyPipeline() {
+		// Pipeline replacement can happen before the shader that acquired this global lock is cleared.
+		DepthColorStorage.unlockDepthColor();
+
 		pipelinesPerDimension.forEach((dimensionId, pipeline) -> {
 			Iris.logger.info("Destroying pipeline {}", dimensionId);
 			resetTextureState();
