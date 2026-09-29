@@ -40,6 +40,7 @@ public class IrisRenderSystem {
 	private static int polygonMode = GL43C.GL_FILL;
 	private static int backupPolygonMode = GL43C.GL_FILL;
 	private static int[] samplers;
+	private static boolean samplersMayBeBound;
 
 	public static void initRenderer() {
 		if (GL.getCapabilities().OpenGL45) {
@@ -59,6 +60,7 @@ public class IrisRenderSystem {
 		supportsTesselation = GL.getCapabilities().GL_ARB_tessellation_shader || GL.getCapabilities().OpenGL40;
 
 		samplers = new int[SamplerLimits.get().getMaxTextureUnits()];
+		samplersMayBeBound = false;
 	}
 
 	public static void getIntegerv(int pname, int[] params) {
@@ -383,9 +385,18 @@ public class IrisRenderSystem {
 		GL33C.glBindSampler(unit, sampler);
 
 		samplers[unit] = sampler;
+
+		if (sampler != 0) {
+			samplersMayBeBound = true;
+		}
 	}
 
 	public static void unbindAllSamplers() {
+		if (samplers != null && !samplersMayBeBound) {
+			// Nothing has been bound since the last cleanup.
+			return;
+		}
+
 		boolean usedASampler = false;
 		for (int i = 0; i < samplers.length; i++) {
 			if (samplers[i] != 0) {
@@ -397,6 +408,8 @@ public class IrisRenderSystem {
 		if (usedASampler && hasMultibind) {
 			GL45C.glBindSamplers(0, emptyArray);
 		}
+
+		samplersMayBeBound = false;
 	}
 
 

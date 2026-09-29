@@ -17,6 +17,7 @@ import java.util.EnumMap;
 import java.util.List;
 
 public class GraphTranslucencyRenderOrderManager implements RenderOrderManager {
+	private static final TransparencyType[] TRANSPARENCY_TYPES = TransparencyType.values();
 	private final FeedbackArcSetProvider feedbackArcSetProvider;
 	private final EnumMap<TransparencyType, Digraph<RenderType>> types;
 	private final EnumMap<TransparencyType, RenderType> currentTypes;
@@ -93,11 +94,13 @@ public class GraphTranslucencyRenderOrderManager implements RenderOrderManager {
 
 	@Override
 	public void reset() {
-		// TODO: Is reallocation efficient?
-		types.clear();
+		for (TransparencyType type : TRANSPARENCY_TYPES) {
+			Digraph<RenderType> graph = types.get(type);
 
-		for (TransparencyType type : TransparencyType.values()) {
-			types.put(type, new MapDigraph<>());
+			// A graph that stayed empty can be kept as it is.
+			if (graph == null || graph.getVertexCount() != 0) {
+				types.put(type, new MapDigraph<>());
+			}
 		}
 	}
 
@@ -117,6 +120,11 @@ public class GraphTranslucencyRenderOrderManager implements RenderOrderManager {
 		List<RenderType> allLayers = new ArrayList<>(layerCount);
 
 		for (Digraph<RenderType> graph : types.values()) {
+			if (graph.getVertexCount() == 0) {
+				// Nothing to order; the feedback arc set of an empty graph is empty as well.
+				continue;
+			}
+
 			// TODO: Make sure that FAS can't become a bottleneck!
 			// Running NP-hard algorithms in a real time rendering loop might not be an amazing idea.
 			// This shouldn't be necessary in sane scenes, though, and if there aren't cycles,

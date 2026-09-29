@@ -2,6 +2,7 @@ package net.irisshaders.iris.uniforms.custom;
 
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -216,7 +217,12 @@ public class CustomUniforms implements FunctionContext {
 	public void push(Object pass) {
 		Object2IntMap<CachedUniform> uniforms = this.locationMap.get(pass);
 		if (uniforms != null) {
-			uniforms.forEach(CachedUniform::pushIfChanged);
+			if (uniforms.getClass() == Object2IntOpenHashMap.class) {
+				// Walk the primitive entries directly instead of boxing every location.
+				Object2IntMaps.fastForEach(uniforms, entry -> entry.getKey().pushIfChanged(entry.getIntValue()));
+			} else {
+				uniforms.forEach(CachedUniform::pushIfChanged);
+			}
 		}
 	}
 

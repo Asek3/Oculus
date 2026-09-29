@@ -73,8 +73,8 @@ public class ProgramSamplers {
 		// in the middle of RenderType setup, bad things will happen.
 		int activeTexture = GlStateManagerAccessor.getActiveTexture();
 
-		for (SamplerBinding samplerBinding : samplerBindings) {
-			samplerBinding.update();
+		for (int i = 0, size = samplerBindings.size(); i < size; i++) {
+			samplerBindings.get(i).update();
 		}
 
 		RenderSystem.activeTexture(GL20C.GL_TEXTURE0 + activeTexture);
@@ -83,8 +83,8 @@ public class ProgramSamplers {
 	public void removeListeners() {
 		active = null;
 
-		for (ValueUpdateNotifier notifier : notifiersToReset) {
-			notifier.setListener(null);
+		for (int i = 0, size = notifiersToReset.size(); i < size; i++) {
+			notifiersToReset.get(i).setListener(null);
 		}
 	}
 

@@ -193,8 +193,9 @@ public class ProgramUniforms {
 	}
 
 	private void updateStage(ImmutableList<Uniform> uniforms) {
-		for (Uniform uniform : uniforms) {
-			uniform.update();
+		// Indexed access avoids allocating an iterator for every stage of every program change.
+		for (int i = 0, size = uniforms.size(); i < size; i++) {
+			uniforms.get(i).update();
 		}
 	}
 
@@ -238,8 +239,8 @@ public class ProgramUniforms {
 	public void removeListeners() {
 		active = null;
 
-		for (ValueUpdateNotifier notifier : notifiersToReset) {
-			notifier.setListener(null);
+		for (int i = 0, size = notifiersToReset.size(); i < size; i++) {
+			notifiersToReset.get(i).setListener(null);
 		}
 	}
 

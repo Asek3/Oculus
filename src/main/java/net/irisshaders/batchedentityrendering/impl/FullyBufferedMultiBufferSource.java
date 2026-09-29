@@ -2,6 +2,7 @@ package net.irisshaders.batchedentityrendering.impl;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import net.irisshaders.batchedentityrendering.impl.ordering.GraphTranslucencyRenderOrderManager;
 import net.irisshaders.batchedentityrendering.impl.ordering.RenderOrderManager;
 import net.irisshaders.iris.layer.WrappingMultiBufferSource;
@@ -13,8 +14,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,7 +26,7 @@ public class FullyBufferedMultiBufferSource extends MultiBufferSource.BufferSour
 	/**
 	 * An LRU cache mapping RenderType objects to a relevant buffer.
 	 */
-	private final LinkedHashMap<RenderType, Integer> affinities;
+	private final Object2IntLinkedOpenHashMap<RenderType> affinities;
 	private final BufferSegmentRenderer segmentRenderer;
 	private final UnflushableWrapper unflushableWrapper;
 	private final List<Function<RenderType, RenderType>> wrappingFunctionStack;
@@ -48,8 +47,9 @@ public class FullyBufferedMultiBufferSource extends MultiBufferSource.BufferSour
 			this.builders[i] = new SegmentedBufferBuilder();
 		}
 
-		// use accessOrder=true so our LinkedHashMap works as an LRU cache.
-		this.affinities = new LinkedHashMap<>(32, 0.75F, true);
+		// getAndMoveToLast and removeFirstInt make this map work as an LRU cache.
+		this.affinities = new Object2IntLinkedOpenHashMap<>(32, 0.75F);
+		this.affinities.defaultReturnValue(-1);
 
 		this.drawCalls = 0;
 		this.segmentRenderer = new BufferSegmentRenderer();
@@ -66,23 +66,16 @@ public class FullyBufferedMultiBufferSource extends MultiBufferSource.BufferSour
 		}
 
 		renderOrderManager.begin(renderType);
-		Integer affinity = affinities.get(renderType);
+		int affinity = affinities.getAndMoveToLast(renderType);
 
-		if (affinity == null) {
+		if (affinity == -1) {
 			if (affinities.size() < builders.length) {
 				affinity = affinities.size();
 			} else {
 				// We remove the element from the map that is used least-frequently.
-				// With how we've configured our LinkedHashMap, that is the first element.
-				Iterator<Map.Entry<RenderType, Integer>> iterator = affinities.entrySet().iterator();
-				Map.Entry<RenderType, Integer> evicted = iterator.next();
-				iterator.remove();
-
-				// The previous type is no longer associated with this buffer ...
-				affinities.remove(evicted.getKey());
-
-				// ... since our new type is now associated with it.
-				affinity = evicted.getValue();
+				// With how we've configured our map, that is the first element, and
+				// our new type takes over its buffer.
+				affinity = affinities.removeFirstInt();
 			}
 
 			affinities.put(renderType, affinity);

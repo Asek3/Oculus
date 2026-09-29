@@ -214,8 +214,9 @@ public class AdvancedShadowCullingFrustum extends Frustum {
 			// (a modified version of "Intersection of 2-planes" from Graphics Gems 1, page 305
 
 			// NB: We can assume that the intersection vector has a non-zero length.
-			Vector3f ixb = cross(intersection, backPlaneNormal);
-			Vector3f fxi = cross(frontPlaneNormal, intersection);
+			// The plane normals are not needed anymore, so they hold the cross products.
+			Vector3f ixb = intersection.cross(backPlaneNormal, backPlaneNormal);
+			Vector3f fxi = frontPlaneNormal.cross(intersection);
 
 			ixb.mul(-frontPlane4.w());
 			fxi.mul(-backPlane4.w());
