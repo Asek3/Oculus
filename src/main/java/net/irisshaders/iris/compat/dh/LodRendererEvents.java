@@ -135,7 +135,11 @@ public class LodRendererEvents {
 	}
 
 	private static DHCompatInternal getInstance() {
-		return (DHCompatInternal) Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::getDHCompat).map(DHCompat::getInstance).orElse(DHCompatInternal.SHADERLESS);
+		// called from every DH render event, so this avoids the Optional chain
+		WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
+		DHCompat compat = pipeline != null ? pipeline.getDHCompat() : null;
+		Object instance = compat != null ? compat.getInstance() : null;
+		return instance != null ? (DHCompatInternal) instance : DHCompatInternal.SHADERLESS;
 	}
 
 	private static void setupCreateDepthTextureEvent() {
