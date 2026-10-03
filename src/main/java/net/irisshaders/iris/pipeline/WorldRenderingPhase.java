@@ -1,6 +1,9 @@
 package net.irisshaders.iris.pipeline;
 
 import net.minecraft.client.renderer.RenderType;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Locale;
 
 public enum WorldRenderingPhase {
 	NONE,
@@ -28,6 +31,9 @@ public enum WorldRenderingPhase {
 	WORLD_BORDER,
 	HAND_TRANSLUCENT;
 
+	// The GL debug group name of this phase, built once instead of on every phase change.
+	private final String debugName = StringUtils.capitalize(name().toLowerCase(Locale.ROOT).replace("_", " "));
+
 	public static WorldRenderingPhase fromTerrainRenderType(RenderType renderType) {
 		if (renderType == RenderType.solid()) {
 			return WorldRenderingPhase.TERRAIN_SOLID;
@@ -42,5 +48,9 @@ public enum WorldRenderingPhase {
 		} else {
 			throw new IllegalStateException("Illegal render type!");
 		}
+	}
+
+	public String getDebugName() {
+		return debugName;
 	}
 }
