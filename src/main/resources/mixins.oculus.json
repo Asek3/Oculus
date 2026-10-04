@@ -29,6 +29,7 @@
     "MixinGlStateManager_FramebufferBinding",
     "MixinItem",
     "MixinItemBlockRenderTypes",
+    "MixinOutlineBufferSource",
     "MixinItemInHandRenderer",
     "MixinLevelRenderer",
     "MixinLightningBoltRenderer",
